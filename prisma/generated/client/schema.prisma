@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Property {
+  id   String @id @default(uuid())
+  name String
+  slug String @unique @default("")
+
+  // Fase 2: Configuração de Exibição Pública
+  publicTitle      String?
+  publicSubtitle   String?
+  shortDescription String? @db.Text
+  fullDescription  String? @db.Text
+  hostName         String?
+  propertyType     String? @default("HOUSE")
+
+  // Capacidade e Estrutura
+  maxGuests  Int     @default(4)
+  bedrooms   Int     @default(2)
+  beds       Int     @default(3)
+  bathrooms  Int     @default(2)
+  allowsPets Boolean @default(false)
+  maxPets    Int     @default(0)
+
+  // Localização
+  street          String?
+  streetNumber    String?
+  neighborhood    String?
+  city            String?
+  state           String?
+  postalCode      String?
+  country         String?
+  locationText    String?
+  latitude        Float?
+  longitude       Float?
+  publicLatitude  Float?
+  publicLongitude Float?
+
+  isActive Boolean @default(true)
+
+  // Financeiro
+  basePrice     Float
+  cleaningFee   Float  @default(0)
+  minimumNights Int    @default(2)
+  currency      String @default("BRL")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservations        Reservation[]
+  blockedDates        BlockedDate[]
+  nightlyOverrides    NightlyOverride[]
+  pricingRules        PricingRule[]
+  availabilityWindows AvailabilityWindow[]
+  photos              PropertyPhoto[]
+  amenities           PropertyAmenity[]
+  rules               PropertyRule[]
+  integrations        Integration[]
+  syncLogs            SyncLog[]
+  reservationLinks    ReservationLink[]
+}
+
+model Guest {
+  id            String  @id @default(uuid())
+  name          String
+  email         String  @unique
+  phone         String
+  status        String  @default("REGULAR") // REGULAR, VIP, FIVE_STAR, INACTIVE, BLOCKED
+  isVip         Boolean @default(false)
+  isFiveStar    Boolean @default(false)
+  notes         String? @db.Text
+  sourceChannel String? @default("DIRECT") // DIRECT, AIRBNB, BOOKING, WHATSAPP, MANUAL
+
+  // Estatísticas Automáticas
+  totalBookings         Int       @default(0)
+  completedStays        Int       @default(0)
+  totalRevenueGenerated Float     @default(0)
+  lastReservationAt     DateTime?
+  lastStayAt            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  userId       String?       @unique
+  user         User?         @relation(fields: [userId], references: [id])
+  reservations Reservation[]
+}
+
+// Modelos Necessários para Auth.js (NextAuth)
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+  accounts      Account[]
+  sessions      Session[]
+  guest         Guest?
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Reservation {
+  id            String            @id @default(uuid())
+  propertyId    String
+  guestId       String
+  checkIn       DateTime
+  checkOut      DateTime
+  status        ReservationStatus @default(PENDING_PAYMENT)
+  totalAmount   Float
+  nightlyRate   Float
+  cleaningFee   Float
+  totalNights   Int
+  holdExpiresAt DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  property     Property      @relation(fields: [propertyId], references: [id])
+  guest        Guest         @relation(fields: [guestId], references: [id])
+  payments     Payment[]
+  blockedDates BlockedDate[]
+
+  @@index([propertyId])
+  @@index([guestId])
+}
+
+enum ReservationStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CANCELLED
+  EXPIRED
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  reservationId        String
+  gatewayTransactionId String?
+  provider             String? // ex: "MERCADO_PAGO"
+  method               PaymentMethod
+  status               PaymentStatus @default(PENDING)
+  amount               Float
+  externalId           String? // ID na API externa
+  expiresAt            DateTime? // Para Pix ou boletos
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @default(now()) @updatedAt
+
+  reservation Reservation @relation(fields: [reservationId], references: [id])
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REFUNDED
+}
+
+model BlockedDate {
+  id            String        @id @default(uuid())
+  propertyId    String
+  date          DateTime
+  source        BlockedSource
+  reservationId String?
+  reason        String?
+  createdAt     DateTime      @default(now())
+
+  property    Property     @relation(fields: [propertyId], references: [id])
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+}
+
+enum BlockedSource {
+  AIRBNB
+  BOOKING
+  ADMIN
+  DIRECT_RESERVATION
+  MANUAL
+}
+
+enum WindowMode {
+  MANUAL_RANGE
+  ROLLING_FROM_TODAY
+}
+
+model AvailabilityWindow {
+  id          String     @id @default(uuid())
+  propertyId  String
+  startDate   DateTime
+  endDate     DateTime
+  mode        WindowMode @default(MANUAL_RANGE)
+  rollingDays Int?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId, startDate, endDate])
+}
+
+model NightlyOverride {
+  id            String   @id @default(uuid())
+  propertyId    String
+  date          DateTime
+  price         Float
+  minimumNights Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+}
+
+model PricingRule {
+  id          String    @id @default(uuid())
+  propertyId  String
+  type        RuleType
+  value       Float // Pode ser porcentagem (ex: 1.2 para +20%) ou valor fixo
+  description String?
+  minDays     Int? // Para Early Bird e Last Minute dinâmico
+  startDate   DateTime? // Para Sazonalidade
+  endDate     DateTime? // Para Sazonalidade
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+enum RuleType {
+  WEEKEND_SURGE // Aumento automático de sexta a domingo
+  LAST_MINUTE // Desconto para reservas em cima da hora
+  EARLY_BIRD // Desconto para reservas antecipadas
+  SEASONAL // Ajuste por temporada (ex: Verão/Inverno)
+}
+
+model Integration {
+  id         String    @id @default(uuid())
+  propertyId String
+  platform   Platform
+  icalUrl    String
+  lastSyncAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+enum Platform {
+  AIRBNB
+  BOOKING
+}
+
+model SyncLog {
+  id           String     @id @default(uuid())
+  propertyId   String?
+  platform     Platform
+  status       SyncStatus
+  eventsAdded  Int        @default(0)
+  errorMessage String?
+  createdAt    DateTime   @default(now())
+
+  property Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+enum SyncStatus {
+  SUCCESS
+  FAILED
+}
+
+model SystemSettings {
+  id                     String   @id @default("singleton")
+  propertyId             String?
+  mercadoPagoPublicKey   String?
+  mercadoPagoAccessToken String?
+  whatsappNumber         String?
+  contactEmail           String?
+  minNightsDefault       Int      @default(2)
+  maxGuestsDefault       Int      @default(4)
+  updatedAt              DateTime @updatedAt
+}
+
+model ReservationLink {
+  id             String    @id @default(uuid())
+  token          String    @unique
+  propertyId     String?
+  discount       Float?
+  expiresAt      DateTime?
+  preFilledDates String? // JSON string
+  createdAt      DateTime  @default(now())
+
+  property Property? @relation(fields: [propertyId], references: [id])
+}
+
+// ----------------------------------------------------
+// FASE 2: CONTEÚDO DA PROPRIEDADE
+// ----------------------------------------------------
+
+model PropertyPhoto {
+  id         String   @id @default(uuid())
+  propertyId String
+  imageUrl   String
+  sortOrder  Int      @default(0)
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model PropertyAmenity {
+  id          String  @id @default(uuid())
+  propertyId  String
+  amenityKey  String
+  amenityName String
+  iconName    String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, amenityKey])
+  @@index([propertyId])
+}
+
+model PropertyRule {
+  id         String  @id @default(uuid())
+  propertyId String
+  ruleText   String
+  iconName   String?
+  sortOrder  Int     @default(0)
+  isActive   Boolean @default(true)
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}

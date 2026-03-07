@@ -1,0 +1,247 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CheckCircle2, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import Image from "next/image";
+
+export default function CheckoutPage() {
+    const { data: session, status } = useSession();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
+    const propertyId = searchParams.get("propertyId") || "casa-oliveira-id";
+    const checkIn = searchParams.get("checkIn");
+    const checkOut = searchParams.get("checkOut");
+    const guestsCount = searchParams.get("guests") || "1";
+
+    const [guestData, setGuestData] = useState<any>(null);
+    const [phone, setPhone] = useState("");
+    const [pricing, setPricing] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [pixData, setPixData] = useState<any>(null);
+
+    useEffect(() => {
+        if (status === "authenticated" && checkIn && checkOut) {
+            const fetchData = async () => {
+                try {
+                    const [guestRes, pricingRes] = await Promise.all([
+                        axios.get("/api/guests/me"),
+                        axios.get(`/api/pricing?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}`)
+                    ]);
+                    setGuestData(guestRes.data);
+                    setPhone(guestRes.data.phone || "");
+                    setPricing(pricingRes.data);
+                } catch (error) {
+                    console.error("Erro ao carregar dados", error);
+                    toast.error("Erro ao carregar informações da reserva.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchData();
+        }
+    }, [status, checkIn, checkOut, propertyId, router, searchParams]);
+
+    // Proteção extra via cliente
+    if (status === "unauthenticated") {
+        const currentPath = window.location.pathname + window.location.search;
+        window.location.href = `/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`;
+        return null;
+    }
+
+    const handleSubmit = async () => {
+        if (!phone) {
+            toast.error("O telefone é obrigatório para confirmar a reserva.");
+            return;
+        }
+
+        setIsSubmitting(true);
+        const idToast = toast.loading("Finalizando sua reserva...");
+
+        try {
+            const response = await axios.post("/api/reservations", {
+                propertyId,
+                checkIn,
+                checkOut,
+                guestName: session?.user?.name,
+                guestEmail: session?.user?.email,
+                guestPhone: phone,
+                totalAmount: pricing.total,
+                nightlyRate: pricing.total / pricing.breakdown.length,
+                cleaningFee: pricing.cleaningFee,
+                totalNights: pricing.breakdown.length,
+                guests: parseInt(guestsCount)
+            });
+
+            toast.success("Reserva realizada com sucesso!", { id: idToast });
+            setPixData(response.data.pix);
+        } catch (error: any) {
+            const msg = error.response?.data?.error || "Erro ao processar reserva.";
+            toast.error(msg, { id: idToast });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (isLoading || status === "loading") {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-sand-50">
+                <Loader2 className="w-10 h-10 animate-spin text-olive-900" />
+            </div>
+        );
+    }
+
+    if (pixData) {
+        return (
+            <div className="min-h-screen bg-sand-50 py-12 px-4">
+                <Card className="max-w-xl mx-auto shadow-2xl rounded-[2rem] overflow-hidden border-0">
+                    <div className="bg-olive-900 p-8 text-center text-white">
+                        <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-400" />
+                        <h1 className="text-3xl font-bold">Reserva Quase Pronta!</h1>
+                        <p className="opacity-80 mt-2">Damos um &quot;hold&quot; nas datas por 30 minutos enquanto você paga.</p>
+                    </div>
+                    <CardContent className="p-10 space-y-8">
+                        <div className="text-center">
+                            <p className="text-olive-900/60 font-medium mb-4 uppercase tracking-widest text-xs">Escaneie o QR Code PIX</p>
+                            <div className="bg-white p-6 inline-block rounded-3xl border-2 border-olive-900/5 shadow-inner">
+                                {/* Aqui viria o QR Code dinâmico do Mercado Pago */}
+                                <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded-2xl">
+                                    <span className="text-gray-400 text-xs font-mono break-all p-4">{pixData.qr_code.substring(0, 100)}...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <Label className="text-olive-900/60 font-bold block text-center uppercase text-[10px] tracking-widest">Ou copie o código</Label>
+                            <div className="flex gap-2">
+                                <Input readOnly value={pixData.qr_code} className="font-mono text-xs h-12 bg-sand-50" />
+                                <Button onClick={() => { navigator.clipboard.writeText(pixData.qr_code); toast.success("Copiado!"); }} variant="outline" className="h-12 px-6 rounded-xl border-olive-900/20">Copiar</Button>
+                            </div>
+                        </div>
+
+                        <Button onClick={() => router.push("/")} className="w-full h-14 bg-olive-900 text-sand-50 rounded-2xl font-bold text-lg hover:bg-olive-800 transition-all shadow-lg">
+                            Voltar ao Site
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-sand-50 py-12 px-4 bg-[url('/imagens/pattern.png')] bg-repeat">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                {/* Coluna Esquerda: Dados Hóspede */}
+                <div className="lg:col-span-2 space-y-6">
+                    <Button variant="ghost" onClick={() => router.back()} className="text-olive-900 font-bold hover:bg-olive-900/5 -ml-4">
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
+                    </Button>
+
+                    <Card className="rounded-[2.5rem] shadow-xl border-0 overflow-hidden">
+                        <CardHeader className="bg-olive-900/5 p-8 border-b border-olive-900/10">
+                            <CardTitle className="text-2xl font-bold text-olive-900">Confirme seus dados</CardTitle>
+                            <CardDescription className="text-olive-900/60 font-medium">Seus dados sociais foram preenchidos automaticamente.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-8 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <Label className="font-bold text-olive-900 mb-2 block">Nome Completo</Label>
+                                    <Input disabled value={session?.user?.name || ""} className="bg-sand-50/50 h-12 rounded-xl border-olive-900/10" />
+                                </div>
+                                <div>
+                                    <Label className="font-bold text-olive-900 mb-2 block">Email</Label>
+                                    <Input disabled value={session?.user?.email || ""} className="bg-sand-50/50 h-12 rounded-xl border-olive-900/10" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <Label className="font-bold text-olive-900 mb-2 block">Telefone / WhatsApp (Obrigatório)</Label>
+                                <Input
+                                    value={phone}
+                                    onChange={(e) => setPhone(e.target.value)}
+                                    placeholder="(11) 99999-9999"
+                                    className="h-12 rounded-xl border-olive-900/20 focus:border-olive-900 text-lg"
+                                />
+                                <p className="text-xs text-olive-900/40 font-medium mt-2">Usaremos este número apenas para comunicações sobre sua reserva.</p>
+                            </div>
+
+                            <div className="pt-8 border-t border-olive-900/5 mt-8">
+                                <div className="flex items-start gap-3 p-6 bg-green-50 rounded-2xl border border-green-100">
+                                    <ShieldCheck className="w-6 h-6 text-green-600 shrink-0" />
+                                    <div>
+                                        <h4 className="text-green-900 font-bold text-sm">Reserva 100% Segura</h4>
+                                        <p className="text-green-800/70 text-xs font-medium leading-relaxed mt-1">Sua conexão é criptografada e seus dados estão protegidos de acordo com a LGPD através de autenticação social verificada.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Button
+                                onClick={handleSubmit}
+                                disabled={isSubmitting}
+                                className="w-full h-16 mt-8 bg-olive-900 text-sand-50 rounded-2xl font-bold text-xl hover:bg-olive-800 transition-all shadow-xl active:scale-[0.98]"
+                            >
+                                {isSubmitting ? "Processando..." : "Confirmar e Ir para Pagamento"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Coluna Direita: Resumo Financeiro */}
+                <div className="lg:col-span-1">
+                    <Card className="rounded-[2rem] shadow-lg border-0 sticky top-8 overflow-hidden">
+                        <div className="aspect-video relative overflow-hidden">
+                            <Image src="/imagens/gallery-1.jpg" alt="Casa Oliveira" fill className="object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-olive-900/60 to-transparent" />
+                            <div className="absolute bottom-4 left-4 text-white">
+                                <p className="font-bold text-lg leading-tight">Casa Oliveira</p>
+                                <p className="text-xs opacity-80">Campos do Jordão, SP</p>
+                            </div>
+                        </div>
+                        <CardContent className="p-6 space-y-6">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center bg-olive-900/5 p-4 rounded-xl">
+                                    <div>
+                                        <p className="text-[10px] font-bold text-olive-900/40 uppercase mb-1">Check-in</p>
+                                        <p className="font-bold text-sm">{new Date(checkIn!).toLocaleDateString('pt-BR')}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[10px] font-bold text-olive-900/40 uppercase mb-1">Checkout</p>
+                                        <p className="font-bold text-sm">{new Date(checkOut!).toLocaleDateString('pt-BR')}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3 pt-4">
+                                    {pricing?.breakdown.map((item: any, idx: number) => (
+                                        <div key={idx} className="flex justify-between text-xs text-olive-900/60 font-medium">
+                                            <span>{new Date(item.date).toLocaleDateString('pt-BR')}</span>
+                                            <span>R$ {item.finalPrice}</span>
+                                        </div>
+                                    ))}
+                                    <div className="flex justify-between text-xs text-olive-900/60 font-medium pb-4 border-b border-olive-900/10">
+                                        <span>Taxa de limpeza</span>
+                                        <span>R$ {pricing?.cleaningFee.toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between font-bold text-xl text-olive-900 pt-2 font-display">
+                                        <span>Total</span>
+                                        <span>R$ {pricing?.total.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+            </div>
+        </div>
+    );
+}

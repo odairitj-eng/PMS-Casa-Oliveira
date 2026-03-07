@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 16, 48, 32;
+  /* olive-900 */
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+}
+
+/* ManualBlockModal: garante a cor de fundo mesmo sem Tailwind JIT */
+[data-manual-block-modal] {
+  background-color: #99CD85 !important;
+}
