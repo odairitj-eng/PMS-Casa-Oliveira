@@ -27,7 +27,8 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 
 export default function GuestDetailPage() {
-    const { id } = useParams();
+    const params = useParams<{ id: string }>();
+    const id = params?.id as string;
     const router = useRouter();
     const [guest, setGuest] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);

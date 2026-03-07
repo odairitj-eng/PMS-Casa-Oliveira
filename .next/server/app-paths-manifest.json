@@ -1,7 +1,8 @@
 {
-  "/page": "app/page.js",
-  "/admin/properties/new/page": "app/admin/properties/new/page.js",
-  "/admin/properties/page": "app/admin/properties/page.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js",
-  "/admin/settings/page": "app/admin/settings/page.js"
+  "/[slug]/page": "app/[slug]/page.js",
+  "/api/admin/properties/[id]/route": "app/api/admin/properties/[id]/route.js",
+  "/admin/calendar/page": "app/admin/calendar/page.js",
+  "/admin/guests/page": "app/admin/guests/page.js",
+  "/admin/properties/[id]/settings/page": "app/admin/properties/[id]/settings/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js"
 }

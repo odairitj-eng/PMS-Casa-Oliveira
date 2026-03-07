@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/options';
 
@@ -14,29 +16,35 @@ function generateSlug(name: string): string {
 }
 
 export async function GET(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any)?.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || (session.user as any)?.role !== 'ADMIN') {
+            return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+        }
+
+        const properties = await db.property.findMany({
+            orderBy: { createdAt: 'asc' },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                publicTitle: true,
+                isActive: true,
+                city: true,
+                state: true,
+                basePrice: true,
+                maxGuests: true,
+                createdAt: true,
+                _count: { select: { reservations: true, photos: true } },
+            },
+        });
+
+        return NextResponse.json(properties);
+    } catch (err: any) {
+        console.error('[PROPERTIES API] Error:', err);
+        return NextResponse.json({ error: 'Erro interno no servidor.' }, { status: 500 });
     }
-
-    const properties = await db.property.findMany({
-        orderBy: { createdAt: 'asc' },
-        select: {
-            id: true,
-            name: true,
-            slug: true,
-            publicTitle: true,
-            isActive: true,
-            city: true,
-            state: true,
-            basePrice: true,
-            maxGuests: true,
-            createdAt: true,
-            _count: { select: { reservations: true, photos: true } },
-        },
-    });
-
-    return NextResponse.json(properties);
 }
 
 export async function POST(req: NextRequest) {

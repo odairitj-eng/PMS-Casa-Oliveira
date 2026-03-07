@@ -102,7 +102,7 @@ export function BookingCard({
     };
 
     return (
-        <Card className="sticky top-8 w-full transition-all duration-500 shadow-xl hover:shadow-2xl rounded-[2rem] border-olive-900/10 hover:border-olive-900/30 group/card overflow-hidden">
+        <Card className="sticky top-8 w-full transition-all duration-500 shadow-xl hover:shadow-2xl rounded-[2rem] border-olive-900/10 hover:border-olive-900/30 group/card">
             <CardHeader className="pb-6 pt-8 px-8">
                 <div className="flex items-baseline gap-1">
                     <CardTitle className="text-3xl md:text-4xl font-bold text-olive-900 tracking-tight">
@@ -116,47 +116,47 @@ export function BookingCard({
             </CardHeader>
 
             <CardContent className="space-y-6 px-8 pb-8">
-                <div className="relative border border-olive-900/20 rounded-2xl overflow-hidden bg-sand-50/50 shadow-inner">
+                <div className="relative border border-olive-900/20 rounded-2xl bg-sand-50/50 shadow-inner">
                     <div className="grid grid-cols-2 border-b border-olive-900/20">
-                        <button
+                        <div
                             onClick={() => setIsDatePickerOpen(true)}
-                            className="p-4 text-left border-r border-olive-900/20 hover:bg-olive-900/5 transition-colors group"
+                            className="p-4 text-left border-r border-olive-900/20 hover:bg-olive-900/5 transition-colors group cursor-pointer rounded-tl-2xl"
                         >
-                            <Label className="text-[10px] font-bold uppercase tracking-widest text-olive-900/50 group-hover:text-olive-900 mb-1 block cursor-pointer">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-olive-900/50 group-hover:text-olive-900 mb-1 block cursor-pointer">
                                 Check-in
-                            </Label>
+                            </span>
                             <span className="text-sm font-bold text-olive-900">
                                 {formatDateDisplay(dates.checkIn)}
                             </span>
-                        </button>
-                        <button
+                        </div>
+                        <div
                             onClick={() => setIsDatePickerOpen(true)}
-                            className="p-4 text-left hover:bg-olive-900/5 transition-colors group"
+                            className="p-4 text-left hover:bg-olive-900/5 transition-colors group cursor-pointer rounded-tr-2xl"
                         >
-                            <Label className="text-[10px] font-bold uppercase tracking-widest text-olive-900/50 group-hover:text-olive-900 mb-1 block cursor-pointer">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-olive-900/50 group-hover:text-olive-900 mb-1 block cursor-pointer">
                                 Checkout
-                            </Label>
+                            </span>
                             <span className="text-sm font-bold text-olive-900">
                                 {formatDateDisplay(dates.checkOut)}
                             </span>
-                        </button>
+                        </div>
                     </div>
 
                     <div className="relative" ref={guestRef}>
-                        <button
-                            className="w-full p-4 text-left flex justify-between items-center hover:bg-olive-900/5 transition-colors group"
+                        <div
+                            className={`w-full p-4 text-left flex justify-between items-center hover:bg-olive-900/5 transition-colors group cursor-pointer rounded-b-2xl ${isGuestOpen ? 'bg-olive-900/5' : ''}`}
                             onClick={() => setIsGuestOpen(!isGuestOpen)}
                         >
                             <div className="min-w-0">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-olive-900/50 group-hover:text-olive-900 mb-1 block cursor-pointer">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-olive-900/50 group-hover:text-olive-900 mb-1 block cursor-pointer">
                                     Hóspedes
-                                </Label>
+                                </span>
                                 <div className="text-sm font-bold text-olive-900 truncate pr-4">
                                     {formatGuestLabel()}
                                 </div>
                             </div>
                             {isGuestOpen ? <ChevronUp className="w-5 h-5 text-olive-900/40" /> : <ChevronDown className="w-5 h-5 text-olive-900/40" />}
-                        </button>
+                        </div>
 
                         {isGuestOpen && (
                             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-olive-900/10 p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">

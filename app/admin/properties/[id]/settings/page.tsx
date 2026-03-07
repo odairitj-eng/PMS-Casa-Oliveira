@@ -25,7 +25,7 @@ type Tab = 'geral' | 'fotos' | 'comodidades' | 'regras' | 'importar' | 'integrac
 export default function PropertySettingsPage() {
     const params = useParams<{ id: string }>();
     const router = useRouter();
-    const propertyId = params.id;
+    const propertyId = params?.id as string;
 
     const [activeTab, setActiveTab] = useState<Tab>('geral');
     const [isLoading, setIsLoading] = useState(true);

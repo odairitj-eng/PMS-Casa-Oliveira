@@ -1,18 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { ManualBlockModal } from "@/components/admin/ManualBlockModal";
 import toast from "react-hot-toast";
 import axios from "axios";
-import { RefreshCcw, Lock, CalendarPlus, X } from "lucide-react";
+import { RefreshCcw, Lock, CalendarPlus, X, Building, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const SAND = "#F5EBE1";
 
-export default function CalendarPage() {
+function CalendarContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
     const [refreshKey, setRefreshKey] = useState(0);
     const [isSyncing, setIsSyncing] = useState(false);
     const [showBlockModal, setShowBlockModal] = useState(false);
@@ -25,21 +29,56 @@ export default function CalendarPage() {
     const [isOpeningWindow, setIsOpeningWindow] = useState(false);
     const [basePrice, setBasePrice] = useState<number>(200);
 
-    // Buscar Preço Base ao carregar
+    const [properties, setProperties] = useState<{ id: string, name: string }[]>([]);
+    const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(searchParams.get('propertyId'));
+    const [isPropertiesLoading, setIsPropertiesLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    // Carregar Propriedades
     useEffect(() => {
-        axios.get("/api/calendar").then(res => {
+        axios.get("/api/admin/properties", { timeout: 8000 }).then(res => {
+            const props = res.data;
+            setProperties(props);
+
+            // Se não tem propriedade selecionada na URL, escolhe a primeira
+            if (!selectedPropertyId && props.length > 0) {
+                setSelectedPropertyId(props[0].id);
+                router.replace(`/admin/calendar?propertyId=${props[0].id}`);
+            }
+            setIsPropertiesLoading(false);
+        }).catch((err) => {
+            console.error("ERRO fetch properties:", err);
+            toast.error("Erro de conexão ao carregar propriedades. Tente reiniciar a sessão.");
+            setHasError(true);
+            setIsPropertiesLoading(false);
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Buscar Preço Base ao carregar/trocar propriedade
+    useEffect(() => {
+        if (!selectedPropertyId) return;
+
+        axios.get(`/api/calendar?propertyId=${selectedPropertyId}`).then(res => {
             if (res.data?.property?.basePrice) {
                 setBasePrice(res.data.property.basePrice);
                 setWindowPrice(String(res.data.property.basePrice));
             }
         });
-    }, []);
+    }, [selectedPropertyId]);
+
+    const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newId = e.target.value;
+        setSelectedPropertyId(newId);
+        router.push(`/admin/calendar?propertyId=${newId}`);
+    };
 
     const handleForceSync = async () => {
+        if (!selectedPropertyId) return;
         setIsSyncing(true);
         const tId = toast.loading("Sincronizando iCal...");
         try {
-            await axios.post('/api/calendar/sync');
+            await axios.post('/api/calendar/sync', { propertyId: selectedPropertyId });
             toast.success("Calendário sincronizado!", { id: tId });
             setRefreshKey(prev => prev + 1);
         } catch {
@@ -59,7 +98,7 @@ export default function CalendarPage() {
             const end = addDays(start, parseInt(windowDays));
 
             await axios.post("/api/admin/availability-windows", {
-                propertyId: "casa-oliveira-id",
+                propertyId: selectedPropertyId,
                 startDate: windowStart,
                 mode: "MANUAL_RANGE",
                 endDate: format(end, "yyyy-MM-dd"),
@@ -79,12 +118,36 @@ export default function CalendarPage() {
     return (
         <div className="space-y-4 px-2">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-[2.5rem] border border-olive-900/5 shadow-sm">
-                <div className="space-y-1">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 md:p-8 rounded-[2.5rem] border border-olive-900/5 shadow-sm gap-6 md:gap-0">
+                <div className="space-y-3">
                     <h1 className="text-3xl font-bold text-olive-900 tracking-tight">Calendário de Tarifas</h1>
-                    <p className="text-olive-900/40 text-[13px] font-medium leading-relaxed">
-                        Gestão de preços diários, bloqueios e integrações (iCal) visual.
-                    </p>
+
+                    {/* Imóvel Selector Component */}
+                    {isPropertiesLoading ? (
+                        <div className="h-11 w-[240px] bg-sand-50/50 rounded-2xl animate-pulse flex items-center px-4 text-xs font-bold text-olive-900/40">Carregando imóveis...</div>
+                    ) : hasError ? (
+                        <div className="h-11 w-[240px] bg-red-50 rounded-2xl flex items-center px-4 text-xs font-bold text-red-600 border border-red-200">Falha ao carregar API</div>
+                    ) : properties.length > 0 ? (
+                        <div className="relative inline-flex items-center">
+                            <div className="absolute left-4 pointer-events-none text-olive-900/40">
+                                <Building className="w-4 h-4" />
+                            </div>
+                            <select
+                                value={selectedPropertyId || ""}
+                                onChange={handlePropertyChange}
+                                className="appearance-none bg-sand-50/50 hover:bg-sand-50 transition-colors border border-olive-900/10 text-olive-900 text-sm font-bold rounded-2xl h-11 pl-11 pr-10 focus:outline-none focus:ring-2 focus:ring-olive-900/20 cursor-pointer w-full md:w-auto min-w-[240px]"
+                            >
+                                {properties.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 pointer-events-none text-olive-900/40">
+                                <ChevronDown className="w-4 h-4" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="h-11 w-[240px] bg-sand-50/50 rounded-2xl flex items-center px-4 text-xs font-bold text-olive-900/40 border border-olive-900/10">Nenhum imóvel disponível</div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3 mt-6 md:mt-0">
@@ -123,17 +186,34 @@ export default function CalendarPage() {
                 </div>
             </div>
 
-            {/* Calendar */}
             <div className="bg-white rounded-[3rem] p-2 border border-olive-900/5 shadow-inner min-h-[800px]">
-                <CalendarView refreshKey={refreshKey} />
+                {selectedPropertyId ? (
+                    <CalendarView refreshKey={refreshKey} propertyId={selectedPropertyId} />
+                ) : (
+                    <div className="h-[600px] flex flex-col items-center justify-center gap-4 text-olive-900/40">
+                        {isPropertiesLoading ? (
+                            <>
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-900"></div>
+                                <p className="font-medium text-sm animate-pulse">Aguardando imóveis...</p>
+                            </>
+                        ) : hasError ? (
+                            <p className="font-medium text-red-600">Erro de conexão ao buscar imóveis.</p>
+                        ) : (
+                            <p className="font-medium">Nenhum imóvel selecionado ou cadastrado.</p>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Modal: Bloquear Manual */}
-            <ManualBlockModal
-                isOpen={showBlockModal}
-                onClose={() => setShowBlockModal(false)}
-                onSuccess={() => setRefreshKey(prev => prev + 1)}
-            />
+            {selectedPropertyId && (
+                <ManualBlockModal
+                    isOpen={showBlockModal}
+                    onClose={() => setShowBlockModal(false)}
+                    onSuccess={() => setRefreshKey(prev => prev + 1)}
+                    propertyId={selectedPropertyId}
+                />
+            )}
 
             {/* Modal inline: Abrir Janela de Reservas */}
             {showOpenWindow && (
@@ -277,5 +357,13 @@ export default function CalendarPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function CalendarPage() {
+    return (
+        <Suspense fallback={<div className="p-8 flex items-center justify-center min-h-[500px]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-olive-900"></div></div>}>
+            <CalendarContent />
+        </Suspense>
     );
 }

@@ -19,6 +19,7 @@ interface CalendarSidebarProps {
     selectedRange: { start: Date; end: Date } | null;
     onSuccess: () => void;
     basePrice?: number;
+    propertyId: string;
 }
 
 const BLOCK_REASONS = [
@@ -28,7 +29,7 @@ const BLOCK_REASONS = [
     { id: "outros", label: "Outros", value: "Outros" },
 ];
 
-export function CalendarSidebar({ isOpen, onClose, selectedRange, onSuccess, basePrice }: CalendarSidebarProps) {
+export function CalendarSidebar({ isOpen, onClose, selectedRange, onSuccess, basePrice, propertyId }: CalendarSidebarProps) {
     const [price, setPrice] = useState("");
     const [minNights, setMinNights] = useState("2");
     const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
@@ -73,7 +74,7 @@ export function CalendarSidebar({ isOpen, onClose, selectedRange, onSuccess, bas
                 minNights: minNights || undefined,
                 isAvailable: isAvailable !== null ? isAvailable : undefined,
                 reason: isAvailable === false ? finalReason : undefined,
-                propertyId: "casa-oliveira-id",
+                propertyId,
             });
             toast.success("Configurações salvas!", { id: tId });
             onSuccess();

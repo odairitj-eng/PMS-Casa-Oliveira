@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { CalendarSidebar } from "@/components/admin/CalendarSidebar";
 import toast from "react-hot-toast";
 
-export function CalendarView({ refreshKey = 0 }: { refreshKey?: number }) {
+export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: number, propertyId: string }) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,9 +34,13 @@ export function CalendarView({ refreshKey = 0 }: { refreshKey?: number }) {
 
     useEffect(() => {
         const loadData = async () => {
+            if (!propertyId) {
+                setLoading(false);
+                return;
+            }
             setLoading(true);
             try {
-                const { data } = await axios.get("/api/calendar");
+                const { data } = await axios.get(`/api/calendar?propertyId=${propertyId}`);
                 setData(data);
             } catch (error) {
                 console.error("Erro ao carregar dados do calendário", error);
@@ -45,7 +49,7 @@ export function CalendarView({ refreshKey = 0 }: { refreshKey?: number }) {
             }
         };
         loadData();
-    }, [refreshKey]);
+    }, [refreshKey, propertyId]);
 
     const onDateClick = (day: Date) => {
         const clickedDay = startOfDay(day);
@@ -77,7 +81,7 @@ export function CalendarView({ refreshKey = 0 }: { refreshKey?: number }) {
     const handleRecalcRolling = async () => {
         const tId = toast.loading("Recalculando janelas dinâmicas...");
         try {
-            await axios.post("/api/admin/availability-windows/recalc");
+            await axios.post("/api/admin/availability-windows/recalc", { propertyId });
             toast.success("Janelas rolling atualizadas!", { id: tId });
             window.location.reload();
         } catch {
@@ -361,6 +365,7 @@ export function CalendarView({ refreshKey = 0 }: { refreshKey?: number }) {
                     window.location.reload();
                 }}
                 basePrice={data?.property?.basePrice}
+                propertyId={propertyId}
             />
         </div>
     );

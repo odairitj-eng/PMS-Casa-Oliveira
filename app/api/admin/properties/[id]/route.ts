@@ -40,7 +40,19 @@ export async function PATCH(
 
     try {
         const body = await req.json();
-        const { slug: _, ...data } = body; // Don't allow slug change via patch (use dedicated endpoint)
+        // Remove known relation arrays, meta-fields, and id/slug before passing to update
+        const {
+            slug: _,
+            id: __,
+            createdAt: ___,
+            updatedAt: ____,
+            photos: _p,
+            amenities: _a,
+            rules: _r,
+            reservations: _res,
+            _count: _c,
+            ...data
+        } = body;
 
         const updated = await db.property.update({
             where: { id: params.id },

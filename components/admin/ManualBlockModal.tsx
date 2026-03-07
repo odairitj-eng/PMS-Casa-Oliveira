@@ -10,6 +10,7 @@ interface ManualBlockModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    propertyId: string;
 }
 
 const BLOCK_REASONS = [
@@ -22,7 +23,7 @@ const BLOCK_REASONS = [
 const BG = "#F5EBE1";   // Bege padrão do sistema (sand-50)
 const FG = "#103020";
 
-export function ManualBlockModal({ isOpen, onClose, onSuccess }: ManualBlockModalProps) {
+export function ManualBlockModal({ isOpen, onClose, onSuccess, propertyId }: ManualBlockModalProps) {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [reason, setReason] = useState("");

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { eachDayOfInterval, format, isWithinInterval, startOfDay, addDays, differenceInDays } from 'date-fns';
 import { calculateSmartPrice } from '@/lib/pricing';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
     try {

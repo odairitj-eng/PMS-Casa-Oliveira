@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { CheckCircle2, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
     const { data: session, status } = useSession();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -242,6 +242,15 @@ export default function CheckoutPage() {
                 </div>
 
             </div>
+
         </div>
+    );
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-sand-50"><Loader2 className="w-10 h-10 animate-spin text-olive-900" /></div>}>
+            <CheckoutContent />
+        </Suspense>
     );
 }
