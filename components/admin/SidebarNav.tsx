@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Copy, CalendarDays, Users, LayoutDashboard, Settings, TrendingUp, Building2 } from "lucide-react";
+import { Copy, CalendarDays, Users, LayoutDashboard, Settings, TrendingUp, Building2, Globe } from "lucide-react";
 
 export function SidebarNav() {
     const pathname = usePathname();
@@ -11,9 +11,9 @@ export function SidebarNav() {
         { href: "/admin/dashboard", label: "Visão Geral", icon: LayoutDashboard },
         { href: "/admin/calendar", label: "Calendário", icon: CalendarDays },
         { href: "/admin/pricing", label: "Smart Pricing", icon: TrendingUp },
-        { href: "/admin/guests", label: "Hóspedes & CRM", icon: Users },
-        { href: "/admin/integrations", label: "Integrações (iCal)", icon: Copy },
         { href: "/admin/properties", label: "Imóveis", icon: Building2 },
+        { href: "/admin/guests", label: "Hóspedes & CRM", icon: Users },
+        { href: "/admin/integrations", label: "Integrações & API", icon: Globe },
         { href: "/admin/settings", label: "Configurações", icon: Settings },
     ];
 

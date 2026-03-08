@@ -13,7 +13,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
     try {
-        const { type, value, description, minDays, startDate, endDate, propertyId = 'casa-oliveira-id' } = await req.json();
+        const { type, value, description, minDays, startDate, endDate, color, propertyId = 'casa-oliveira-id' } = await req.json();
 
         if (!type || !value) {
             return NextResponse.json({ error: 'Tipo e valor são obrigatórios.' }, { status: 400 });
@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
                 minDays: minDays ? parseInt(minDays) : null,
                 startDate: startDate ? new Date(startDate) : null,
                 endDate: endDate ? new Date(endDate) : null,
+                color,
                 propertyId
             }
         });

@@ -21,17 +21,20 @@ export async function getDateAvailabilityStatus(
     const client = tx || defaultDb;
     const d = startOfDay(date);
 
-    // 1. Verificar se está dentro de uma janela de abertura ativa
-    const window = await client.availabilityWindow.findFirst({
-        where: {
-            propertyId,
-            isActive: true,
-            startDate: { lte: d },
-            endDate: { gte: d },
-        }
-    });
+    // 1. Verificar Janelas de Abertura
+    const totalWindows = await client.availabilityWindow.count({ where: { propertyId, isActive: true } });
 
-    if (!window) return "CLOSED_BY_DEFAULT";
+    if (totalWindows > 0) {
+        const window = await client.availabilityWindow.findFirst({
+            where: {
+                propertyId,
+                isActive: true,
+                startDate: { lte: d },
+                endDate: { gte: d },
+            }
+        });
+        if (!window) return "CLOSED_BY_DEFAULT";
+    }
 
     // 2. Verificar se há reservas confirmadas
     const reservation = await client.reservation.findFirst({

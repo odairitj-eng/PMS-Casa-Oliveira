@@ -13,7 +13,11 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { startDate, endDate, price, minNights, isAvailable, reason, propertyId = "casa-oliveira-id" } = body;
+        const { startDate, endDate, price, minNights, isAvailable, reason, propertyId } = body;
+
+        if (!propertyId) {
+            return NextResponse.json({ error: "Property ID é obrigatório" }, { status: 400 });
+        }
 
         if (!startDate || !endDate) {
             return NextResponse.json({ error: "Datas de início e fim são obrigatórias" }, { status: 400 });
@@ -57,16 +61,19 @@ export async function POST(req: NextRequest) {
         await db.$transaction(async (tx: any) => {
             for (const date of days) {
                 // 1. Lógica de Preço e Estadia Mínima
-                if (price !== undefined || minNights !== undefined) {
+                const parsedPrice = price !== undefined && price !== "" ? parseFloat(price) : undefined;
+                const parsedMinNights = minNights !== undefined && minNights !== "" ? parseInt(minNights) : undefined;
+
+                if (parsedPrice !== undefined || parsedMinNights !== undefined) {
                     const data: any = { propertyId, date };
-                    if (price !== undefined) data.price = parseFloat(price);
-                    if (minNights !== undefined) data.minNights = parseInt(minNights);
+                    if (parsedPrice !== undefined) data.price = parsedPrice;
+                    if (parsedMinNights !== undefined) data.minimumNights = parsedMinNights; // Atenção: No schema é minimumNights
 
                     await tx.nightlyOverride.upsert({
                         where: { propertyId_date: { propertyId, date } },
                         update: {
-                            ...(price !== undefined && { price: parseFloat(price) }),
-                            ...(minNights !== undefined && { minNights: parseInt(minNights) }),
+                            ...(parsedPrice !== undefined && { price: parsedPrice }),
+                            ...(parsedMinNights !== undefined && { minimumNights: parsedMinNights }),
                         },
                         create: data,
                     });

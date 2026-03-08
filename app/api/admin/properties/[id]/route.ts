@@ -42,7 +42,6 @@ export async function PATCH(
         const body = await req.json();
         // Remove known relation arrays, meta-fields, and id/slug before passing to update
         const {
-            slug: _,
             id: __,
             createdAt: ___,
             updatedAt: ____,

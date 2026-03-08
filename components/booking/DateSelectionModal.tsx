@@ -21,6 +21,7 @@ import {
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight, X, Calendar as CalendarIcon } from "lucide-react";
 import axios from "axios";
+import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ interface DateSelectionModalProps {
     onSelect: (range: { checkIn: string; checkOut: string }) => void;
     initialCheckIn?: string;
     initialCheckOut?: string;
+    propertyId: string;
 }
 
 export function DateSelectionModal({
@@ -38,7 +40,8 @@ export function DateSelectionModal({
     onClose,
     onSelect,
     initialCheckIn,
-    initialCheckOut
+    initialCheckOut,
+    propertyId
 }: DateSelectionModalProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedRange, setSelectedRange] = useState<{ start: Date | null; end: Date | null }>({
@@ -50,11 +53,11 @@ export function DateSelectionModal({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && propertyId) {
             const loadData = async () => {
                 setLoading(true);
                 try {
-                    const { data } = await axios.get("/api/calendar");
+                    const { data } = await axios.get(`/api/calendar?propertyId=${propertyId}`);
                     setData(data);
                 } catch (error) {
                     console.error("Erro ao carregar dados do calendário", error);
@@ -75,13 +78,16 @@ export function DateSelectionModal({
         // Regra 1: Não permitir datas passadas
         if (isBefore(d, today)) return false;
 
-        // Regra 2: Deve estar dentro de uma janela de disponibilidade (Availability Window)
-        const inWindow = data.availabilityWindows?.some((w: any) => {
-            const start = startOfDay(new Date(w.startDate));
-            const end = startOfDay(new Date(w.endDate));
-            return isWithinInterval(d, { start, end });
-        });
-        if (!inWindow) return false;
+        // Regra 2: Janelas de Disponibilidade
+        const hasWindows = data.availabilityWindows && data.availabilityWindows.length > 0;
+        if (hasWindows) {
+            const inWindow = data.availabilityWindows.some((w: any) => {
+                const start = startOfDay(new Date(w.startDate));
+                const end = startOfDay(new Date(w.endDate));
+                return isWithinInterval(d, { start, end });
+            });
+            if (!inWindow) return false;
+        }
 
         // Regra 3: Não pode estar bloqueado manualmente
         const isBlocked = data.blockedDates?.some((b: any) => isSameDay(new Date(b.date), d));
@@ -129,6 +135,14 @@ export function DateSelectionModal({
 
     const handleConfirm = () => {
         if (selectedRange.start && selectedRange.end) {
+            const nights = differenceInDays(selectedRange.end, selectedRange.start);
+            const minNights = data?.property?.minimumNights || 1;
+
+            if (nights < minNights) {
+                toast.error(`A estadia mínima para este imóvel é de ${minNights} noites.`);
+                return;
+            }
+
             onSelect({
                 checkIn: format(selectedRange.start, "yyyy-MM-dd"),
                 checkOut: format(selectedRange.end, "yyyy-MM-dd")

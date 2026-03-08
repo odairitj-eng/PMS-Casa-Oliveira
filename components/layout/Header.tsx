@@ -14,10 +14,9 @@ export function Header() {
     if (isAdminPage) return null;
 
     const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, id: string) => {
-        if (pathname !== "/") return; // Se não estiver na home, deixa o Link do Next.js funcionar normalmente
-        e.preventDefault();
         const element = document.getElementById(id);
         if (element) {
+            e.preventDefault();
             const headerOffset = 100; // Ajuste para o tamanho do header fixo
             const elementPosition = element.getBoundingClientRect().top;
             const offsetPosition = elementPosition + window.scrollY - headerOffset;
@@ -26,6 +25,9 @@ export function Header() {
                 top: offsetPosition,
                 behavior: "smooth"
             });
+
+            // Opcional: atualiza a URL sem recarregar
+            window.history.pushState(null, '', `#${id}`);
         }
     };
 
@@ -45,25 +47,32 @@ export function Header() {
                 <div className="flex items-center gap-6">
                     <nav className="hidden md:flex items-center gap-8">
                         <Link
-                            href="/#a-casa"
+                            href="#a-casa"
                             onClick={(e) => handleScroll(e, 'a-casa')}
                             className="text-sm font-bold text-olive-900/60 hover:text-olive-900 transition-colors"
                         >
                             A Casa
                         </Link>
                         <Link
-                            href="/#comodidades"
+                            href="#comodidades"
                             onClick={(e) => handleScroll(e, 'comodidades')}
                             className="text-sm font-bold text-olive-900/60 hover:text-olive-900 transition-colors"
                         >
                             Comodidades
                         </Link>
                         <Link
-                            href="/#localizacao"
+                            href="#localizacao"
                             onClick={(e) => handleScroll(e, 'localizacao')}
                             className="text-sm font-bold text-olive-900/60 hover:text-olive-900 transition-colors"
                         >
                             Localização
+                        </Link>
+                        <Link
+                            href="#regras"
+                            onClick={(e) => handleScroll(e, 'regras')}
+                            className="text-sm font-bold text-olive-900/60 hover:text-olive-900 transition-colors"
+                        >
+                            Regras da Casa
                         </Link>
                     </nav>
 

@@ -254,6 +254,7 @@ export function BookingCard({
                 onSelect={handleDateSelect}
                 initialCheckIn={dates.checkIn}
                 initialCheckOut={dates.checkOut}
+                propertyId={propertyId}
             />
         </Card>
     );

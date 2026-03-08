@@ -135,7 +135,7 @@ function CalendarContent() {
                             <select
                                 value={selectedPropertyId || ""}
                                 onChange={handlePropertyChange}
-                                className="appearance-none bg-sand-50/50 hover:bg-sand-50 transition-colors border border-olive-900/10 text-olive-900 text-sm font-bold rounded-2xl h-11 pl-11 pr-10 focus:outline-none focus:ring-2 focus:ring-olive-900/20 cursor-pointer w-full md:w-auto min-w-[240px]"
+                                className="appearance-none bg-sand-50/50 hover:bg-sand-50 transition-colors border border-olive-900/10 text-olive-900 text-sm font-bold rounded-2xl h-11 pl-11 pr-10 focus:outline-none focus:ring-2 focus:ring-olive-900/20 cursor-pointer w-full md:w-auto min-w-[480px]"
                             >
                                 {properties.map(p => (
                                     <option key={p.id} value={p.id}>{p.name}</option>

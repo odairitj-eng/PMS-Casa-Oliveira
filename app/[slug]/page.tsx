@@ -71,7 +71,35 @@ export default async function PropertyPage({ params }: Props) {
                     <div className="flex justify-between items-start border-b border-olive-900/10 pb-8">
                         <div>
                             <h2 className="text-2xl font-bold">
-                                {property.propertyType === 'HOUSE' ? 'Casa inteira' : 'Lugar inteiro'} | Hospedado por {property.hostName || 'Anfitrião'}
+                                {(() => {
+                                    const typeLabels: Record<string, string> = {
+                                        HOUSE: 'Casa',
+                                        TOWNHOUSE: 'Townhouse',
+                                        BUNGALOW: 'Bangalô',
+                                        CABIN: 'Cabana',
+                                        CHALET: 'Chalé',
+                                        EARTH_HOUSE: 'Casa na terra',
+                                        HUT: 'Casebre',
+                                        LIGHTHOUSE: 'Torre de farol',
+                                        VILLA: 'Vila',
+                                        DOME_HOUSE: 'Casa de cúpula',
+                                        FARMHOUSE: 'Casa de campo',
+                                        FARM_HOTEL: 'Hotel-fazenda',
+                                        HOUSEBOAT: 'Casa flutuante',
+                                        TINY_HOUSE: 'Microcasa',
+                                    };
+
+                                    const type = property.propertyType || 'HOUSE';
+                                    const label = typeLabels[type] || 'Imóvel';
+
+                                    let accommodation = property.accommodationType || 'Espaço inteiro';
+                                    if (accommodation === 'Espaço inteiro') {
+                                        const isMasculine = ['BUNGALOW', 'CHALET', 'HUT', 'FARM_HOTEL'].includes(type);
+                                        accommodation = isMasculine ? 'inteiro' : 'inteira';
+                                    }
+
+                                    return `${label} ${accommodation}`;
+                                })()} | Hospedado por {property.hostName || 'Anfitrião'}
                             </h2>
                             <p className="text-olive-900/80 mt-1">
                                 {property.maxGuests} {property.maxGuests > 1 ? 'hóspedes' : 'hóspede'} ·{' '}
@@ -85,16 +113,18 @@ export default async function PropertyPage({ params }: Props) {
                         </div>
                     </div>
 
-                    <PropertyDescription
-                        shortDescription={property.shortDescription}
-                        fullDescription={property.fullDescription}
-                    />
+                    <div id="a-casa" className="scroll-mt-24">
+                        <PropertyDescription
+                            shortDescription={property.shortDescription}
+                            fullDescription={property.fullDescription}
+                        />
+                    </div>
 
                     <div id="comodidades" className="scroll-mt-24">
                         <Amenities amenities={property.amenities} />
                     </div>
 
-                    <div className="py-8 border-t border-olive-900/10">
+                    <div id="regras" className="py-8 border-t border-olive-900/10 scroll-mt-24">
                         <h2 className="text-2xl font-bold mb-4">Regras da casa</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {property.rules.length > 0 ? (

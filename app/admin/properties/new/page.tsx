@@ -15,10 +15,14 @@ export default function NewPropertyPage() {
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         name: '',
+        publicTitle: '',
         basePrice: '',
         cleaningFee: '',
         minimumNights: '2',
         maxGuests: '4',
+        bedrooms: '1',
+        beds: '1',
+        bathrooms: '1',
         city: '',
         state: '',
         country: 'Brasil',
@@ -36,6 +40,9 @@ export default function NewPropertyPage() {
                 cleaningFee: parseFloat(form.cleaningFee || '0'),
                 minimumNights: parseInt(form.minimumNights),
                 maxGuests: parseInt(form.maxGuests),
+                bedrooms: parseInt(form.bedrooms),
+                beds: parseInt(form.beds),
+                bathrooms: parseInt(form.bathrooms),
             });
             toast.success('Imóvel criado com sucesso!');
             router.push(`/admin/properties/${res.data.id}/settings`);
@@ -73,7 +80,7 @@ export default function NewPropertyPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-2">
-                        <Label className="text-olive-900/70">Nome do Imóvel *</Label>
+                        <Label className="text-olive-900/70">Nome Interno (Admin) *</Label>
                         <Input
                             required
                             value={form.name}
@@ -81,7 +88,18 @@ export default function NewPropertyPage() {
                             placeholder="Ex: Casa Oliveira — Vista Panorâmica"
                             className="h-12 rounded-xl border-olive-900/10"
                         />
-                        <p className="text-xs text-olive-900/40">O slug será gerado automaticamente a partir do nome.</p>
+                        <p className="text-xs text-olive-900/40">Nome curto apenas para identificação no sistema.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-olive-900/70">Título Público (Anúncio)</Label>
+                        <Input
+                            value={form.publicTitle}
+                            onChange={e => set('publicTitle', e.target.value)}
+                            placeholder="Ex: Charmosa Casa de Campo com Deck"
+                            className="h-12 rounded-xl border-olive-900/10"
+                        />
+                        <p className="text-xs text-olive-900/40">Como os hóspedes verão o título do imóvel.</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -123,6 +141,36 @@ export default function NewPropertyPage() {
                                 type="number" min="1"
                                 value={form.maxGuests}
                                 onChange={e => set('maxGuests', e.target.value)}
+                                className="h-12 rounded-xl border-olive-900/10"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-olive-900/70">Quartos</Label>
+                            <Input
+                                type="number" min="0"
+                                value={form.bedrooms}
+                                onChange={e => set('bedrooms', e.target.value)}
+                                className="h-12 rounded-xl border-olive-900/10"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-olive-900/70">Camas</Label>
+                            <Input
+                                type="number" min="0"
+                                value={form.beds}
+                                onChange={e => set('beds', e.target.value)}
+                                className="h-12 rounded-xl border-olive-900/10"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-olive-900/70">Banheiros</Label>
+                            <Input
+                                type="number" min="0"
+                                value={form.bathrooms}
+                                onChange={e => set('bathrooms', e.target.value)}
                                 className="h-12 rounded-xl border-olive-900/10"
                             />
                         </div>

@@ -229,7 +229,16 @@ exports.Prisma.ReservationScalarFieldEnum = {
   totalNights: 'totalNights',
   holdExpiresAt: 'holdExpiresAt',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  numGuests: 'numGuests'
+};
+
+exports.Prisma.ReservationOccupantScalarFieldEnum = {
+  id: 'id',
+  reservationId: 'reservationId',
+  name: 'name',
+  document: 'document',
+  isChild: 'isChild'
 };
 
 exports.Prisma.PaymentScalarFieldEnum = {
@@ -287,6 +296,7 @@ exports.Prisma.PricingRuleScalarFieldEnum = {
   minDays: 'minDays',
   startDate: 'startDate',
   endDate: 'endDate',
+  color: 'color',
   isActive: 'isActive',
   createdAt: 'createdAt'
 };
@@ -436,6 +446,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   VerificationToken: 'VerificationToken',
   Reservation: 'Reservation',
+  ReservationOccupant: 'ReservationOccupant',
   Payment: 'Payment',
   BlockedDate: 'BlockedDate',
   AvailabilityWindow: 'AvailabilityWindow',

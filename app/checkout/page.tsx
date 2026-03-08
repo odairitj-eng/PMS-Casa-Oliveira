@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import { CheckCircle2, ShieldCheck, ArrowLeft, Loader2, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -28,6 +28,15 @@ function CheckoutContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [pixData, setPixData] = useState<any>(null);
+    const [occupants, setOccupants] = useState<any[]>([]);
+
+    useEffect(() => {
+        // Inicializar array de ocupantes baseado no número de hóspedes (excluindo o organizador)
+        const count = parseInt(guestsCount);
+        if (count > 1) {
+            setOccupants(Array(count - 1).fill({ name: "", document: "" }));
+        }
+    }, [guestsCount]);
 
     useEffect(() => {
         if (status === "authenticated" && checkIn && checkOut) {
@@ -79,7 +88,8 @@ function CheckoutContent() {
                 nightlyRate: pricing.total / pricing.breakdown.length,
                 cleaningFee: pricing.cleaningFee,
                 totalNights: pricing.breakdown.length,
-                guests: parseInt(guestsCount)
+                guests: parseInt(guestsCount),
+                occupants: occupants.filter(o => o.name) // Enviar apenas os preenchidos
             });
 
             toast.success("Reserva realizada com sucesso!", { id: idToast });
@@ -174,6 +184,45 @@ function CheckoutContent() {
                                 />
                                 <p className="text-xs text-olive-900/40 font-medium mt-2">Usaremos este número apenas para comunicações sobre sua reserva.</p>
                             </div>
+
+                            {occupants.length > 0 && (
+                                <div className="pt-8 border-t border-olive-900/5 space-y-6">
+                                    <h3 className="font-bold text-olive-900 flex items-center gap-2">
+                                        <Plus className="w-4 h-4" /> Acompanhantes
+                                    </h3>
+                                    {occupants.map((occ, idx) => (
+                                        <div key={idx} className="p-6 bg-olive-900/[0.02] rounded-2xl border border-olive-900/5 space-y-4">
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-olive-900/40">Hóspede {idx + 2}</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <Label className="text-xs font-bold text-olive-900/60 mb-1 block">Nome Completo</Label>
+                                                    <Input
+                                                        value={occ.name}
+                                                        onChange={(e) => {
+                                                            const newOccs = [...occupants];
+                                                            newOccs[idx] = { ...newOccs[idx], name: e.target.value };
+                                                            setOccupants(newOccs);
+                                                        }}
+                                                        className="h-10 rounded-xl border-olive-900/10 focus:border-olive-900"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-xs font-bold text-olive-900/60 mb-1 block">Documento (CPF/RG)</Label>
+                                                    <Input
+                                                        value={occ.document}
+                                                        onChange={(e) => {
+                                                            const newOccs = [...occupants];
+                                                            newOccs[idx] = { ...newOccs[idx], document: e.target.value };
+                                                            setOccupants(newOccs);
+                                                        }}
+                                                        className="h-10 rounded-xl border-olive-900/10 focus:border-olive-900"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
 
                             <div className="pt-8 border-t border-olive-900/5 mt-8">
                                 <div className="flex items-start gap-3 p-6 bg-green-50 rounded-2xl border border-green-100">

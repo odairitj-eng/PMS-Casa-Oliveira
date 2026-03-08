@@ -14,7 +14,9 @@ import {
     addDays,
     isBefore,
     startOfDay,
-    isWithinInterval
+    isWithinInterval,
+    isWeekend,
+    differenceInDays
 } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight, Lock, Clock, Info, X, Calendar, Minus } from "lucide-react";
@@ -28,6 +30,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
     const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
+
+    // Estados para seleção por arraste (botão direito)
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState<Date | null>(null);
+    const [dragEnd, setDragEnd] = useState<Date | null>(null);
 
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -53,6 +60,10 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
     const onDateClick = (day: Date) => {
         const clickedDay = startOfDay(day);
+        const today = startOfDay(new Date());
+
+        // Não permitir selecionar datas passadas no admin para edição
+        if (isBefore(clickedDay, today)) return;
 
         if (!selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end))) {
             setSelectedRange({ start: clickedDay, end: clickedDay });
@@ -65,6 +76,77 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         }
     };
 
+    // Handlers para Arraste com Botão Direito
+    const handlePointerDown = (e: React.PointerEvent, day: Date) => {
+        if (e.button === 2) { // Botão direito
+            (e.target as HTMLElement).setPointerCapture(e.pointerId);
+            const startDay = startOfDay(day);
+            const today = startOfDay(new Date());
+            if (isBefore(startDay, today)) return;
+
+            setIsDragging(true);
+            setDragStart(startDay);
+            setDragEnd(startDay);
+        }
+    };
+
+    const handlePointerEnter = (day: Date) => {
+        if (isDragging) {
+            const currentDay = startOfDay(day);
+            const today = startOfDay(new Date());
+            if (isBefore(currentDay, today)) return;
+            setDragEnd(currentDay);
+        }
+    };
+
+    const handleMouseUp = () => {
+        if (isDragging && dragStart && dragEnd) {
+            const start = isBefore(dragStart, dragEnd) ? dragStart : dragEnd;
+            const end = isBefore(dragStart, dragEnd) ? dragEnd : dragStart;
+            setSelectedRange({ start, end });
+        }
+        setIsDragging(false);
+        setDragStart(null);
+        setDragEnd(null);
+    };
+
+    // Helper para verificar se uma data está no intervalo de arraste de forma performática
+    const getIsDateInDragRange = (cloneDay: Date) => {
+        if (!isDragging || !dragStart || !dragEnd) return false;
+        const t = cloneDay.getTime();
+        const s = dragStart.getTime();
+        const e = dragEnd.getTime();
+        return (t >= s && t <= e) || (t >= e && t <= s);
+    };
+
+    // Efeito para finalizar arraste globalmente e gerenciar cursor/seleção
+    useEffect(() => {
+        const handleGlobalPointerUp = (e: PointerEvent) => {
+            if (isDragging) {
+                handleMouseUp();
+            }
+        };
+
+        const handleGlobalContextMenu = (e: MouseEvent) => {
+            if (isDragging) e.preventDefault();
+        };
+
+        if (isDragging) {
+            document.body.style.userSelect = 'none';
+            document.body.style.cursor = 'crosshair';
+            window.addEventListener('pointerup', handleGlobalPointerUp);
+            window.addEventListener('contextmenu', handleGlobalContextMenu);
+        } else {
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+        }
+
+        return () => {
+            window.removeEventListener('pointerup', handleGlobalPointerUp);
+            window.removeEventListener('contextmenu', handleGlobalContextMenu);
+        };
+    }, [isDragging, dragStart, dragEnd]);
+
     const handleOpenSidebar = () => {
         if (selectedRange) setIsSidebarOpen(true);
     };
@@ -75,6 +157,36 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
             const start = startOfDay(new Date(w.startDate));
             const end = startOfDay(new Date(w.endDate));
             return isWithinInterval(startOfDay(date), { start, end });
+        });
+    };
+
+    const getDayRules = (date: Date) => {
+        if (!data?.pricingRules) return [];
+        const dateOnly = startOfDay(date);
+        const now = startOfDay(new Date());
+
+        return data.pricingRules.filter((rule: any) => {
+            if (!rule.isActive) return false;
+
+            if (rule.type === 'WEEKEND_SURGE' && isWeekend(dateOnly)) return true;
+
+            if (rule.type === 'SEASONAL' && rule.startDate && rule.endDate) {
+                const s = startOfDay(new Date(rule.startDate));
+                const e = startOfDay(new Date(rule.endDate));
+                if (dateOnly >= s && dateOnly <= e) return true;
+            }
+
+            if (rule.type === 'LAST_MINUTE') {
+                const daysToDate = differenceInDays(dateOnly, now);
+                if (daysToDate >= 0 && daysToDate <= (rule.minDays || 7)) return true;
+            }
+
+            if (rule.type === 'EARLY_BIRD') {
+                const daysToDate = differenceInDays(dateOnly, now);
+                if (daysToDate >= (rule.minDays || 30)) return true;
+            }
+
+            return false;
         });
     };
 
@@ -201,9 +313,26 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 );
                 const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(new Date(b.date), cloneDay));
 
-                const isSelected = selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end });
+                const isPast = isBefore(cloneDay, startOfDay(new Date()));
 
-                const price = dayOverride?.price || data?.property?.basePrice || 0;
+                // Verificar se está no range de arraste atual
+                const isInDragRange = getIsDateInDragRange(cloneDay);
+
+                const isSelected = (selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
+
+                // --- Cálculo de Preço Inteligente (Smart Pricing) ---
+                let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
+                const isManualOverride = !!dayOverride;
+                const activeRules = isManualOverride ? [] : getDayRules(cloneDay);
+
+                if (!isManualOverride) {
+                    activeRules.forEach((rule: any) => {
+                        finalPrice *= rule.value;
+                    });
+                }
+                const hasRuleApplied = activeRules.length > 0;
+                const price = Math.round(finalPrice);
+                // --------------------------------------------------
 
                 days.push(
                     <div
@@ -211,12 +340,15 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         className={cn(
                             "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
-                            !inWindow && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
-                            inWindow && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
+                            (isPast || !inWindow) && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
+                            inWindow && isCurrentMonth && !isPast && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
                         )}
                         onClick={() => onDateClick(cloneDay)}
+                        onPointerDown={(e) => handlePointerDown(e, cloneDay)}
+                        onPointerEnter={() => handlePointerEnter(cloneDay)}
+                        onContextMenu={(e) => e.preventDefault()}
                     >
                         <div className="relative z-10 flex flex-col h-full">
                             <div className="flex justify-between items-start">
@@ -228,9 +360,20 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 )}>
                                     {format(cloneDay, "d")}
                                 </span>
-                                {!inWindow && isCurrentMonth && !dayReservation && !dayBlock && (
+                                {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && (
                                     <Lock className="w-3 h-3 text-olive-900/20" />
                                 )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-1 mb-1 mt-0.5 min-h-[4px]">
+                                {getDayRules(cloneDay).map((rule: any, idx: number) => (
+                                    <div
+                                        key={rule.id}
+                                        className="h-1 flex-1 rounded-full opacity-60"
+                                        style={{ backgroundColor: rule.color || '#10b981' }}
+                                        title={rule.description || rule.type}
+                                    />
+                                ))}
                             </div>
 
                             {isCurrentMonth && (
@@ -251,17 +394,25 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             <Minus className="w-2.5 h-2.5" />
                                             <span className="truncate">{dayBlock.reason || "Indisponível"}</span>
                                         </div>
-                                    ) : !inWindow ? (
+                                    ) : (isPast || !inWindow) ? (
                                         <div className="flex flex-col opacity-30">
                                             <span className="text-[10px] font-bold text-olive-900/40 uppercase">Fechado</span>
                                         </div>
                                     ) : (
                                         <div className="flex flex-col">
                                             <span className={cn(
-                                                "text-lg font-black tracking-tight",
+                                                "text-lg font-black tracking-tight flex items-center gap-0.5",
                                                 isSelected ? "text-olive-900" : (inWindow ? "text-olive-900" : "text-olive-900/60")
                                             )}>
                                                 R${price}
+                                                {hasRuleApplied && (
+                                                    <span
+                                                        className="text-emerald-600 text-xs ml-0.5 cursor-help"
+                                                        title="Preço inteligente aplicado (regras automáticas)"
+                                                    >
+                                                        *
+                                                    </span>
+                                                )}
                                             </span>
                                             {dayOverride?.minNights && (
                                                 <div className="flex items-center gap-1 mt-0.5 opacity-40">
@@ -309,8 +460,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                             {Array.from({ length: 42 }, (_, i) => {
                                 const day = addDays(startOfWeek(startOfMonth(month)), i);
                                 const isCurrentMonth = isSameMonth(day, month);
-                                const isSelected = selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end });
                                 const inWindow = isDateInWindow(day);
+
+                                const isInDragRange = getIsDateInDragRange(day);
+
+                                const isSelected = (selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
 
                                 return (
                                     <div
@@ -323,6 +477,9 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                                     "hover:bg-sand-50 text-olive-900/60"
                                         )}
                                         onClick={() => onDateClick(day)}
+                                        onPointerDown={(e) => handlePointerDown(e, day)}
+                                        onPointerEnter={() => handlePointerEnter(day)}
+                                        onContextMenu={(e) => e.preventDefault()}
                                     >
                                         {format(day, "d")}
                                     </div>
@@ -336,7 +493,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
     }
 
     return (
-        <div className="w-full max-w-[1600px] mx-auto px-4 pb-12">
+        <div className="w-full max-w-[1600px] mx-auto px-4 pb-12 select-none" onContextMenu={(e) => e.button === 2 && e.preventDefault()}>
             {renderHeader()}
 
             {viewMode === 'month' && (

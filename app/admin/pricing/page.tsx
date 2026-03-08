@@ -8,12 +8,23 @@ import { Label } from "@/components/ui/label";
 import { Trash2, AlertCircle, TrendingUp, CalendarClock } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { cn } from "@/lib/utils";
 
 const RULE_TYPES = [
     { value: 'WEEKEND_SURGE', label: 'Aumento de Fim de Semana', icon: TrendingUp },
     { value: 'LAST_MINUTE', label: 'Desconto Última Hora', icon: CalendarClock },
     { value: 'EARLY_BIRD', label: 'Desconto Antecipação', icon: TrendingUp },
     { value: 'SEASONAL', label: 'Ajuste Sazonal / Datas', icon: TrendingUp },
+];
+
+const PRESET_COLORS = [
+    { name: 'Esmeralda', value: '#10b981' },
+    { name: 'Azul', value: '#3b82f6' },
+    { name: 'Roxo', value: '#8b5cf6' },
+    { name: 'Rosa', value: '#ec4899' },
+    { name: 'Laranja', value: '#f59e0b' },
+    { name: 'Vermelho', value: '#ef4444' },
+    { name: 'Petróleo', value: '#064e3b' },
 ];
 
 export default function AdminPricingPage() {
@@ -24,7 +35,8 @@ export default function AdminPricingPage() {
         description: '',
         minDays: '',
         startDate: '',
-        endDate: ''
+        endDate: '',
+        color: '#10b981'
     });
     const [isLoading, setIsLoading] = useState(false);
     const [property, setProperty] = useState<any>(null);
@@ -34,17 +46,37 @@ export default function AdminPricingPage() {
     }, []);
 
     const fetchRules = async () => {
-        const { data } = await axios.get('/api/calendar');
-        setProperty(data.property);
+        try {
+            // 1. Buscar imóveis para ter um ID padrão
+            const { data: properties } = await axios.get('/api/admin/properties');
+            if (properties && properties.length > 0) {
+                const defaultProperty = properties[0];
+                setProperty(defaultProperty);
 
-        const resRules = await axios.get('/api/admin/pricing/rules');
-        setRules(resRules.data);
+                // 2. Buscar dados do calendário para este imóvel
+                const { data: calendarData } = await axios.get(`/api/calendar?propertyId=${defaultProperty.id}`);
+                // O calendário retorna property, reservations, etc.
+                if (calendarData.property) {
+                    setProperty(calendarData.property);
+                }
+
+                // 3. Buscar as regras
+                const resRules = await axios.get('/api/admin/pricing/rules');
+                setRules(resRules.data);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar dados de pricing:", error);
+            toast.error("Erro ao carregar configurações de preço.");
+        }
     };
 
     const handleAddRule = async () => {
         setIsLoading(true);
         try {
-            await axios.post('/api/admin/pricing/rules', newRule);
+            await axios.post('/api/admin/pricing/rules', {
+                ...newRule,
+                propertyId: property?.id
+            });
             toast.success("Regra adicionada!");
             setNewRule({
                 type: 'WEEKEND_SURGE',
@@ -52,7 +84,8 @@ export default function AdminPricingPage() {
                 description: '',
                 minDays: '',
                 startDate: '',
-                endDate: ''
+                endDate: '',
+                color: '#10b981'
             });
             fetchRules();
         } catch (error) {
@@ -76,7 +109,7 @@ export default function AdminPricingPage() {
         <div className="space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-olive-900 leading-tight">Smart Pricing Engine</h1>
+                    <h1 className="text-3xl font-bold text-olive-900 leading-tight">Motor de Preços Inteligente</h1>
                     <p className="text-olive-900/60 font-medium">Automatize sua estratégia de preço com inteligência.</p>
                 </div>
             </div>
@@ -89,7 +122,7 @@ export default function AdminPricingPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <Label className="mb-2 block">Tipo de Regra</Label>
+                            <Label className="mb-2 block text-xs font-bold text-olive-900/60 uppercase">Tipo de Regra</Label>
                             <select
                                 className="w-full rounded-lg border border-olive-900/10 p-2 text-sm focus:ring-olive-900/20"
                                 value={newRule.type}
@@ -101,7 +134,7 @@ export default function AdminPricingPage() {
                             </select>
                         </div>
                         <div>
-                            <Label className="mb-2 block">Multiplicador (Ex: 1.2 = +20%)</Label>
+                            <Label className="mb-2 block text-xs font-bold text-olive-900/60 uppercase">Multiplicador (Ex: 1.2 = +20%)</Label>
                             <Input
                                 type="number"
                                 step="0.01"
@@ -112,7 +145,7 @@ export default function AdminPricingPage() {
 
                         {(newRule.type === 'LAST_MINUTE' || newRule.type === 'EARLY_BIRD') && (
                             <div>
-                                <Label className="mb-2 block">
+                                <Label className="mb-2 block text-xs font-bold text-olive-900/60 uppercase">
                                     {newRule.type === 'LAST_MINUTE' ? 'Até quantos dias antes?' : 'A partir de quantos dias antes?'}
                                 </Label>
                                 <Input
@@ -127,7 +160,7 @@ export default function AdminPricingPage() {
                         {newRule.type === 'SEASONAL' && (
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <Label className="mb-2 block">Início</Label>
+                                    <Label className="mb-2 block text-xs font-bold text-olive-900/60 uppercase">Início</Label>
                                     <Input
                                         type="date"
                                         value={newRule.startDate}
@@ -135,7 +168,7 @@ export default function AdminPricingPage() {
                                     />
                                 </div>
                                 <div>
-                                    <Label className="mb-2 block">Fim</Label>
+                                    <Label className="mb-2 block text-xs font-bold text-olive-900/60 uppercase">Fim</Label>
                                     <Input
                                         type="date"
                                         value={newRule.endDate}
@@ -146,13 +179,33 @@ export default function AdminPricingPage() {
                         )}
 
                         <div>
-                            <Label className="mb-2 block">Descrição (Opcional)</Label>
+                            <Label className="mb-2 block text-xs font-bold text-olive-900/60 uppercase">Descrição (Opcional)</Label>
                             <Input
                                 placeholder="Feriado de Inverno"
                                 value={newRule.description}
                                 onChange={(e) => setNewRule({ ...newRule, description: e.target.value })}
                             />
                         </div>
+
+                        <div>
+                            <Label className="mb-3 block text-xs font-bold text-olive-900/60 uppercase">Cor Identificadora</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {PRESET_COLORS.map(c => (
+                                    <button
+                                        key={c.value}
+                                        type="button"
+                                        onClick={() => setNewRule({ ...newRule, color: c.value })}
+                                        className={cn(
+                                            "w-8 h-8 rounded-full border-2 transition-all",
+                                            newRule.color === c.value ? "border-olive-900 scale-110 shadow-md" : "border-transparent hover:scale-105"
+                                        )}
+                                        style={{ backgroundColor: c.value }}
+                                        title={c.name}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
                         <Button
                             onClick={handleAddRule}
                             disabled={isLoading}
@@ -177,11 +230,15 @@ export default function AdminPricingPage() {
                                 const ruleType = RULE_TYPES.find(r => r.value === rule.type);
                                 const Icon = ruleType?.icon || TrendingUp;
                                 return (
-                                    <Card key={rule.id} className="shadow-sm border border-olive-900/10 hover:border-olive-900/30 transition-all">
+                                    <Card key={rule.id} className="shadow-sm border border-olive-900/10 hover:border-olive-900/30 transition-all overflow-hidden">
+                                        <div className="h-1 w-full" style={{ backgroundColor: rule.color || '#10b981' }} />
                                         <CardContent className="p-4 flex items-center justify-between">
                                             <div className="flex items-center gap-4">
-                                                <div className="bg-olive-900/5 p-3 rounded-xl">
-                                                    <Icon className="w-6 h-6 text-olive-900" />
+                                                <div
+                                                    className="p-3 rounded-xl"
+                                                    style={{ backgroundColor: `${rule.color || '#10b981'}20` }}
+                                                >
+                                                    <Icon className="w-6 h-6" style={{ color: rule.color || '#10b981' }} />
                                                 </div>
                                                 <div>
                                                     <p className="font-bold text-olive-900">{ruleType?.label}</p>

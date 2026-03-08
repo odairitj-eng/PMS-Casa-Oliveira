@@ -70,8 +70,8 @@ export function CalendarSidebar({ isOpen, onClose, selectedRange, onSuccess, bas
             await axios.post("/api/admin/calendar/update", {
                 startDate: selectedRange.start,
                 endDate: selectedRange.end,
-                price: price || undefined,
-                minNights: minNights || undefined,
+                price: price.trim() || undefined,
+                minNights: minNights.trim() || undefined,
                 isAvailable: isAvailable !== null ? isAvailable : undefined,
                 reason: isAvailable === false ? finalReason : undefined,
                 propertyId,
@@ -79,7 +79,12 @@ export function CalendarSidebar({ isOpen, onClose, selectedRange, onSuccess, bas
             toast.success("Configurações salvas!", { id: tId });
             onSuccess();
             onClose();
-            setPrice(""); setMinNights("2"); setIsAvailable(null); setReason(""); setCustomReason("");
+            // Resetar estados
+            setPrice("");
+            setMinNights("2");
+            setIsAvailable(null);
+            setReason("");
+            setCustomReason("");
         } catch (error: any) {
             toast.error(error.response?.data?.error || "Erro ao salvar.", { id: tId });
         } finally {

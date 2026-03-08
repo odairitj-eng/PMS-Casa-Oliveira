@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, Loader2 } from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../ui/select";
+import { Save, Loader2, Minus, Plus } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -32,12 +39,24 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle>Informações Principais</CardTitle>
-                    <CardDescription>Nome, descrições, lotação e localização para exibição pública.</CardDescription>
+                    <CardDescription>Nome, descrições, lotação e status de exibição.</CardDescription>
                 </div>
-                <Button onClick={handleSave} disabled={isSaving} className="bg-olive-900 border hover:bg-olive-800 text-white gap-2">
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    Salvar
-                </Button>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-olive-900/10 bg-olive-900/5">
+                        <Label className="text-sm font-bold text-olive-900 cursor-pointer" htmlFor="is-active">Ativo</Label>
+                        <input
+                            id="is-active"
+                            type="checkbox"
+                            className="w-4 h-4 accent-olive-900 cursor-pointer"
+                            checked={data.isActive ?? true}
+                            onChange={(e) => setData({ ...data, isActive: e.target.checked })}
+                        />
+                    </div>
+                    <Button onClick={handleSave} disabled={isSaving} className="bg-olive-900 border hover:bg-olive-800 text-white gap-2">
+                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                        Salvar
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -48,6 +67,187 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     <div className="space-y-2">
                         <Label>Título Público do Anúncio</Label>
                         <Input value={data.publicTitle || ""} onChange={(e) => setData({ ...data, publicTitle: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Nome do Anfitrião (Exibido no perfil)</Label>
+                        <Input value={data.hostName || ""} onChange={(e) => setData({ ...data, hostName: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Slug (Link da Página Pública)</Label>
+                        <Input
+                            value={data.slug || ""}
+                            onChange={(e) => setData({ ...data, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                            placeholder="ex: casa-oliveira-itjai"
+                        />
+                        <p className="text-[10px] text-olive-900/40">O link será: /<span>{data.slug || "..."}</span></p>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Moeda</Label>
+                        <Select
+                            value={data.currency || "BRL"}
+                            onValueChange={(v: string) => setData({ ...data, currency: v })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="BRL" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="BRL">Real (BRL)</SelectItem>
+                                <SelectItem value="USD">Dólar (USD)</SelectItem>
+                                <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <div className="space-y-4 p-6 rounded-2xl border border-olive-900/10 bg-sand-50/20">
+                    <h3 className="text-lg font-bold text-olive-900 border-b border-olive-900/10 pb-2">Tipo de propriedade</h3>
+
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <Label className="text-olive-900/60 text-xs font-bold uppercase tracking-wider">Qual opção melhor representa o seu espaço?</Label>
+                            <Select
+                                value={data.category || "Casa"}
+                                onValueChange={(v: string) => setData({ ...data, category: v })}
+                            >
+                                <SelectTrigger className="h-14 rounded-xl border-olive-900/20 bg-white text-lg font-medium">
+                                    <SelectValue placeholder="Selecione a categoria" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Casa">Casa</SelectItem>
+                                    <SelectItem value="Apartamento">Apartamento</SelectItem>
+                                    <SelectItem value="Chalé">Chalé</SelectItem>
+                                    <SelectItem value="Pousada">Pousada</SelectItem>
+                                    <SelectItem value="Villa">Villa</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-olive-900/60 text-xs font-bold uppercase tracking-wider">Tipo de propriedade</Label>
+                            <Select
+                                value={data.propertyType || "HOUSE"}
+                                onValueChange={(v: string) => setData({ ...data, propertyType: v })}
+                            >
+                                <SelectTrigger className="h-14 rounded-xl border-olive-900/20 bg-white text-lg font-medium">
+                                    <SelectValue placeholder="Selecione o tipo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="HOUSE">Casa</SelectItem>
+                                    <SelectItem value="TOWNHOUSE">Townhouse</SelectItem>
+                                    <SelectItem value="BUNGALOW">Bangalô</SelectItem>
+                                    <SelectItem value="CABIN">Cabana</SelectItem>
+                                    <SelectItem value="CHALET">Chalé</SelectItem>
+                                    <SelectItem value="EARTH_HOUSE">Casa na terra</SelectItem>
+                                    <SelectItem value="HUT">Casebre</SelectItem>
+                                    <SelectItem value="LIGHTHOUSE">Torre de farol</SelectItem>
+                                    <SelectItem value="VILLA">Vila</SelectItem>
+                                    <SelectItem value="DOME_HOUSE">Casa de cúpula</SelectItem>
+                                    <SelectItem value="FARMHOUSE">Casa de campo</SelectItem>
+                                    <SelectItem value="FARM_HOTEL">Hotel-fazenda</SelectItem>
+                                    <SelectItem value="HOUSEBOAT">Casa flutuante</SelectItem>
+                                    <SelectItem value="TINY_HOUSE">Microcasa</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-olive-900/40 italic">Uma casa que pode ser independente ou ter paredes compartilhadas.</p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-olive-900/60 text-xs font-bold uppercase tracking-wider">Tipo de acomodação</Label>
+                            <Select
+                                value={data.accommodationType || "Espaço inteiro"}
+                                onValueChange={(v: string) => setData({ ...data, accommodationType: v })}
+                            >
+                                <SelectTrigger className="h-14 rounded-xl border-olive-900/20 bg-white text-lg font-medium">
+                                    <SelectValue placeholder="Selecione a acomodação" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Espaço inteiro">Espaço inteiro</SelectItem>
+                                    <SelectItem value="Quarto privativo">Quarto privativo</SelectItem>
+                                    <SelectItem value="Quarto compartilhado">Quarto compartilhado</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <p className="text-xs text-olive-900/40 italic">Os hóspedes têm todo o lugar para si. Isso geralmente inclui um quarto, um banheiro e uma cozinha.</p>
+                        </div>
+
+                        <div className="flex items-center justify-between py-2">
+                            <Label className="text-base font-bold text-olive-900">Quantos andares tem o prédio?</Label>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => setData({ ...data, buildingFloors: Math.max(1, (data.buildingFloors || 1) - 1) })}
+                                    className="p-2 rounded-full border border-olive-900/20 hover:bg-olive-900/5 text-olive-900 transition-colors"
+                                >
+                                    <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="text-xl font-bold min-w-[20px] text-center">{data.buildingFloors || 1}</span>
+                                <button
+                                    onClick={() => setData({ ...data, buildingFloors: (data.buildingFloors || 1) + 1 })}
+                                    className="p-2 rounded-full border border-olive-900/20 hover:bg-olive-900/5 text-olive-900 transition-colors"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between py-2">
+                            <Label className="text-base font-bold text-olive-900">Em que andar fica a acomodação?</Label>
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => setData({ ...data, floorNumber: Math.max(0, (data.floorNumber || 0) - 1) })}
+                                    className="p-2 rounded-full border border-olive-900/20 hover:bg-olive-900/5 text-olive-900 transition-colors"
+                                >
+                                    <Minus className="w-4 h-4" />
+                                </button>
+                                <span className="text-xl font-bold min-w-[20px] text-center">{data.floorNumber || 0}</span>
+                                <button
+                                    onClick={() => setData({ ...data, floorNumber: (data.floorNumber || 0) + 1 })}
+                                    className="p-2 rounded-full border border-olive-900/20 hover:bg-olive-900/5 text-olive-900 transition-colors"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="flex flex-col justify-center px-4 rounded-xl border border-olive-900/20 bg-white h-14">
+                                <Label className="text-[10px] uppercase font-bold text-olive-900/40">Ano de construção</Label>
+                                <input
+                                    type="number"
+                                    className="bg-transparent border-none focus:ring-0 text-lg font-medium p-0"
+                                    value={data.constructionYear || "2025"}
+                                    onChange={(e) => setData({ ...data, constructionYear: parseInt(e.target.value) })}
+                                />
+                            </div>
+
+                            <div className="md:col-span-2 flex gap-0 rounded-xl border border-olive-900/20 bg-white h-14">
+                                <div className="flex-1 flex flex-col justify-center px-4 border-r border-olive-900/10">
+                                    <Label className="text-[10px] uppercase font-bold text-olive-900/40">Tamanho da propriedade</Label>
+                                    <input
+                                        type="number"
+                                        className="bg-transparent border-none focus:ring-0 text-lg font-medium p-0"
+                                        value={data.propertySize || 0}
+                                        onChange={(e) => setData({ ...data, propertySize: parseFloat(e.target.value) })}
+                                    />
+                                </div>
+                                <div className="w-1/2">
+                                    <Select
+                                        value={data.propertySizeUnit || "m²"}
+                                        onValueChange={(v: string) => setData({ ...data, propertySizeUnit: v })}
+                                    >
+                                        <SelectTrigger className="h-full border-none rounded-none bg-olive-900/5 focus:ring-0 font-medium">
+                                            <div className="flex flex-col items-start overflow-hidden">
+                                                <span className="text-[10px] uppercase font-bold text-olive-900/40">Unidade</span>
+                                                <SelectValue />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="m²">m²</SelectItem>
+                                            <SelectItem value="ft²">ft²</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-xs text-olive-900/40 italic">O espaço interno disponível para os hóspedes.</p>
                     </div>
                 </div>
 
@@ -154,6 +354,10 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     <div className="space-y-2">
                         <Label>Estado (UF)</Label>
                         <Input value={data.state || ""} onChange={(e) => setData({ ...data, state: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>País</Label>
+                        <Input value={data.country || "Brasil"} onChange={(e) => setData({ ...data, country: e.target.value })} />
                     </div>
                 </div>
 

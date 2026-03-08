@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
                 name: true,
                 slug: true,
                 publicTitle: true,
+                channexId: true,
                 isActive: true,
                 city: true,
                 state: true,
@@ -81,5 +82,31 @@ export async function POST(req: NextRequest) {
     } catch (error: any) {
         console.error('[Properties POST Error]', error);
         return NextResponse.json({ error: 'Erro ao criar imóvel.' }, { status: 500 });
+    }
+}
+
+export async function PATCH(req: NextRequest) {
+    const session = await getServerSession(authOptions);
+    if (!session || (session.user as any)?.role !== 'ADMIN') {
+        return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+    }
+
+    try {
+        const body = await req.json();
+        const { id, channexId } = body;
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID do imóvel é obrigatório.' }, { status: 400 });
+        }
+
+        const property = await db.property.update({
+            where: { id },
+            data: { channexId },
+        });
+
+        return NextResponse.json(property);
+    } catch (error: any) {
+        console.error('[Properties PATCH Error]', error);
+        return NextResponse.json({ error: 'Erro ao atualizar imóvel.' }, { status: 500 });
     }
 }

@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
+import { ManualReservationModal } from "@/components/admin/ManualReservationModal";
 
 export default function GuestDetailPage() {
     const params = useParams<{ id: string }>();
@@ -34,6 +35,7 @@ export default function GuestDetailPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [notes, setNotes] = useState("");
     const [isSaving, setIsSaving] = useState(false);
+    const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
 
     const fetchGuest = async () => {
         setIsLoading(true);
@@ -316,7 +318,7 @@ export default function GuestDetailPage() {
                             <Button
                                 variant="ghost"
                                 className="w-full h-12 rounded-xl text-white/60 hover:text-white hover:bg-white/5 font-bold flex items-center justify-center gap-2"
-                                onClick={() => router.push(`/admin/calendar?guestId=${guest.id}`)}
+                                onClick={() => setIsReservationModalOpen(true)}
                             >
                                 <Calendar className="w-4 h-4" /> Reserva Manual
                             </Button>
@@ -345,6 +347,12 @@ export default function GuestDetailPage() {
                             </Button>
                         </CardContent>
                     </Card>
+                    <ManualReservationModal
+                        isOpen={isReservationModalOpen}
+                        onClose={() => setIsReservationModalOpen(false)}
+                        guest={{ id, name: guest.name, email: guest.email }}
+                        onSuccess={fetchGuest}
+                    />
                 </div>
             </div>
         </div>

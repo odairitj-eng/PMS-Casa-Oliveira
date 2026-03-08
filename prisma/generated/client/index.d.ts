@@ -49,6 +49,11 @@ export type VerificationToken = $Result.DefaultSelection<Prisma.$VerificationTok
  */
 export type Reservation = $Result.DefaultSelection<Prisma.$ReservationPayload>
 /**
+ * Model ReservationOccupant
+ * 
+ */
+export type ReservationOccupant = $Result.DefaultSelection<Prisma.$ReservationOccupantPayload>
+/**
  * Model Payment
  * 
  */
@@ -423,6 +428,16 @@ export class PrismaClient<
     * ```
     */
   get reservation(): Prisma.ReservationDelegate<ExtArgs>;
+
+  /**
+   * `prisma.reservationOccupant`: Exposes CRUD operations for the **ReservationOccupant** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ReservationOccupants
+    * const reservationOccupants = await prisma.reservationOccupant.findMany()
+    * ```
+    */
+  get reservationOccupant(): Prisma.ReservationOccupantDelegate<ExtArgs>;
 
   /**
    * `prisma.payment`: Exposes CRUD operations for the **Payment** model.
@@ -991,6 +1006,7 @@ export namespace Prisma {
     User: 'User',
     VerificationToken: 'VerificationToken',
     Reservation: 'Reservation',
+    ReservationOccupant: 'ReservationOccupant',
     Payment: 'Payment',
     BlockedDate: 'BlockedDate',
     AvailabilityWindow: 'AvailabilityWindow',
@@ -1018,7 +1034,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "property" | "guest" | "account" | "session" | "user" | "verificationToken" | "reservation" | "payment" | "blockedDate" | "availabilityWindow" | "nightlyOverride" | "pricingRule" | "integration" | "syncLog" | "systemSettings" | "reservationLink" | "propertyPhoto" | "propertyAmenity" | "propertyRule"
+      modelProps: "property" | "guest" | "account" | "session" | "user" | "verificationToken" | "reservation" | "reservationOccupant" | "payment" | "blockedDate" | "availabilityWindow" | "nightlyOverride" | "pricingRule" | "integration" | "syncLog" | "systemSettings" | "reservationLink" | "propertyPhoto" | "propertyAmenity" | "propertyRule"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1509,6 +1525,76 @@ export namespace Prisma {
           count: {
             args: Prisma.ReservationCountArgs<ExtArgs>
             result: $Utils.Optional<ReservationCountAggregateOutputType> | number
+          }
+        }
+      }
+      ReservationOccupant: {
+        payload: Prisma.$ReservationOccupantPayload<ExtArgs>
+        fields: Prisma.ReservationOccupantFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ReservationOccupantFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ReservationOccupantFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>
+          }
+          findFirst: {
+            args: Prisma.ReservationOccupantFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ReservationOccupantFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>
+          }
+          findMany: {
+            args: Prisma.ReservationOccupantFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>[]
+          }
+          create: {
+            args: Prisma.ReservationOccupantCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>
+          }
+          createMany: {
+            args: Prisma.ReservationOccupantCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ReservationOccupantCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>[]
+          }
+          delete: {
+            args: Prisma.ReservationOccupantDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>
+          }
+          update: {
+            args: Prisma.ReservationOccupantUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>
+          }
+          deleteMany: {
+            args: Prisma.ReservationOccupantDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ReservationOccupantUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ReservationOccupantUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ReservationOccupantPayload>
+          }
+          aggregate: {
+            args: Prisma.ReservationOccupantAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateReservationOccupant>
+          }
+          groupBy: {
+            args: Prisma.ReservationOccupantGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ReservationOccupantGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ReservationOccupantCountArgs<ExtArgs>
+            result: $Utils.Optional<ReservationOccupantCountAggregateOutputType> | number
           }
         }
       }
@@ -2707,11 +2793,13 @@ export namespace Prisma {
   export type ReservationCountOutputType = {
     payments: number
     blockedDates: number
+    occupants: number
   }
 
   export type ReservationCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     payments?: boolean | ReservationCountOutputTypeCountPaymentsArgs
     blockedDates?: boolean | ReservationCountOutputTypeCountBlockedDatesArgs
+    occupants?: boolean | ReservationCountOutputTypeCountOccupantsArgs
   }
 
   // Custom InputTypes
@@ -2737,6 +2825,13 @@ export namespace Prisma {
    */
   export type ReservationCountOutputTypeCountBlockedDatesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BlockedDateWhereInput
+  }
+
+  /**
+   * ReservationCountOutputType without action
+   */
+  export type ReservationCountOutputTypeCountOccupantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReservationOccupantWhereInput
   }
 
 
@@ -9364,6 +9459,7 @@ export namespace Prisma {
     nightlyRate: number | null
     cleaningFee: number | null
     totalNights: number | null
+    numGuests: number | null
   }
 
   export type ReservationSumAggregateOutputType = {
@@ -9371,6 +9467,7 @@ export namespace Prisma {
     nightlyRate: number | null
     cleaningFee: number | null
     totalNights: number | null
+    numGuests: number | null
   }
 
   export type ReservationMinAggregateOutputType = {
@@ -9387,6 +9484,7 @@ export namespace Prisma {
     holdExpiresAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
+    numGuests: number | null
   }
 
   export type ReservationMaxAggregateOutputType = {
@@ -9403,6 +9501,7 @@ export namespace Prisma {
     holdExpiresAt: Date | null
     createdAt: Date | null
     updatedAt: Date | null
+    numGuests: number | null
   }
 
   export type ReservationCountAggregateOutputType = {
@@ -9419,6 +9518,7 @@ export namespace Prisma {
     holdExpiresAt: number
     createdAt: number
     updatedAt: number
+    numGuests: number
     _all: number
   }
 
@@ -9428,6 +9528,7 @@ export namespace Prisma {
     nightlyRate?: true
     cleaningFee?: true
     totalNights?: true
+    numGuests?: true
   }
 
   export type ReservationSumAggregateInputType = {
@@ -9435,6 +9536,7 @@ export namespace Prisma {
     nightlyRate?: true
     cleaningFee?: true
     totalNights?: true
+    numGuests?: true
   }
 
   export type ReservationMinAggregateInputType = {
@@ -9451,6 +9553,7 @@ export namespace Prisma {
     holdExpiresAt?: true
     createdAt?: true
     updatedAt?: true
+    numGuests?: true
   }
 
   export type ReservationMaxAggregateInputType = {
@@ -9467,6 +9570,7 @@ export namespace Prisma {
     holdExpiresAt?: true
     createdAt?: true
     updatedAt?: true
+    numGuests?: true
   }
 
   export type ReservationCountAggregateInputType = {
@@ -9483,6 +9587,7 @@ export namespace Prisma {
     holdExpiresAt?: true
     createdAt?: true
     updatedAt?: true
+    numGuests?: true
     _all?: true
   }
 
@@ -9586,6 +9691,7 @@ export namespace Prisma {
     holdExpiresAt: Date | null
     createdAt: Date
     updatedAt: Date
+    numGuests: number | null
     _count: ReservationCountAggregateOutputType | null
     _avg: ReservationAvgAggregateOutputType | null
     _sum: ReservationSumAggregateOutputType | null
@@ -9621,10 +9727,12 @@ export namespace Prisma {
     holdExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    numGuests?: boolean
     property?: boolean | PropertyDefaultArgs<ExtArgs>
     guest?: boolean | GuestDefaultArgs<ExtArgs>
     payments?: boolean | Reservation$paymentsArgs<ExtArgs>
     blockedDates?: boolean | Reservation$blockedDatesArgs<ExtArgs>
+    occupants?: boolean | Reservation$occupantsArgs<ExtArgs>
     _count?: boolean | ReservationCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reservation"]>
 
@@ -9642,6 +9750,7 @@ export namespace Prisma {
     holdExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    numGuests?: boolean
     property?: boolean | PropertyDefaultArgs<ExtArgs>
     guest?: boolean | GuestDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["reservation"]>
@@ -9660,6 +9769,7 @@ export namespace Prisma {
     holdExpiresAt?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    numGuests?: boolean
   }
 
   export type ReservationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9667,6 +9777,7 @@ export namespace Prisma {
     guest?: boolean | GuestDefaultArgs<ExtArgs>
     payments?: boolean | Reservation$paymentsArgs<ExtArgs>
     blockedDates?: boolean | Reservation$blockedDatesArgs<ExtArgs>
+    occupants?: boolean | Reservation$occupantsArgs<ExtArgs>
     _count?: boolean | ReservationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ReservationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9681,6 +9792,7 @@ export namespace Prisma {
       guest: Prisma.$GuestPayload<ExtArgs>
       payments: Prisma.$PaymentPayload<ExtArgs>[]
       blockedDates: Prisma.$BlockedDatePayload<ExtArgs>[]
+      occupants: Prisma.$ReservationOccupantPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9696,6 +9808,7 @@ export namespace Prisma {
       holdExpiresAt: Date | null
       createdAt: Date
       updatedAt: Date
+      numGuests: number | null
     }, ExtArgs["result"]["reservation"]>
     composites: {}
   }
@@ -10064,6 +10177,7 @@ export namespace Prisma {
     guest<T extends GuestDefaultArgs<ExtArgs> = {}>(args?: Subset<T, GuestDefaultArgs<ExtArgs>>): Prisma__GuestClient<$Result.GetResult<Prisma.$GuestPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     payments<T extends Reservation$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Reservation$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany"> | Null>
     blockedDates<T extends Reservation$blockedDatesArgs<ExtArgs> = {}>(args?: Subset<T, Reservation$blockedDatesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BlockedDatePayload<ExtArgs>, T, "findMany"> | Null>
+    occupants<T extends Reservation$occupantsArgs<ExtArgs> = {}>(args?: Subset<T, Reservation$occupantsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10106,6 +10220,7 @@ export namespace Prisma {
     readonly holdExpiresAt: FieldRef<"Reservation", 'DateTime'>
     readonly createdAt: FieldRef<"Reservation", 'DateTime'>
     readonly updatedAt: FieldRef<"Reservation", 'DateTime'>
+    readonly numGuests: FieldRef<"Reservation", 'Int'>
   }
     
 
@@ -10464,6 +10579,26 @@ export namespace Prisma {
   }
 
   /**
+   * Reservation.occupants
+   */
+  export type Reservation$occupantsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    where?: ReservationOccupantWhereInput
+    orderBy?: ReservationOccupantOrderByWithRelationInput | ReservationOccupantOrderByWithRelationInput[]
+    cursor?: ReservationOccupantWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ReservationOccupantScalarFieldEnum | ReservationOccupantScalarFieldEnum[]
+  }
+
+  /**
    * Reservation without action
    */
   export type ReservationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10475,6 +10610,939 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ReservationInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ReservationOccupant
+   */
+
+  export type AggregateReservationOccupant = {
+    _count: ReservationOccupantCountAggregateOutputType | null
+    _min: ReservationOccupantMinAggregateOutputType | null
+    _max: ReservationOccupantMaxAggregateOutputType | null
+  }
+
+  export type ReservationOccupantMinAggregateOutputType = {
+    id: string | null
+    reservationId: string | null
+    name: string | null
+    document: string | null
+    isChild: boolean | null
+  }
+
+  export type ReservationOccupantMaxAggregateOutputType = {
+    id: string | null
+    reservationId: string | null
+    name: string | null
+    document: string | null
+    isChild: boolean | null
+  }
+
+  export type ReservationOccupantCountAggregateOutputType = {
+    id: number
+    reservationId: number
+    name: number
+    document: number
+    isChild: number
+    _all: number
+  }
+
+
+  export type ReservationOccupantMinAggregateInputType = {
+    id?: true
+    reservationId?: true
+    name?: true
+    document?: true
+    isChild?: true
+  }
+
+  export type ReservationOccupantMaxAggregateInputType = {
+    id?: true
+    reservationId?: true
+    name?: true
+    document?: true
+    isChild?: true
+  }
+
+  export type ReservationOccupantCountAggregateInputType = {
+    id?: true
+    reservationId?: true
+    name?: true
+    document?: true
+    isChild?: true
+    _all?: true
+  }
+
+  export type ReservationOccupantAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReservationOccupant to aggregate.
+     */
+    where?: ReservationOccupantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReservationOccupants to fetch.
+     */
+    orderBy?: ReservationOccupantOrderByWithRelationInput | ReservationOccupantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ReservationOccupantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReservationOccupants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReservationOccupants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ReservationOccupants
+    **/
+    _count?: true | ReservationOccupantCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ReservationOccupantMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ReservationOccupantMaxAggregateInputType
+  }
+
+  export type GetReservationOccupantAggregateType<T extends ReservationOccupantAggregateArgs> = {
+        [P in keyof T & keyof AggregateReservationOccupant]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateReservationOccupant[P]>
+      : GetScalarType<T[P], AggregateReservationOccupant[P]>
+  }
+
+
+
+
+  export type ReservationOccupantGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ReservationOccupantWhereInput
+    orderBy?: ReservationOccupantOrderByWithAggregationInput | ReservationOccupantOrderByWithAggregationInput[]
+    by: ReservationOccupantScalarFieldEnum[] | ReservationOccupantScalarFieldEnum
+    having?: ReservationOccupantScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ReservationOccupantCountAggregateInputType | true
+    _min?: ReservationOccupantMinAggregateInputType
+    _max?: ReservationOccupantMaxAggregateInputType
+  }
+
+  export type ReservationOccupantGroupByOutputType = {
+    id: string
+    reservationId: string
+    name: string
+    document: string | null
+    isChild: boolean
+    _count: ReservationOccupantCountAggregateOutputType | null
+    _min: ReservationOccupantMinAggregateOutputType | null
+    _max: ReservationOccupantMaxAggregateOutputType | null
+  }
+
+  type GetReservationOccupantGroupByPayload<T extends ReservationOccupantGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ReservationOccupantGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ReservationOccupantGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ReservationOccupantGroupByOutputType[P]>
+            : GetScalarType<T[P], ReservationOccupantGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ReservationOccupantSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    reservationId?: boolean
+    name?: boolean
+    document?: boolean
+    isChild?: boolean
+    reservation?: boolean | ReservationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["reservationOccupant"]>
+
+  export type ReservationOccupantSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    reservationId?: boolean
+    name?: boolean
+    document?: boolean
+    isChild?: boolean
+    reservation?: boolean | ReservationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["reservationOccupant"]>
+
+  export type ReservationOccupantSelectScalar = {
+    id?: boolean
+    reservationId?: boolean
+    name?: boolean
+    document?: boolean
+    isChild?: boolean
+  }
+
+  export type ReservationOccupantInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    reservation?: boolean | ReservationDefaultArgs<ExtArgs>
+  }
+  export type ReservationOccupantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    reservation?: boolean | ReservationDefaultArgs<ExtArgs>
+  }
+
+  export type $ReservationOccupantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ReservationOccupant"
+    objects: {
+      reservation: Prisma.$ReservationPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      reservationId: string
+      name: string
+      document: string | null
+      isChild: boolean
+    }, ExtArgs["result"]["reservationOccupant"]>
+    composites: {}
+  }
+
+  type ReservationOccupantGetPayload<S extends boolean | null | undefined | ReservationOccupantDefaultArgs> = $Result.GetResult<Prisma.$ReservationOccupantPayload, S>
+
+  type ReservationOccupantCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ReservationOccupantFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: ReservationOccupantCountAggregateInputType | true
+    }
+
+  export interface ReservationOccupantDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ReservationOccupant'], meta: { name: 'ReservationOccupant' } }
+    /**
+     * Find zero or one ReservationOccupant that matches the filter.
+     * @param {ReservationOccupantFindUniqueArgs} args - Arguments to find a ReservationOccupant
+     * @example
+     * // Get one ReservationOccupant
+     * const reservationOccupant = await prisma.reservationOccupant.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ReservationOccupantFindUniqueArgs>(args: SelectSubset<T, ReservationOccupantFindUniqueArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one ReservationOccupant that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {ReservationOccupantFindUniqueOrThrowArgs} args - Arguments to find a ReservationOccupant
+     * @example
+     * // Get one ReservationOccupant
+     * const reservationOccupant = await prisma.reservationOccupant.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ReservationOccupantFindUniqueOrThrowArgs>(args: SelectSubset<T, ReservationOccupantFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first ReservationOccupant that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantFindFirstArgs} args - Arguments to find a ReservationOccupant
+     * @example
+     * // Get one ReservationOccupant
+     * const reservationOccupant = await prisma.reservationOccupant.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ReservationOccupantFindFirstArgs>(args?: SelectSubset<T, ReservationOccupantFindFirstArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first ReservationOccupant that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantFindFirstOrThrowArgs} args - Arguments to find a ReservationOccupant
+     * @example
+     * // Get one ReservationOccupant
+     * const reservationOccupant = await prisma.reservationOccupant.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ReservationOccupantFindFirstOrThrowArgs>(args?: SelectSubset<T, ReservationOccupantFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more ReservationOccupants that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ReservationOccupants
+     * const reservationOccupants = await prisma.reservationOccupant.findMany()
+     * 
+     * // Get first 10 ReservationOccupants
+     * const reservationOccupants = await prisma.reservationOccupant.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const reservationOccupantWithIdOnly = await prisma.reservationOccupant.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ReservationOccupantFindManyArgs>(args?: SelectSubset<T, ReservationOccupantFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a ReservationOccupant.
+     * @param {ReservationOccupantCreateArgs} args - Arguments to create a ReservationOccupant.
+     * @example
+     * // Create one ReservationOccupant
+     * const ReservationOccupant = await prisma.reservationOccupant.create({
+     *   data: {
+     *     // ... data to create a ReservationOccupant
+     *   }
+     * })
+     * 
+     */
+    create<T extends ReservationOccupantCreateArgs>(args: SelectSubset<T, ReservationOccupantCreateArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many ReservationOccupants.
+     * @param {ReservationOccupantCreateManyArgs} args - Arguments to create many ReservationOccupants.
+     * @example
+     * // Create many ReservationOccupants
+     * const reservationOccupant = await prisma.reservationOccupant.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ReservationOccupantCreateManyArgs>(args?: SelectSubset<T, ReservationOccupantCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ReservationOccupants and returns the data saved in the database.
+     * @param {ReservationOccupantCreateManyAndReturnArgs} args - Arguments to create many ReservationOccupants.
+     * @example
+     * // Create many ReservationOccupants
+     * const reservationOccupant = await prisma.reservationOccupant.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ReservationOccupants and only return the `id`
+     * const reservationOccupantWithIdOnly = await prisma.reservationOccupant.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ReservationOccupantCreateManyAndReturnArgs>(args?: SelectSubset<T, ReservationOccupantCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a ReservationOccupant.
+     * @param {ReservationOccupantDeleteArgs} args - Arguments to delete one ReservationOccupant.
+     * @example
+     * // Delete one ReservationOccupant
+     * const ReservationOccupant = await prisma.reservationOccupant.delete({
+     *   where: {
+     *     // ... filter to delete one ReservationOccupant
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ReservationOccupantDeleteArgs>(args: SelectSubset<T, ReservationOccupantDeleteArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one ReservationOccupant.
+     * @param {ReservationOccupantUpdateArgs} args - Arguments to update one ReservationOccupant.
+     * @example
+     * // Update one ReservationOccupant
+     * const reservationOccupant = await prisma.reservationOccupant.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ReservationOccupantUpdateArgs>(args: SelectSubset<T, ReservationOccupantUpdateArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more ReservationOccupants.
+     * @param {ReservationOccupantDeleteManyArgs} args - Arguments to filter ReservationOccupants to delete.
+     * @example
+     * // Delete a few ReservationOccupants
+     * const { count } = await prisma.reservationOccupant.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ReservationOccupantDeleteManyArgs>(args?: SelectSubset<T, ReservationOccupantDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ReservationOccupants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ReservationOccupants
+     * const reservationOccupant = await prisma.reservationOccupant.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ReservationOccupantUpdateManyArgs>(args: SelectSubset<T, ReservationOccupantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ReservationOccupant.
+     * @param {ReservationOccupantUpsertArgs} args - Arguments to update or create a ReservationOccupant.
+     * @example
+     * // Update or create a ReservationOccupant
+     * const reservationOccupant = await prisma.reservationOccupant.upsert({
+     *   create: {
+     *     // ... data to create a ReservationOccupant
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ReservationOccupant we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ReservationOccupantUpsertArgs>(args: SelectSubset<T, ReservationOccupantUpsertArgs<ExtArgs>>): Prisma__ReservationOccupantClient<$Result.GetResult<Prisma.$ReservationOccupantPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of ReservationOccupants.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantCountArgs} args - Arguments to filter ReservationOccupants to count.
+     * @example
+     * // Count the number of ReservationOccupants
+     * const count = await prisma.reservationOccupant.count({
+     *   where: {
+     *     // ... the filter for the ReservationOccupants we want to count
+     *   }
+     * })
+    **/
+    count<T extends ReservationOccupantCountArgs>(
+      args?: Subset<T, ReservationOccupantCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ReservationOccupantCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ReservationOccupant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ReservationOccupantAggregateArgs>(args: Subset<T, ReservationOccupantAggregateArgs>): Prisma.PrismaPromise<GetReservationOccupantAggregateType<T>>
+
+    /**
+     * Group by ReservationOccupant.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ReservationOccupantGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ReservationOccupantGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ReservationOccupantGroupByArgs['orderBy'] }
+        : { orderBy?: ReservationOccupantGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ReservationOccupantGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReservationOccupantGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ReservationOccupant model
+   */
+  readonly fields: ReservationOccupantFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ReservationOccupant.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ReservationOccupantClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    reservation<T extends ReservationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ReservationDefaultArgs<ExtArgs>>): Prisma__ReservationClient<$Result.GetResult<Prisma.$ReservationPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ReservationOccupant model
+   */ 
+  interface ReservationOccupantFieldRefs {
+    readonly id: FieldRef<"ReservationOccupant", 'String'>
+    readonly reservationId: FieldRef<"ReservationOccupant", 'String'>
+    readonly name: FieldRef<"ReservationOccupant", 'String'>
+    readonly document: FieldRef<"ReservationOccupant", 'String'>
+    readonly isChild: FieldRef<"ReservationOccupant", 'Boolean'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ReservationOccupant findUnique
+   */
+  export type ReservationOccupantFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * Filter, which ReservationOccupant to fetch.
+     */
+    where: ReservationOccupantWhereUniqueInput
+  }
+
+  /**
+   * ReservationOccupant findUniqueOrThrow
+   */
+  export type ReservationOccupantFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * Filter, which ReservationOccupant to fetch.
+     */
+    where: ReservationOccupantWhereUniqueInput
+  }
+
+  /**
+   * ReservationOccupant findFirst
+   */
+  export type ReservationOccupantFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * Filter, which ReservationOccupant to fetch.
+     */
+    where?: ReservationOccupantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReservationOccupants to fetch.
+     */
+    orderBy?: ReservationOccupantOrderByWithRelationInput | ReservationOccupantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReservationOccupants.
+     */
+    cursor?: ReservationOccupantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReservationOccupants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReservationOccupants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReservationOccupants.
+     */
+    distinct?: ReservationOccupantScalarFieldEnum | ReservationOccupantScalarFieldEnum[]
+  }
+
+  /**
+   * ReservationOccupant findFirstOrThrow
+   */
+  export type ReservationOccupantFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * Filter, which ReservationOccupant to fetch.
+     */
+    where?: ReservationOccupantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReservationOccupants to fetch.
+     */
+    orderBy?: ReservationOccupantOrderByWithRelationInput | ReservationOccupantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ReservationOccupants.
+     */
+    cursor?: ReservationOccupantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReservationOccupants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReservationOccupants.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ReservationOccupants.
+     */
+    distinct?: ReservationOccupantScalarFieldEnum | ReservationOccupantScalarFieldEnum[]
+  }
+
+  /**
+   * ReservationOccupant findMany
+   */
+  export type ReservationOccupantFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * Filter, which ReservationOccupants to fetch.
+     */
+    where?: ReservationOccupantWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ReservationOccupants to fetch.
+     */
+    orderBy?: ReservationOccupantOrderByWithRelationInput | ReservationOccupantOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ReservationOccupants.
+     */
+    cursor?: ReservationOccupantWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ReservationOccupants from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ReservationOccupants.
+     */
+    skip?: number
+    distinct?: ReservationOccupantScalarFieldEnum | ReservationOccupantScalarFieldEnum[]
+  }
+
+  /**
+   * ReservationOccupant create
+   */
+  export type ReservationOccupantCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ReservationOccupant.
+     */
+    data: XOR<ReservationOccupantCreateInput, ReservationOccupantUncheckedCreateInput>
+  }
+
+  /**
+   * ReservationOccupant createMany
+   */
+  export type ReservationOccupantCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ReservationOccupants.
+     */
+    data: ReservationOccupantCreateManyInput | ReservationOccupantCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ReservationOccupant createManyAndReturn
+   */
+  export type ReservationOccupantCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many ReservationOccupants.
+     */
+    data: ReservationOccupantCreateManyInput | ReservationOccupantCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ReservationOccupant update
+   */
+  export type ReservationOccupantUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ReservationOccupant.
+     */
+    data: XOR<ReservationOccupantUpdateInput, ReservationOccupantUncheckedUpdateInput>
+    /**
+     * Choose, which ReservationOccupant to update.
+     */
+    where: ReservationOccupantWhereUniqueInput
+  }
+
+  /**
+   * ReservationOccupant updateMany
+   */
+  export type ReservationOccupantUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ReservationOccupants.
+     */
+    data: XOR<ReservationOccupantUpdateManyMutationInput, ReservationOccupantUncheckedUpdateManyInput>
+    /**
+     * Filter which ReservationOccupants to update
+     */
+    where?: ReservationOccupantWhereInput
+  }
+
+  /**
+   * ReservationOccupant upsert
+   */
+  export type ReservationOccupantUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ReservationOccupant to update in case it exists.
+     */
+    where: ReservationOccupantWhereUniqueInput
+    /**
+     * In case the ReservationOccupant found by the `where` argument doesn't exist, create a new ReservationOccupant with this data.
+     */
+    create: XOR<ReservationOccupantCreateInput, ReservationOccupantUncheckedCreateInput>
+    /**
+     * In case the ReservationOccupant was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ReservationOccupantUpdateInput, ReservationOccupantUncheckedUpdateInput>
+  }
+
+  /**
+   * ReservationOccupant delete
+   */
+  export type ReservationOccupantDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
+    /**
+     * Filter which ReservationOccupant to delete.
+     */
+    where: ReservationOccupantWhereUniqueInput
+  }
+
+  /**
+   * ReservationOccupant deleteMany
+   */
+  export type ReservationOccupantDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ReservationOccupants to delete
+     */
+    where?: ReservationOccupantWhereInput
+  }
+
+  /**
+   * ReservationOccupant without action
+   */
+  export type ReservationOccupantDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ReservationOccupant
+     */
+    select?: ReservationOccupantSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ReservationOccupantInclude<ExtArgs> | null
   }
 
 
@@ -14536,6 +15604,7 @@ export namespace Prisma {
     minDays: number | null
     startDate: Date | null
     endDate: Date | null
+    color: string | null
     isActive: boolean | null
     createdAt: Date | null
   }
@@ -14549,6 +15618,7 @@ export namespace Prisma {
     minDays: number | null
     startDate: Date | null
     endDate: Date | null
+    color: string | null
     isActive: boolean | null
     createdAt: Date | null
   }
@@ -14562,6 +15632,7 @@ export namespace Prisma {
     minDays: number
     startDate: number
     endDate: number
+    color: number
     isActive: number
     createdAt: number
     _all: number
@@ -14587,6 +15658,7 @@ export namespace Prisma {
     minDays?: true
     startDate?: true
     endDate?: true
+    color?: true
     isActive?: true
     createdAt?: true
   }
@@ -14600,6 +15672,7 @@ export namespace Prisma {
     minDays?: true
     startDate?: true
     endDate?: true
+    color?: true
     isActive?: true
     createdAt?: true
   }
@@ -14613,6 +15686,7 @@ export namespace Prisma {
     minDays?: true
     startDate?: true
     endDate?: true
+    color?: true
     isActive?: true
     createdAt?: true
     _all?: true
@@ -14713,6 +15787,7 @@ export namespace Prisma {
     minDays: number | null
     startDate: Date | null
     endDate: Date | null
+    color: string | null
     isActive: boolean
     createdAt: Date
     _count: PricingRuleCountAggregateOutputType | null
@@ -14745,6 +15820,7 @@ export namespace Prisma {
     minDays?: boolean
     startDate?: boolean
     endDate?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
     property?: boolean | PropertyDefaultArgs<ExtArgs>
@@ -14759,6 +15835,7 @@ export namespace Prisma {
     minDays?: boolean
     startDate?: boolean
     endDate?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
     property?: boolean | PropertyDefaultArgs<ExtArgs>
@@ -14773,6 +15850,7 @@ export namespace Prisma {
     minDays?: boolean
     startDate?: boolean
     endDate?: boolean
+    color?: boolean
     isActive?: boolean
     createdAt?: boolean
   }
@@ -14798,6 +15876,7 @@ export namespace Prisma {
       minDays: number | null
       startDate: Date | null
       endDate: Date | null
+      color: string | null
       isActive: boolean
       createdAt: Date
     }, ExtArgs["result"]["pricingRule"]>
@@ -15202,6 +16281,7 @@ export namespace Prisma {
     readonly minDays: FieldRef<"PricingRule", 'Int'>
     readonly startDate: FieldRef<"PricingRule", 'DateTime'>
     readonly endDate: FieldRef<"PricingRule", 'DateTime'>
+    readonly color: FieldRef<"PricingRule", 'String'>
     readonly isActive: FieldRef<"PricingRule", 'Boolean'>
     readonly createdAt: FieldRef<"PricingRule", 'DateTime'>
   }
@@ -22545,10 +23625,22 @@ export namespace Prisma {
     totalNights: 'totalNights',
     holdExpiresAt: 'holdExpiresAt',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    numGuests: 'numGuests'
   };
 
   export type ReservationScalarFieldEnum = (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum]
+
+
+  export const ReservationOccupantScalarFieldEnum: {
+    id: 'id',
+    reservationId: 'reservationId',
+    name: 'name',
+    document: 'document',
+    isChild: 'isChild'
+  };
+
+  export type ReservationOccupantScalarFieldEnum = (typeof ReservationOccupantScalarFieldEnum)[keyof typeof ReservationOccupantScalarFieldEnum]
 
 
   export const PaymentScalarFieldEnum: {
@@ -22618,6 +23710,7 @@ export namespace Prisma {
     minDays: 'minDays',
     startDate: 'startDate',
     endDate: 'endDate',
+    color: 'color',
     isActive: 'isActive',
     createdAt: 'createdAt'
   };
@@ -23557,10 +24650,12 @@ export namespace Prisma {
     holdExpiresAt?: DateTimeNullableFilter<"Reservation"> | Date | string | null
     createdAt?: DateTimeFilter<"Reservation"> | Date | string
     updatedAt?: DateTimeFilter<"Reservation"> | Date | string
+    numGuests?: IntNullableFilter<"Reservation"> | number | null
     property?: XOR<PropertyRelationFilter, PropertyWhereInput>
     guest?: XOR<GuestRelationFilter, GuestWhereInput>
     payments?: PaymentListRelationFilter
     blockedDates?: BlockedDateListRelationFilter
+    occupants?: ReservationOccupantListRelationFilter
   }
 
   export type ReservationOrderByWithRelationInput = {
@@ -23577,10 +24672,12 @@ export namespace Prisma {
     holdExpiresAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    numGuests?: SortOrderInput | SortOrder
     property?: PropertyOrderByWithRelationInput
     guest?: GuestOrderByWithRelationInput
     payments?: PaymentOrderByRelationAggregateInput
     blockedDates?: BlockedDateOrderByRelationAggregateInput
+    occupants?: ReservationOccupantOrderByRelationAggregateInput
   }
 
   export type ReservationWhereUniqueInput = Prisma.AtLeast<{
@@ -23600,10 +24697,12 @@ export namespace Prisma {
     holdExpiresAt?: DateTimeNullableFilter<"Reservation"> | Date | string | null
     createdAt?: DateTimeFilter<"Reservation"> | Date | string
     updatedAt?: DateTimeFilter<"Reservation"> | Date | string
+    numGuests?: IntNullableFilter<"Reservation"> | number | null
     property?: XOR<PropertyRelationFilter, PropertyWhereInput>
     guest?: XOR<GuestRelationFilter, GuestWhereInput>
     payments?: PaymentListRelationFilter
     blockedDates?: BlockedDateListRelationFilter
+    occupants?: ReservationOccupantListRelationFilter
   }, "id">
 
   export type ReservationOrderByWithAggregationInput = {
@@ -23620,6 +24719,7 @@ export namespace Prisma {
     holdExpiresAt?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    numGuests?: SortOrderInput | SortOrder
     _count?: ReservationCountOrderByAggregateInput
     _avg?: ReservationAvgOrderByAggregateInput
     _max?: ReservationMaxOrderByAggregateInput
@@ -23644,6 +24744,62 @@ export namespace Prisma {
     holdExpiresAt?: DateTimeNullableWithAggregatesFilter<"Reservation"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Reservation"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Reservation"> | Date | string
+    numGuests?: IntNullableWithAggregatesFilter<"Reservation"> | number | null
+  }
+
+  export type ReservationOccupantWhereInput = {
+    AND?: ReservationOccupantWhereInput | ReservationOccupantWhereInput[]
+    OR?: ReservationOccupantWhereInput[]
+    NOT?: ReservationOccupantWhereInput | ReservationOccupantWhereInput[]
+    id?: StringFilter<"ReservationOccupant"> | string
+    reservationId?: StringFilter<"ReservationOccupant"> | string
+    name?: StringFilter<"ReservationOccupant"> | string
+    document?: StringNullableFilter<"ReservationOccupant"> | string | null
+    isChild?: BoolFilter<"ReservationOccupant"> | boolean
+    reservation?: XOR<ReservationRelationFilter, ReservationWhereInput>
+  }
+
+  export type ReservationOccupantOrderByWithRelationInput = {
+    id?: SortOrder
+    reservationId?: SortOrder
+    name?: SortOrder
+    document?: SortOrderInput | SortOrder
+    isChild?: SortOrder
+    reservation?: ReservationOrderByWithRelationInput
+  }
+
+  export type ReservationOccupantWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: ReservationOccupantWhereInput | ReservationOccupantWhereInput[]
+    OR?: ReservationOccupantWhereInput[]
+    NOT?: ReservationOccupantWhereInput | ReservationOccupantWhereInput[]
+    reservationId?: StringFilter<"ReservationOccupant"> | string
+    name?: StringFilter<"ReservationOccupant"> | string
+    document?: StringNullableFilter<"ReservationOccupant"> | string | null
+    isChild?: BoolFilter<"ReservationOccupant"> | boolean
+    reservation?: XOR<ReservationRelationFilter, ReservationWhereInput>
+  }, "id">
+
+  export type ReservationOccupantOrderByWithAggregationInput = {
+    id?: SortOrder
+    reservationId?: SortOrder
+    name?: SortOrder
+    document?: SortOrderInput | SortOrder
+    isChild?: SortOrder
+    _count?: ReservationOccupantCountOrderByAggregateInput
+    _max?: ReservationOccupantMaxOrderByAggregateInput
+    _min?: ReservationOccupantMinOrderByAggregateInput
+  }
+
+  export type ReservationOccupantScalarWhereWithAggregatesInput = {
+    AND?: ReservationOccupantScalarWhereWithAggregatesInput | ReservationOccupantScalarWhereWithAggregatesInput[]
+    OR?: ReservationOccupantScalarWhereWithAggregatesInput[]
+    NOT?: ReservationOccupantScalarWhereWithAggregatesInput | ReservationOccupantScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ReservationOccupant"> | string
+    reservationId?: StringWithAggregatesFilter<"ReservationOccupant"> | string
+    name?: StringWithAggregatesFilter<"ReservationOccupant"> | string
+    document?: StringNullableWithAggregatesFilter<"ReservationOccupant"> | string | null
+    isChild?: BoolWithAggregatesFilter<"ReservationOccupant"> | boolean
   }
 
   export type PaymentWhereInput = {
@@ -23959,6 +25115,7 @@ export namespace Prisma {
     minDays?: IntNullableFilter<"PricingRule"> | number | null
     startDate?: DateTimeNullableFilter<"PricingRule"> | Date | string | null
     endDate?: DateTimeNullableFilter<"PricingRule"> | Date | string | null
+    color?: StringNullableFilter<"PricingRule"> | string | null
     isActive?: BoolFilter<"PricingRule"> | boolean
     createdAt?: DateTimeFilter<"PricingRule"> | Date | string
     property?: XOR<PropertyRelationFilter, PropertyWhereInput>
@@ -23973,6 +25130,7 @@ export namespace Prisma {
     minDays?: SortOrderInput | SortOrder
     startDate?: SortOrderInput | SortOrder
     endDate?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     property?: PropertyOrderByWithRelationInput
@@ -23990,6 +25148,7 @@ export namespace Prisma {
     minDays?: IntNullableFilter<"PricingRule"> | number | null
     startDate?: DateTimeNullableFilter<"PricingRule"> | Date | string | null
     endDate?: DateTimeNullableFilter<"PricingRule"> | Date | string | null
+    color?: StringNullableFilter<"PricingRule"> | string | null
     isActive?: BoolFilter<"PricingRule"> | boolean
     createdAt?: DateTimeFilter<"PricingRule"> | Date | string
     property?: XOR<PropertyRelationFilter, PropertyWhereInput>
@@ -24004,6 +25163,7 @@ export namespace Prisma {
     minDays?: SortOrderInput | SortOrder
     startDate?: SortOrderInput | SortOrder
     endDate?: SortOrderInput | SortOrder
+    color?: SortOrderInput | SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
     _count?: PricingRuleCountOrderByAggregateInput
@@ -24025,6 +25185,7 @@ export namespace Prisma {
     minDays?: IntNullableWithAggregatesFilter<"PricingRule"> | number | null
     startDate?: DateTimeNullableWithAggregatesFilter<"PricingRule"> | Date | string | null
     endDate?: DateTimeNullableWithAggregatesFilter<"PricingRule"> | Date | string | null
+    color?: StringNullableWithAggregatesFilter<"PricingRule"> | string | null
     isActive?: BoolWithAggregatesFilter<"PricingRule"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"PricingRule"> | Date | string
   }
@@ -25216,10 +26377,12 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     property: PropertyCreateNestedOneWithoutReservationsInput
     guest: GuestCreateNestedOneWithoutReservationsInput
     payments?: PaymentCreateNestedManyWithoutReservationInput
     blockedDates?: BlockedDateCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationUncheckedCreateInput = {
@@ -25236,8 +26399,10 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     payments?: PaymentUncheckedCreateNestedManyWithoutReservationInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantUncheckedCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationUpdateInput = {
@@ -25252,10 +26417,12 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     property?: PropertyUpdateOneRequiredWithoutReservationsNestedInput
     guest?: GuestUpdateOneRequiredWithoutReservationsNestedInput
     payments?: PaymentUpdateManyWithoutReservationNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateInput = {
@@ -25272,8 +26439,10 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     payments?: PaymentUncheckedUpdateManyWithoutReservationNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUncheckedUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationCreateManyInput = {
@@ -25290,6 +26459,7 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
   }
 
   export type ReservationUpdateManyMutationInput = {
@@ -25304,6 +26474,7 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type ReservationUncheckedUpdateManyInput = {
@@ -25320,6 +26491,62 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type ReservationOccupantCreateInput = {
+    id?: string
+    name: string
+    document?: string | null
+    isChild?: boolean
+    reservation: ReservationCreateNestedOneWithoutOccupantsInput
+  }
+
+  export type ReservationOccupantUncheckedCreateInput = {
+    id?: string
+    reservationId: string
+    name: string
+    document?: string | null
+    isChild?: boolean
+  }
+
+  export type ReservationOccupantUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
+    reservation?: ReservationUpdateOneRequiredWithoutOccupantsNestedInput
+  }
+
+  export type ReservationOccupantUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reservationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type ReservationOccupantCreateManyInput = {
+    id?: string
+    reservationId: string
+    name: string
+    document?: string | null
+    isChild?: boolean
+  }
+
+  export type ReservationOccupantUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type ReservationOccupantUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    reservationId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type PaymentCreateInput = {
@@ -25647,6 +26874,7 @@ export namespace Prisma {
     minDays?: number | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    color?: string | null
     isActive?: boolean
     createdAt?: Date | string
     property: PropertyCreateNestedOneWithoutPricingRulesInput
@@ -25661,6 +26889,7 @@ export namespace Prisma {
     minDays?: number | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    color?: string | null
     isActive?: boolean
     createdAt?: Date | string
   }
@@ -25673,6 +26902,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     property?: PropertyUpdateOneRequiredWithoutPricingRulesNestedInput
@@ -25687,6 +26917,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25700,6 +26931,7 @@ export namespace Prisma {
     minDays?: number | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    color?: string | null
     isActive?: boolean
     createdAt?: Date | string
   }
@@ -25712,6 +26944,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25725,6 +26958,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26975,7 +28209,17 @@ export namespace Prisma {
     none?: PaymentWhereInput
   }
 
+  export type ReservationOccupantListRelationFilter = {
+    every?: ReservationOccupantWhereInput
+    some?: ReservationOccupantWhereInput
+    none?: ReservationOccupantWhereInput
+  }
+
   export type PaymentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ReservationOccupantOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -26993,6 +28237,7 @@ export namespace Prisma {
     holdExpiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    numGuests?: SortOrder
   }
 
   export type ReservationAvgOrderByAggregateInput = {
@@ -27000,6 +28245,7 @@ export namespace Prisma {
     nightlyRate?: SortOrder
     cleaningFee?: SortOrder
     totalNights?: SortOrder
+    numGuests?: SortOrder
   }
 
   export type ReservationMaxOrderByAggregateInput = {
@@ -27016,6 +28262,7 @@ export namespace Prisma {
     holdExpiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    numGuests?: SortOrder
   }
 
   export type ReservationMinOrderByAggregateInput = {
@@ -27032,6 +28279,7 @@ export namespace Prisma {
     holdExpiresAt?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    numGuests?: SortOrder
   }
 
   export type ReservationSumOrderByAggregateInput = {
@@ -27039,6 +28287,7 @@ export namespace Prisma {
     nightlyRate?: SortOrder
     cleaningFee?: SortOrder
     totalNights?: SortOrder
+    numGuests?: SortOrder
   }
 
   export type EnumReservationStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -27049,6 +28298,35 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumReservationStatusFilter<$PrismaModel>
     _max?: NestedEnumReservationStatusFilter<$PrismaModel>
+  }
+
+  export type ReservationRelationFilter = {
+    is?: ReservationWhereInput
+    isNot?: ReservationWhereInput
+  }
+
+  export type ReservationOccupantCountOrderByAggregateInput = {
+    id?: SortOrder
+    reservationId?: SortOrder
+    name?: SortOrder
+    document?: SortOrder
+    isChild?: SortOrder
+  }
+
+  export type ReservationOccupantMaxOrderByAggregateInput = {
+    id?: SortOrder
+    reservationId?: SortOrder
+    name?: SortOrder
+    document?: SortOrder
+    isChild?: SortOrder
+  }
+
+  export type ReservationOccupantMinOrderByAggregateInput = {
+    id?: SortOrder
+    reservationId?: SortOrder
+    name?: SortOrder
+    document?: SortOrder
+    isChild?: SortOrder
   }
 
   export type EnumPaymentMethodFilter<$PrismaModel = never> = {
@@ -27063,11 +28341,6 @@ export namespace Prisma {
     in?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.PaymentStatus[] | ListEnumPaymentStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumPaymentStatusFilter<$PrismaModel> | $Enums.PaymentStatus
-  }
-
-  export type ReservationRelationFilter = {
-    is?: ReservationWhereInput
-    isNot?: ReservationWhereInput
   }
 
   export type PaymentCountOrderByAggregateInput = {
@@ -27319,6 +28592,7 @@ export namespace Prisma {
     minDays?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
   }
@@ -27337,6 +28611,7 @@ export namespace Prisma {
     minDays?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
   }
@@ -27350,6 +28625,7 @@ export namespace Prisma {
     minDays?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
+    color?: SortOrder
     isActive?: SortOrder
     createdAt?: SortOrder
   }
@@ -28416,6 +29692,13 @@ export namespace Prisma {
     connect?: BlockedDateWhereUniqueInput | BlockedDateWhereUniqueInput[]
   }
 
+  export type ReservationOccupantCreateNestedManyWithoutReservationInput = {
+    create?: XOR<ReservationOccupantCreateWithoutReservationInput, ReservationOccupantUncheckedCreateWithoutReservationInput> | ReservationOccupantCreateWithoutReservationInput[] | ReservationOccupantUncheckedCreateWithoutReservationInput[]
+    connectOrCreate?: ReservationOccupantCreateOrConnectWithoutReservationInput | ReservationOccupantCreateOrConnectWithoutReservationInput[]
+    createMany?: ReservationOccupantCreateManyReservationInputEnvelope
+    connect?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+  }
+
   export type PaymentUncheckedCreateNestedManyWithoutReservationInput = {
     create?: XOR<PaymentCreateWithoutReservationInput, PaymentUncheckedCreateWithoutReservationInput> | PaymentCreateWithoutReservationInput[] | PaymentUncheckedCreateWithoutReservationInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutReservationInput | PaymentCreateOrConnectWithoutReservationInput[]
@@ -28428,6 +29711,13 @@ export namespace Prisma {
     connectOrCreate?: BlockedDateCreateOrConnectWithoutReservationInput | BlockedDateCreateOrConnectWithoutReservationInput[]
     createMany?: BlockedDateCreateManyReservationInputEnvelope
     connect?: BlockedDateWhereUniqueInput | BlockedDateWhereUniqueInput[]
+  }
+
+  export type ReservationOccupantUncheckedCreateNestedManyWithoutReservationInput = {
+    create?: XOR<ReservationOccupantCreateWithoutReservationInput, ReservationOccupantUncheckedCreateWithoutReservationInput> | ReservationOccupantCreateWithoutReservationInput[] | ReservationOccupantUncheckedCreateWithoutReservationInput[]
+    connectOrCreate?: ReservationOccupantCreateOrConnectWithoutReservationInput | ReservationOccupantCreateOrConnectWithoutReservationInput[]
+    createMany?: ReservationOccupantCreateManyReservationInputEnvelope
+    connect?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
   }
 
   export type EnumReservationStatusFieldUpdateOperationsInput = {
@@ -28478,6 +29768,20 @@ export namespace Prisma {
     deleteMany?: BlockedDateScalarWhereInput | BlockedDateScalarWhereInput[]
   }
 
+  export type ReservationOccupantUpdateManyWithoutReservationNestedInput = {
+    create?: XOR<ReservationOccupantCreateWithoutReservationInput, ReservationOccupantUncheckedCreateWithoutReservationInput> | ReservationOccupantCreateWithoutReservationInput[] | ReservationOccupantUncheckedCreateWithoutReservationInput[]
+    connectOrCreate?: ReservationOccupantCreateOrConnectWithoutReservationInput | ReservationOccupantCreateOrConnectWithoutReservationInput[]
+    upsert?: ReservationOccupantUpsertWithWhereUniqueWithoutReservationInput | ReservationOccupantUpsertWithWhereUniqueWithoutReservationInput[]
+    createMany?: ReservationOccupantCreateManyReservationInputEnvelope
+    set?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    disconnect?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    delete?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    connect?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    update?: ReservationOccupantUpdateWithWhereUniqueWithoutReservationInput | ReservationOccupantUpdateWithWhereUniqueWithoutReservationInput[]
+    updateMany?: ReservationOccupantUpdateManyWithWhereWithoutReservationInput | ReservationOccupantUpdateManyWithWhereWithoutReservationInput[]
+    deleteMany?: ReservationOccupantScalarWhereInput | ReservationOccupantScalarWhereInput[]
+  }
+
   export type PaymentUncheckedUpdateManyWithoutReservationNestedInput = {
     create?: XOR<PaymentCreateWithoutReservationInput, PaymentUncheckedCreateWithoutReservationInput> | PaymentCreateWithoutReservationInput[] | PaymentUncheckedCreateWithoutReservationInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutReservationInput | PaymentCreateOrConnectWithoutReservationInput[]
@@ -28504,6 +29808,34 @@ export namespace Prisma {
     update?: BlockedDateUpdateWithWhereUniqueWithoutReservationInput | BlockedDateUpdateWithWhereUniqueWithoutReservationInput[]
     updateMany?: BlockedDateUpdateManyWithWhereWithoutReservationInput | BlockedDateUpdateManyWithWhereWithoutReservationInput[]
     deleteMany?: BlockedDateScalarWhereInput | BlockedDateScalarWhereInput[]
+  }
+
+  export type ReservationOccupantUncheckedUpdateManyWithoutReservationNestedInput = {
+    create?: XOR<ReservationOccupantCreateWithoutReservationInput, ReservationOccupantUncheckedCreateWithoutReservationInput> | ReservationOccupantCreateWithoutReservationInput[] | ReservationOccupantUncheckedCreateWithoutReservationInput[]
+    connectOrCreate?: ReservationOccupantCreateOrConnectWithoutReservationInput | ReservationOccupantCreateOrConnectWithoutReservationInput[]
+    upsert?: ReservationOccupantUpsertWithWhereUniqueWithoutReservationInput | ReservationOccupantUpsertWithWhereUniqueWithoutReservationInput[]
+    createMany?: ReservationOccupantCreateManyReservationInputEnvelope
+    set?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    disconnect?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    delete?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    connect?: ReservationOccupantWhereUniqueInput | ReservationOccupantWhereUniqueInput[]
+    update?: ReservationOccupantUpdateWithWhereUniqueWithoutReservationInput | ReservationOccupantUpdateWithWhereUniqueWithoutReservationInput[]
+    updateMany?: ReservationOccupantUpdateManyWithWhereWithoutReservationInput | ReservationOccupantUpdateManyWithWhereWithoutReservationInput[]
+    deleteMany?: ReservationOccupantScalarWhereInput | ReservationOccupantScalarWhereInput[]
+  }
+
+  export type ReservationCreateNestedOneWithoutOccupantsInput = {
+    create?: XOR<ReservationCreateWithoutOccupantsInput, ReservationUncheckedCreateWithoutOccupantsInput>
+    connectOrCreate?: ReservationCreateOrConnectWithoutOccupantsInput
+    connect?: ReservationWhereUniqueInput
+  }
+
+  export type ReservationUpdateOneRequiredWithoutOccupantsNestedInput = {
+    create?: XOR<ReservationCreateWithoutOccupantsInput, ReservationUncheckedCreateWithoutOccupantsInput>
+    connectOrCreate?: ReservationCreateOrConnectWithoutOccupantsInput
+    upsert?: ReservationUpsertWithoutOccupantsInput
+    connect?: ReservationWhereUniqueInput
+    update?: XOR<XOR<ReservationUpdateToOneWithWhereWithoutOccupantsInput, ReservationUpdateWithoutOccupantsInput>, ReservationUncheckedUpdateWithoutOccupantsInput>
   }
 
   export type ReservationCreateNestedOneWithoutPaymentsInput = {
@@ -29106,9 +30438,11 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     guest: GuestCreateNestedOneWithoutReservationsInput
     payments?: PaymentCreateNestedManyWithoutReservationInput
     blockedDates?: BlockedDateCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationUncheckedCreateWithoutPropertyInput = {
@@ -29124,8 +30458,10 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     payments?: PaymentUncheckedCreateNestedManyWithoutReservationInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantUncheckedCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationCreateOrConnectWithoutPropertyInput = {
@@ -29202,6 +30538,7 @@ export namespace Prisma {
     minDays?: number | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    color?: string | null
     isActive?: boolean
     createdAt?: Date | string
   }
@@ -29214,6 +30551,7 @@ export namespace Prisma {
     minDays?: number | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    color?: string | null
     isActive?: boolean
     createdAt?: Date | string
   }
@@ -29455,6 +30793,7 @@ export namespace Prisma {
     holdExpiresAt?: DateTimeNullableFilter<"Reservation"> | Date | string | null
     createdAt?: DateTimeFilter<"Reservation"> | Date | string
     updatedAt?: DateTimeFilter<"Reservation"> | Date | string
+    numGuests?: IntNullableFilter<"Reservation"> | number | null
   }
 
   export type BlockedDateUpsertWithWhereUniqueWithoutPropertyInput = {
@@ -29543,6 +30882,7 @@ export namespace Prisma {
     minDays?: IntNullableFilter<"PricingRule"> | number | null
     startDate?: DateTimeNullableFilter<"PricingRule"> | Date | string | null
     endDate?: DateTimeNullableFilter<"PricingRule"> | Date | string | null
+    color?: StringNullableFilter<"PricingRule"> | string | null
     isActive?: BoolFilter<"PricingRule"> | boolean
     createdAt?: DateTimeFilter<"PricingRule"> | Date | string
   }
@@ -29788,9 +31128,11 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     property: PropertyCreateNestedOneWithoutReservationsInput
     payments?: PaymentCreateNestedManyWithoutReservationInput
     blockedDates?: BlockedDateCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationUncheckedCreateWithoutGuestInput = {
@@ -29806,8 +31148,10 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     payments?: PaymentUncheckedCreateNestedManyWithoutReservationInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantUncheckedCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationCreateOrConnectWithoutGuestInput = {
@@ -30413,6 +31757,30 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type ReservationOccupantCreateWithoutReservationInput = {
+    id?: string
+    name: string
+    document?: string | null
+    isChild?: boolean
+  }
+
+  export type ReservationOccupantUncheckedCreateWithoutReservationInput = {
+    id?: string
+    name: string
+    document?: string | null
+    isChild?: boolean
+  }
+
+  export type ReservationOccupantCreateOrConnectWithoutReservationInput = {
+    where: ReservationOccupantWhereUniqueInput
+    create: XOR<ReservationOccupantCreateWithoutReservationInput, ReservationOccupantUncheckedCreateWithoutReservationInput>
+  }
+
+  export type ReservationOccupantCreateManyReservationInputEnvelope = {
+    data: ReservationOccupantCreateManyReservationInput | ReservationOccupantCreateManyReservationInput[]
+    skipDuplicates?: boolean
+  }
+
   export type PropertyUpsertWithoutReservationsInput = {
     update: XOR<PropertyUpdateWithoutReservationsInput, PropertyUncheckedUpdateWithoutReservationsInput>
     create: XOR<PropertyCreateWithoutReservationsInput, PropertyUncheckedCreateWithoutReservationsInput>
@@ -30618,6 +31986,125 @@ export namespace Prisma {
     data: XOR<BlockedDateUpdateManyMutationInput, BlockedDateUncheckedUpdateManyWithoutReservationInput>
   }
 
+  export type ReservationOccupantUpsertWithWhereUniqueWithoutReservationInput = {
+    where: ReservationOccupantWhereUniqueInput
+    update: XOR<ReservationOccupantUpdateWithoutReservationInput, ReservationOccupantUncheckedUpdateWithoutReservationInput>
+    create: XOR<ReservationOccupantCreateWithoutReservationInput, ReservationOccupantUncheckedCreateWithoutReservationInput>
+  }
+
+  export type ReservationOccupantUpdateWithWhereUniqueWithoutReservationInput = {
+    where: ReservationOccupantWhereUniqueInput
+    data: XOR<ReservationOccupantUpdateWithoutReservationInput, ReservationOccupantUncheckedUpdateWithoutReservationInput>
+  }
+
+  export type ReservationOccupantUpdateManyWithWhereWithoutReservationInput = {
+    where: ReservationOccupantScalarWhereInput
+    data: XOR<ReservationOccupantUpdateManyMutationInput, ReservationOccupantUncheckedUpdateManyWithoutReservationInput>
+  }
+
+  export type ReservationOccupantScalarWhereInput = {
+    AND?: ReservationOccupantScalarWhereInput | ReservationOccupantScalarWhereInput[]
+    OR?: ReservationOccupantScalarWhereInput[]
+    NOT?: ReservationOccupantScalarWhereInput | ReservationOccupantScalarWhereInput[]
+    id?: StringFilter<"ReservationOccupant"> | string
+    reservationId?: StringFilter<"ReservationOccupant"> | string
+    name?: StringFilter<"ReservationOccupant"> | string
+    document?: StringNullableFilter<"ReservationOccupant"> | string | null
+    isChild?: BoolFilter<"ReservationOccupant"> | boolean
+  }
+
+  export type ReservationCreateWithoutOccupantsInput = {
+    id?: string
+    checkIn: Date | string
+    checkOut: Date | string
+    status?: $Enums.ReservationStatus
+    totalAmount: number
+    nightlyRate: number
+    cleaningFee: number
+    totalNights: number
+    holdExpiresAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    numGuests?: number | null
+    property: PropertyCreateNestedOneWithoutReservationsInput
+    guest: GuestCreateNestedOneWithoutReservationsInput
+    payments?: PaymentCreateNestedManyWithoutReservationInput
+    blockedDates?: BlockedDateCreateNestedManyWithoutReservationInput
+  }
+
+  export type ReservationUncheckedCreateWithoutOccupantsInput = {
+    id?: string
+    propertyId: string
+    guestId: string
+    checkIn: Date | string
+    checkOut: Date | string
+    status?: $Enums.ReservationStatus
+    totalAmount: number
+    nightlyRate: number
+    cleaningFee: number
+    totalNights: number
+    holdExpiresAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    numGuests?: number | null
+    payments?: PaymentUncheckedCreateNestedManyWithoutReservationInput
+    blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutReservationInput
+  }
+
+  export type ReservationCreateOrConnectWithoutOccupantsInput = {
+    where: ReservationWhereUniqueInput
+    create: XOR<ReservationCreateWithoutOccupantsInput, ReservationUncheckedCreateWithoutOccupantsInput>
+  }
+
+  export type ReservationUpsertWithoutOccupantsInput = {
+    update: XOR<ReservationUpdateWithoutOccupantsInput, ReservationUncheckedUpdateWithoutOccupantsInput>
+    create: XOR<ReservationCreateWithoutOccupantsInput, ReservationUncheckedCreateWithoutOccupantsInput>
+    where?: ReservationWhereInput
+  }
+
+  export type ReservationUpdateToOneWithWhereWithoutOccupantsInput = {
+    where?: ReservationWhereInput
+    data: XOR<ReservationUpdateWithoutOccupantsInput, ReservationUncheckedUpdateWithoutOccupantsInput>
+  }
+
+  export type ReservationUpdateWithoutOccupantsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    checkIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOut?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    nightlyRate?: FloatFieldUpdateOperationsInput | number
+    cleaningFee?: FloatFieldUpdateOperationsInput | number
+    totalNights?: IntFieldUpdateOperationsInput | number
+    holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
+    property?: PropertyUpdateOneRequiredWithoutReservationsNestedInput
+    guest?: GuestUpdateOneRequiredWithoutReservationsNestedInput
+    payments?: PaymentUpdateManyWithoutReservationNestedInput
+    blockedDates?: BlockedDateUpdateManyWithoutReservationNestedInput
+  }
+
+  export type ReservationUncheckedUpdateWithoutOccupantsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    propertyId?: StringFieldUpdateOperationsInput | string
+    guestId?: StringFieldUpdateOperationsInput | string
+    checkIn?: DateTimeFieldUpdateOperationsInput | Date | string
+    checkOut?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumReservationStatusFieldUpdateOperationsInput | $Enums.ReservationStatus
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    nightlyRate?: FloatFieldUpdateOperationsInput | number
+    cleaningFee?: FloatFieldUpdateOperationsInput | number
+    totalNights?: IntFieldUpdateOperationsInput | number
+    holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
+    payments?: PaymentUncheckedUpdateManyWithoutReservationNestedInput
+    blockedDates?: BlockedDateUncheckedUpdateManyWithoutReservationNestedInput
+  }
+
   export type ReservationCreateWithoutPaymentsInput = {
     id?: string
     checkIn: Date | string
@@ -30630,9 +32117,11 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     property: PropertyCreateNestedOneWithoutReservationsInput
     guest: GuestCreateNestedOneWithoutReservationsInput
     blockedDates?: BlockedDateCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationUncheckedCreateWithoutPaymentsInput = {
@@ -30649,7 +32138,9 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantUncheckedCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationCreateOrConnectWithoutPaymentsInput = {
@@ -30680,9 +32171,11 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     property?: PropertyUpdateOneRequiredWithoutReservationsNestedInput
     guest?: GuestUpdateOneRequiredWithoutReservationsNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateWithoutPaymentsInput = {
@@ -30699,7 +32192,9 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUncheckedUpdateManyWithoutReservationNestedInput
   }
 
   export type PropertyCreateWithoutBlockedDatesInput = {
@@ -30813,9 +32308,11 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     property: PropertyCreateNestedOneWithoutReservationsInput
     guest: GuestCreateNestedOneWithoutReservationsInput
     payments?: PaymentCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationUncheckedCreateWithoutBlockedDatesInput = {
@@ -30832,7 +32329,9 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
     payments?: PaymentUncheckedCreateNestedManyWithoutReservationInput
+    occupants?: ReservationOccupantUncheckedCreateNestedManyWithoutReservationInput
   }
 
   export type ReservationCreateOrConnectWithoutBlockedDatesInput = {
@@ -30968,9 +32467,11 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     property?: PropertyUpdateOneRequiredWithoutReservationsNestedInput
     guest?: GuestUpdateOneRequiredWithoutReservationsNestedInput
     payments?: PaymentUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateWithoutBlockedDatesInput = {
@@ -30987,7 +32488,9 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     payments?: PaymentUncheckedUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUncheckedUpdateManyWithoutReservationNestedInput
   }
 
   export type PropertyCreateWithoutAvailabilityWindowsInput = {
@@ -32839,6 +34342,7 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
   }
 
   export type BlockedDateCreateManyPropertyInput = {
@@ -32867,6 +34371,7 @@ export namespace Prisma {
     minDays?: number | null
     startDate?: Date | string | null
     endDate?: Date | string | null
+    color?: string | null
     isActive?: boolean
     createdAt?: Date | string
   }
@@ -32945,9 +34450,11 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     guest?: GuestUpdateOneRequiredWithoutReservationsNestedInput
     payments?: PaymentUpdateManyWithoutReservationNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateWithoutPropertyInput = {
@@ -32963,8 +34470,10 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     payments?: PaymentUncheckedUpdateManyWithoutReservationNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUncheckedUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateManyWithoutPropertyInput = {
@@ -32980,6 +34489,7 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type BlockedDateUpdateWithoutPropertyInput = {
@@ -33044,6 +34554,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33056,6 +34567,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33068,6 +34580,7 @@ export namespace Prisma {
     minDays?: NullableIntFieldUpdateOperationsInput | number | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    color?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -33271,6 +34784,7 @@ export namespace Prisma {
     holdExpiresAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    numGuests?: number | null
   }
 
   export type ReservationUpdateWithoutGuestInput = {
@@ -33285,9 +34799,11 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     property?: PropertyUpdateOneRequiredWithoutReservationsNestedInput
     payments?: PaymentUpdateManyWithoutReservationNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateWithoutGuestInput = {
@@ -33303,8 +34819,10 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
     payments?: PaymentUncheckedUpdateManyWithoutReservationNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutReservationNestedInput
+    occupants?: ReservationOccupantUncheckedUpdateManyWithoutReservationNestedInput
   }
 
   export type ReservationUncheckedUpdateManyWithoutGuestInput = {
@@ -33320,6 +34838,7 @@ export namespace Prisma {
     holdExpiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    numGuests?: NullableIntFieldUpdateOperationsInput | number | null
   }
 
   export type AccountCreateManyUserInput = {
@@ -33424,6 +34943,13 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type ReservationOccupantCreateManyReservationInput = {
+    id?: string
+    name: string
+    document?: string | null
+    isChild?: boolean
+  }
+
   export type PaymentUpdateWithoutReservationInput = {
     id?: StringFieldUpdateOperationsInput | string
     gatewayTransactionId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33490,6 +35016,27 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type ReservationOccupantUpdateWithoutReservationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type ReservationOccupantUncheckedUpdateWithoutReservationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type ReservationOccupantUncheckedUpdateManyWithoutReservationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    document?: NullableStringFieldUpdateOperationsInput | string | null
+    isChild?: BoolFieldUpdateOperationsInput | boolean
+  }
+
 
 
   /**
@@ -33539,6 +35086,10 @@ export namespace Prisma {
      * @deprecated Use ReservationDefaultArgs instead
      */
     export type ReservationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ReservationDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ReservationOccupantDefaultArgs instead
+     */
+    export type ReservationOccupantArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ReservationOccupantDefaultArgs<ExtArgs>
     /**
      * @deprecated Use PaymentDefaultArgs instead
      */

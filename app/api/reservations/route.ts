@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
 import { createPixPayment } from "@/lib/payments";
 import { getDateAvailabilityStatus } from "@/lib/availability";
-import { startOfDay } from "date-fns";
+import { startOfDay, format } from "date-fns";
+import { channex } from "@/lib/channex";
 
 export async function POST(req: NextRequest) {
     try {
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
 
         const body = await req.json();
         const { propertyId, checkIn, checkOut, guestName, guestEmail, guestPhone,
-            totalAmount, nightlyRate, cleaningFee, totalNights } = body;
+            totalAmount, nightlyRate, cleaningFee, totalNights, guests, occupants = [] } = body;
 
         if (guestEmail !== session.user.email) {
             return NextResponse.json({ error: 'Identidade do hóspede inválida para esta sessão.' }, { status: 403 });
@@ -76,7 +77,17 @@ export async function POST(req: NextRequest) {
                     nightlyRate,
                     cleaningFee,
                     totalNights,
-                    holdExpiresAt: expiresAt
+                    holdExpiresAt: expiresAt,
+                    numGuests: guests,
+                    occupants: {
+                        createMany: {
+                            data: occupants.map((occ: any) => ({
+                                name: occ.name,
+                                document: occ.document,
+                                isChild: !!occ.isChild
+                            }))
+                        }
+                    }
                 }
             });
 
@@ -99,6 +110,13 @@ export async function POST(req: NextRequest) {
 
             return reservation;
         });
+
+        // Disparo Assíncrono para a Channex (Segundo Plano)
+        channex.pushAvailability(
+            propertyId,
+            format(inDate, "yyyy-MM-dd"),
+            format(outDate, "yyyy-MM-dd")
+        ).catch(err => console.error("[Channex Sync Error]:", err));
 
         const pixData = await createPixPayment({
             amount: result.totalAmount,
