@@ -19,6 +19,7 @@ import { PhotosForm } from "@/components/admin/PhotosForm";
 import { AmenitiesForm } from "@/components/admin/AmenitiesForm";
 import { RulesForm } from "@/components/admin/RulesForm";
 import { ImportForm } from "@/components/admin/ImportForm";
+import { IntegrationsForm } from "@/components/admin/IntegrationsForm";
 
 type Tab = 'geral' | 'fotos' | 'comodidades' | 'regras' | 'importar' | 'integracoes' | 'contato';
 
@@ -151,33 +152,37 @@ export default function PropertySettingsPage() {
                     <ImportForm />
                 )}
 
-                {/* iCal export link */}
-                {activeTab === 'integracoes' && propertyData?.slug && (
-                    <Card className="shadow-sm border-olive-900/10">
-                        <CardHeader>
-                            <CardTitle>Calendário iCal — Exportação</CardTitle>
-                            <CardDescription>Copie a URL abaixo e adicione no Airbnb, Booking ou outro canal para sincronizar reservas.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="p-4 bg-olive-900/5 rounded-xl font-mono text-sm break-all border border-olive-900/10 select-all">
-                                {typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/export/{propertyData.slug}
-                            </div>
-                            <div className="flex gap-3">
-                                <Button
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(`${window.location.origin}/api/ical/export/${propertyData.slug}`);
-                                        toast.success('URL copiada!');
-                                    }}
-                                    className="bg-olive-900 hover:bg-olive-800 text-white"
-                                >
-                                    Copiar URL
-                                </Button>
-                                <a href={`/api/ical/export/${propertyData.slug}`} target="_blank">
-                                    <Button variant="outline">Testar Feed</Button>
-                                </a>
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* Integrations (iCal sync) */}
+                {activeTab === 'integracoes' && (
+                    <div className="space-y-6">
+                        <IntegrationsForm propertyId={propertyId} />
+
+                        <Card className="shadow-sm border-olive-900/10">
+                            <CardHeader>
+                                <CardTitle>Calendário iCal — Exportação</CardTitle>
+                                <CardDescription>Copie a URL abaixo e adicione no Airbnb, Booking ou outro canal para sincronizar reservas da Casa Oliveira para fora.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="p-4 bg-olive-900/5 rounded-xl font-mono text-sm break-all border border-olive-900/10 select-all">
+                                    {typeof window !== 'undefined' ? `${window.location.origin}/api/ical/export/${propertyData.slug}` : ''}
+                                </div>
+                                <div className="flex gap-3">
+                                    <Button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`${window.location.origin}/api/ical/export/${propertyData.slug}`);
+                                            toast.success('URL copiada!');
+                                        }}
+                                        className="bg-olive-900 hover:bg-olive-800 text-white"
+                                    >
+                                        Copiar URL
+                                    </Button>
+                                    <a href={`/api/ical/export/${propertyData.slug}`} target="_blank">
+                                        <Button variant="outline">Testar Feed</Button>
+                                    </a>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 )}
 
                 {/* System Settings */}

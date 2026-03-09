@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { getDateAvailabilityStatus } from "@/lib/availability";
 import { startOfDay, format } from "date-fns";
 import { channex } from "@/lib/channex";
+import { reservationSchema } from "@/lib/validations/schemas";
 
 export async function POST(req: NextRequest) {
     try {
@@ -16,7 +17,12 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { propertyId, guestId, checkIn, checkOut, totalAmount, nightlyRate, cleaningFee, totalNights, numGuests, occupants = [] } = body;
+        const validation = reservationSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ error: "Dados inválidos", details: validation.error.flatten() }, { status: 400 });
+        }
+
+        const { propertyId, guestId, checkIn, checkOut, totalAmount, nightlyRate, cleaningFee, totalNights, numGuests, occupants = [] } = validation.data as any;
 
         const inDate = startOfDay(new Date(checkIn));
         const outDate = startOfDay(new Date(checkOut));

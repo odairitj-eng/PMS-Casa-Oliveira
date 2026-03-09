@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/options';
+import { propertySchema } from '@/lib/validations/schemas';
 
 export async function GET(
     req: NextRequest,
@@ -42,18 +43,19 @@ export async function PATCH(
 
     try {
         const body = await req.json();
-        // Remove known relation arrays, meta-fields, and id/slug before passing to update
-        const {
-            id: __,
-            createdAt: ___,
-            updatedAt: ____,
-            photos: _p,
-            amenities: _a,
-            rules: _r,
-            reservations: _res,
-            _count: _c,
-            ...data
-        } = body;
+
+        // VALIDAÇÃO ZOD PARCIAL
+        const validation = propertySchema.partial().safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ error: "Dados inválidos", details: validation.error.flatten() }, { status: 400 });
+        }
+
+        const data = validation.data;
+
+        // Proteção: Remove campos que nunca devem ser alterados via PATCH genérico
+        delete (data as any).id;
+        delete (data as any).createdAt;
+        delete (data as any).updatedAt;
 
         const updated = await db.property.update({
             where: { id: params.id },

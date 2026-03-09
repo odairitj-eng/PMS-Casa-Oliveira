@@ -101,7 +101,15 @@ export async function PATCH(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { id, channexId } = body;
+
+        // VALIDAÇÃO ZOD PARCIAL
+        const validation = propertySchema.partial().safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ error: "Dados inválidos", details: validation.error.flatten() }, { status: 400 });
+        }
+
+        const data = validation.data;
+        const { id, channexId } = body; // Mantemos ID do body para o where
 
         if (!id) {
             return NextResponse.json({ error: 'ID do imóvel é obrigatório.' }, { status: 400 });
@@ -109,7 +117,10 @@ export async function PATCH(req: NextRequest) {
 
         const property = await db.property.update({
             where: { id },
-            data: { channexId },
+            data: {
+                ...data,
+                channexId: data.channexId // Garante que channexId validado seja usado
+            },
         });
 
         return NextResponse.json(property);

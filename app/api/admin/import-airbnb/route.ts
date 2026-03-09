@@ -1,15 +1,24 @@
 export const dynamic = 'force-dynamic';
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
 import * as cheerio from "cheerio";
 import axios from "axios";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     try {
+        // 🛡️ REDUNDANT ADMIN CHECK (DEFENSE IN DEPTH)
+        const session = await getServerSession(authOptions);
+        if (!session || (session.user as any)?.role !== "ADMIN") {
+            return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+        }
+
         const { url } = await req.json();
 
-        if (!url || !url.includes("airbnb")) {
-            return NextResponse.json({ error: "URL inválida do Airbnb" }, { status: 400 });
+        // 🛡️ SSRF PROTECTION
+        if (!url || !url.startsWith("https://") || !url.includes("airbnb.com/rooms/")) {
+            return NextResponse.json({ error: "URL inválida. Apenas links diretos de anúncios do Airbnb são permitidos por segurança." }, { status: 400 });
         }
 
         // Fetching the Airbnb listing page

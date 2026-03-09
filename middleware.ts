@@ -8,17 +8,19 @@ export default withAuth(
         const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
 
         if (isAdminRoute && token?.role !== "ADMIN") {
-            return NextResponse.redirect(new URL("/", req.url));
+            const url = req.nextUrl.clone();
+            url.pathname = "/auth/login";
+            return NextResponse.redirect(url);
         }
 
         const response = NextResponse.next();
 
-        // 🛡️ HEADERS DE SEGURANÇA (HARDENING)
+        // 🛡️ HEADERS DE SEGURANÇA (PRODUÇÃO HARDENING)
         const cspHeader = `
             default-src 'self';
-            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.mercadopago.com https://*.vercel-scripts.com;
+            script-src 'self' https://*.mercadopago.com https://*.vercel-scripts.com;
             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-            img-src 'self' blob: data: https://*.mercadopago.com https://*.githubusercontent.com https://*.googleusercontent.com;
+            img-src 'self' blob: data: https://*.mercadopago.com https://*.githubusercontent.com https://*.googleusercontent.com https://*.airbnb.com;
             font-src 'self' https://fonts.gstatic.com;
             object-src 'none';
             base-uri 'self';
@@ -34,7 +36,7 @@ export default withAuth(
         response.headers.set('X-Frame-Options', 'DENY');
         response.headers.set('X-XSS-Protection', '1; mode=block');
         response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
 
         return response;
     },

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { db as prisma } from "@/lib/db";
+import { propertyPhotoSchema } from "@/lib/validations/schemas";
 
 async function resolvePropertyId(propertyId?: string | null) {
     if (propertyId) return propertyId;
@@ -25,7 +26,8 @@ export async function GET(req: NextRequest) {
         });
         return NextResponse.json(photos);
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("[Photos GET Error]", error);
+        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }
 
@@ -34,7 +36,14 @@ export async function POST(req: NextRequest) {
     if (!session || (session.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
-        const data = await req.json();
+        const body = await req.json();
+        const validation = propertyPhotoSchema.safeParse(body);
+
+        if (!validation.success) {
+            return NextResponse.json({ error: "Dados inválidos", details: validation.error.flatten() }, { status: 400 });
+        }
+
+        const data = validation.data;
         const propertyId = await resolvePropertyId(data.propertyId);
         if (!propertyId) return NextResponse.json({ error: "Imóvel não encontrado" }, { status: 404 });
 
@@ -52,7 +61,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(updated);
         } else {
             const created = await prisma.propertyPhoto.create({
-                data: { propertyId, imageUrl: data.imageUrl, sortOrder: data.sortOrder || 0, isPrimary: data.isPrimary || false }
+                data: { propertyId, imageUrl: data.imageUrl, sortOrder: data.sortOrder, isPrimary: data.isPrimary }
             });
             if (data.isPrimary) {
                 await prisma.propertyPhoto.updateMany({
@@ -63,7 +72,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json(created);
         }
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("[Photos POST Error]", error);
+        return NextResponse.json({ error: "Erro interno ao salvar foto" }, { status: 500 });
     }
 }
 

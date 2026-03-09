@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { db as prisma } from "@/lib/db";
+import { propertyRuleSchema } from "@/lib/validations/schemas";
 
 async function resolvePropertyId(propertyId?: string | null) {
     if (propertyId) return propertyId;
@@ -25,7 +26,8 @@ export async function GET(req: NextRequest) {
         });
         return NextResponse.json(rules);
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("[Rules GET Error]", error);
+        return NextResponse.json({ error: "Erro interno" }, { status: 500 });
     }
 }
 
@@ -34,14 +36,26 @@ export async function POST(req: NextRequest) {
     if (!session || (session.user as any)?.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
-        const data = await req.json();
+        const body = await req.json();
+        const validation = propertyRuleSchema.safeParse(body);
+
+        if (!validation.success) {
+            return NextResponse.json({ error: "Dados inválidos", details: validation.error.flatten() }, { status: 400 });
+        }
+
+        const data = validation.data;
         const propertyId = await resolvePropertyId(data.propertyId);
         if (!propertyId) return NextResponse.json({ error: "Imóvel não encontrado" }, { status: 404 });
 
         if (data.id) {
             const updated = await prisma.propertyRule.update({
                 where: { id: data.id },
-                data: { ruleText: data.ruleText, iconName: data.iconName, sortOrder: data.sortOrder, isActive: data.isActive }
+                data: {
+                    ruleText: data.ruleText,
+                    iconName: data.iconName,
+                    sortOrder: data.sortOrder,
+                    isActive: data.isActive
+                }
             });
             return NextResponse.json(updated);
         } else {
@@ -51,13 +65,14 @@ export async function POST(req: NextRequest) {
                     ruleText: data.ruleText,
                     iconName: data.iconName,
                     sortOrder: data.sortOrder,
-                    isActive: data.isActive !== undefined ? data.isActive : true
+                    isActive: data.isActive
                 }
             });
             return NextResponse.json(created);
         }
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        console.error("[Rules POST Error]", error);
+        return NextResponse.json({ error: "Erro interno ao salvar regra" }, { status: 500 });
     }
 }
 

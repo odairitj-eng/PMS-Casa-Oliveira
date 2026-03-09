@@ -6,17 +6,32 @@ import { createPixPayment } from "@/lib/payments";
 import { getDateAvailabilityStatus } from "@/lib/availability";
 import { startOfDay, format } from "date-fns";
 import { channex } from "@/lib/channex";
+import { reservationSchema } from "@/lib/validations/schemas";
+import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
     try {
+        const limiter = await rateLimit(req, 10, 60000); // 10 por minuto
+        if (!limiter.success) return rateLimitResponse();
+
         const session = await getServerSession(authOptions);
         if (!session || !session.user?.email) {
             return NextResponse.json({ error: 'Você precisa estar logado para reservar.' }, { status: 401 });
         }
 
         const body = await req.json();
+
+        // 🛡️ VALIDAÇÃO DE SCHEMA (ZOD HARDENING)
+        const parseResult = reservationSchema.safeParse(body);
+        if (!parseResult.success) {
+            return NextResponse.json({
+                error: 'Dados de reserva inválidos.',
+                details: parseResult.error.flatten().fieldErrors
+            }, { status: 400 });
+        }
+
         const { propertyId, checkIn, checkOut, guestName, guestEmail, guestPhone,
-            totalAmount, nightlyRate, cleaningFee, totalNights, guests, occupants = [] } = body;
+            totalAmount, nightlyRate, cleaningFee, totalNights, guests, occupants = [] } = parseResult.data as any;
 
         if (guestEmail !== session.user.email) {
             return NextResponse.json({ error: 'Identidade do hóspede inválida para esta sessão.' }, { status: 403 });

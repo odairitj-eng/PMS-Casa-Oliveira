@@ -422,3 +422,11 @@ model PropertyRule {
 
   @@index([propertyId])
 }
+
+model ProcessedEvent {
+  id        String   @id
+  provider  String
+  createdAt DateTime @default(now())
+
+  @@index([id, provider])
+}
