@@ -1,4 +1,3 @@
-import ical from 'node-ical';
 import axios from 'axios';
 import { BlockedSource } from '@prisma/client';
 
@@ -9,6 +8,7 @@ export interface ICalEvent {
 }
 
 export async function fetchAndParseICal(url: string): Promise<ICalEvent[]> {
+    const ical = require('node-ical');
     try {
         const response = await axios.get(url, {
             headers: {

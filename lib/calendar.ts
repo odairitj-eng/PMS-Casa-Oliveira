@@ -1,5 +1,4 @@
 import { db } from './db';
-import ical from 'node-ical';
 import axios from 'axios';
 
 /**
@@ -58,9 +57,10 @@ export async function generateIcalFeed(propertyId: string) {
  * Sincroniza eventos de um calendário externo (Airbnb, Booking) para o banco de dados.
  */
 export async function syncIcalEvents(propertyId: string, integrationId: string) {
+    const ical = require('node-ical');
     const integration = await db.integration.findUnique({
         where: { id: integrationId }
-    });
+    }) as any;
 
     if (!integration || !integration.icalUrl) {
         throw new Error('Integração ou URL iCal não encontrada.');
@@ -112,7 +112,7 @@ export async function syncIcalEvents(propertyId: string, integrationId: string) 
                     propertyId: propertyId,
                     source: source
                 }
-            }),
+            } as any),
             // Insere os novos bloqueios
             db.blockedDate.createMany({
                 data: nightsToBlock.map(date => ({
@@ -136,7 +136,7 @@ export async function syncIcalEvents(propertyId: string, integrationId: string) 
                     status: 'SUCCESS',
                     eventsAdded: nightsToBlock.length,
                     errorMessage: `Sincronização do ${integration.platform} concluída. ${nightsToBlock.length} noites bloqueadas.`
-                }
+                } as any
             })
         ]);
 
@@ -151,7 +151,7 @@ export async function syncIcalEvents(propertyId: string, integrationId: string) 
                 platform: integration.platform,
                 status: 'FAILED',
                 errorMessage: `Erro: ${error.message}`
-            }
+            } as any
         });
 
         throw error;
