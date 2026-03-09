@@ -16,6 +16,12 @@ const nextConfig = {
             },
         ],
     },
+    webpack: (config, { isServer }) => {
+        if (isServer) {
+            config.externals.push('node-ical');
+        }
+        return config;
+    },
 };
 
 export default nextConfig;
