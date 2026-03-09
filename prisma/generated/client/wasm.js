@@ -132,12 +132,19 @@ exports.Prisma.PropertyScalarFieldEnum = {
   fullDescription: 'fullDescription',
   hostName: 'hostName',
   propertyType: 'propertyType',
+  category: 'category',
+  accommodationType: 'accommodationType',
   maxGuests: 'maxGuests',
   bedrooms: 'bedrooms',
   beds: 'beds',
   bathrooms: 'bathrooms',
   allowsPets: 'allowsPets',
   maxPets: 'maxPets',
+  buildingFloors: 'buildingFloors',
+  floorNumber: 'floorNumber',
+  constructionYear: 'constructionYear',
+  propertySize: 'propertySize',
+  propertySizeUnit: 'propertySizeUnit',
   street: 'street',
   streetNumber: 'streetNumber',
   neighborhood: 'neighborhood',
@@ -156,7 +163,8 @@ exports.Prisma.PropertyScalarFieldEnum = {
   minimumNights: 'minimumNights',
   currency: 'currency',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  channexId: 'channexId'
 };
 
 exports.Prisma.GuestScalarFieldEnum = {
@@ -411,6 +419,7 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
 exports.BlockedSource = exports.$Enums.BlockedSource = {
   AIRBNB: 'AIRBNB',
   BOOKING: 'BOOKING',
+  CHANNEX: 'CHANNEX',
   ADMIN: 'ADMIN',
   DIRECT_RESERVATION: 'DIRECT_RESERVATION',
   MANUAL: 'MANUAL'
@@ -430,7 +439,8 @@ exports.RuleType = exports.$Enums.RuleType = {
 
 exports.Platform = exports.$Enums.Platform = {
   AIRBNB: 'AIRBNB',
-  BOOKING: 'BOOKING'
+  BOOKING: 'BOOKING',
+  CHANNEX: 'CHANNEX'
 };
 
 exports.SyncStatus = exports.$Enums.SyncStatus = {

@@ -1,11 +1,9 @@
 {
+  "/[slug]/page": "app/[slug]/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/api/admin/pricing/rules/route": "app/api/admin/pricing/rules/route.js",
-  "/api/calendar/route": "app/api/calendar/route.js",
-  "/api/admin/properties/route": "app/api/admin/properties/route.js",
-  "/admin/calendar/page": "app/admin/calendar/page.js",
+  "/admin/guests/page": "app/admin/guests/page.js",
   "/admin/properties/page": "app/admin/properties/page.js",
-  "/admin/properties/[id]/settings/page": "app/admin/properties/[id]/settings/page.js",
-  "/admin/pricing/page": "app/admin/pricing/page.js",
-  "/admin/dashboard/page": "app/admin/dashboard/page.js"
+  "/admin/properties/[id]/settings/page": "app/admin/properties/[id]/settings/page.js"
 }

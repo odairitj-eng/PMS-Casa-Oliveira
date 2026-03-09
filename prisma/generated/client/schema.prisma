@@ -54,6 +54,7 @@ model Property {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  channexId           String?              @unique
   reservations        Reservation[]
   blockedDates        BlockedDate[]
   nightlyOverrides    NightlyOverride[]
@@ -166,6 +167,9 @@ model Reservation {
   payments     Payment[]
   blockedDates BlockedDate[]
 
+  numGuests Int?                  @default(1)
+  occupants ReservationOccupant[]
+
   @@index([propertyId])
   @@index([guestId])
 }
@@ -175,6 +179,18 @@ enum ReservationStatus {
   CONFIRMED
   CANCELLED
   EXPIRED
+}
+
+model ReservationOccupant {
+  id            String  @id @default(uuid())
+  reservationId String
+  name          String
+  document      String? // CPF ou Identidade
+  isChild       Boolean @default(false)
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
 }
 
 model Payment {
@@ -224,6 +240,7 @@ model BlockedDate {
 enum BlockedSource {
   AIRBNB
   BOOKING
+  CHANNEX
   ADMIN
   DIRECT_RESERVATION
   MANUAL
@@ -274,6 +291,7 @@ model PricingRule {
   minDays     Int? // Para Early Bird e Last Minute dinâmico
   startDate   DateTime? // Para Sazonalidade
   endDate     DateTime? // Para Sazonalidade
+  color       String? // Para identificação visual no calendário
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
 
@@ -305,6 +323,7 @@ model Integration {
 enum Platform {
   AIRBNB
   BOOKING
+  CHANNEX
 }
 
 model SyncLog {

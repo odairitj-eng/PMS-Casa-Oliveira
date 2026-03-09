@@ -157,6 +157,7 @@ export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 export const BlockedSource: {
   AIRBNB: 'AIRBNB',
   BOOKING: 'BOOKING',
+  CHANNEX: 'CHANNEX',
   ADMIN: 'ADMIN',
   DIRECT_RESERVATION: 'DIRECT_RESERVATION',
   MANUAL: 'MANUAL'
@@ -185,7 +186,8 @@ export type RuleType = (typeof RuleType)[keyof typeof RuleType]
 
 export const Platform: {
   AIRBNB: 'AIRBNB',
-  BOOKING: 'BOOKING'
+  BOOKING: 'BOOKING',
+  CHANNEX: 'CHANNEX'
 };
 
 export type Platform = (typeof Platform)[keyof typeof Platform]
@@ -2857,6 +2859,10 @@ export namespace Prisma {
     beds: number | null
     bathrooms: number | null
     maxPets: number | null
+    buildingFloors: number | null
+    floorNumber: number | null
+    constructionYear: number | null
+    propertySize: number | null
     latitude: number | null
     longitude: number | null
     publicLatitude: number | null
@@ -2872,6 +2878,10 @@ export namespace Prisma {
     beds: number | null
     bathrooms: number | null
     maxPets: number | null
+    buildingFloors: number | null
+    floorNumber: number | null
+    constructionYear: number | null
+    propertySize: number | null
     latitude: number | null
     longitude: number | null
     publicLatitude: number | null
@@ -2891,12 +2901,19 @@ export namespace Prisma {
     fullDescription: string | null
     hostName: string | null
     propertyType: string | null
+    category: string | null
+    accommodationType: string | null
     maxGuests: number | null
     bedrooms: number | null
     beds: number | null
     bathrooms: number | null
     allowsPets: boolean | null
     maxPets: number | null
+    buildingFloors: number | null
+    floorNumber: number | null
+    constructionYear: number | null
+    propertySize: number | null
+    propertySizeUnit: string | null
     street: string | null
     streetNumber: string | null
     neighborhood: string | null
@@ -2916,6 +2933,7 @@ export namespace Prisma {
     currency: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    channexId: string | null
   }
 
   export type PropertyMaxAggregateOutputType = {
@@ -2928,12 +2946,19 @@ export namespace Prisma {
     fullDescription: string | null
     hostName: string | null
     propertyType: string | null
+    category: string | null
+    accommodationType: string | null
     maxGuests: number | null
     bedrooms: number | null
     beds: number | null
     bathrooms: number | null
     allowsPets: boolean | null
     maxPets: number | null
+    buildingFloors: number | null
+    floorNumber: number | null
+    constructionYear: number | null
+    propertySize: number | null
+    propertySizeUnit: string | null
     street: string | null
     streetNumber: string | null
     neighborhood: string | null
@@ -2953,6 +2978,7 @@ export namespace Prisma {
     currency: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    channexId: string | null
   }
 
   export type PropertyCountAggregateOutputType = {
@@ -2965,12 +2991,19 @@ export namespace Prisma {
     fullDescription: number
     hostName: number
     propertyType: number
+    category: number
+    accommodationType: number
     maxGuests: number
     bedrooms: number
     beds: number
     bathrooms: number
     allowsPets: number
     maxPets: number
+    buildingFloors: number
+    floorNumber: number
+    constructionYear: number
+    propertySize: number
+    propertySizeUnit: number
     street: number
     streetNumber: number
     neighborhood: number
@@ -2990,6 +3023,7 @@ export namespace Prisma {
     currency: number
     createdAt: number
     updatedAt: number
+    channexId: number
     _all: number
   }
 
@@ -3000,6 +3034,10 @@ export namespace Prisma {
     beds?: true
     bathrooms?: true
     maxPets?: true
+    buildingFloors?: true
+    floorNumber?: true
+    constructionYear?: true
+    propertySize?: true
     latitude?: true
     longitude?: true
     publicLatitude?: true
@@ -3015,6 +3053,10 @@ export namespace Prisma {
     beds?: true
     bathrooms?: true
     maxPets?: true
+    buildingFloors?: true
+    floorNumber?: true
+    constructionYear?: true
+    propertySize?: true
     latitude?: true
     longitude?: true
     publicLatitude?: true
@@ -3034,12 +3076,19 @@ export namespace Prisma {
     fullDescription?: true
     hostName?: true
     propertyType?: true
+    category?: true
+    accommodationType?: true
     maxGuests?: true
     bedrooms?: true
     beds?: true
     bathrooms?: true
     allowsPets?: true
     maxPets?: true
+    buildingFloors?: true
+    floorNumber?: true
+    constructionYear?: true
+    propertySize?: true
+    propertySizeUnit?: true
     street?: true
     streetNumber?: true
     neighborhood?: true
@@ -3059,6 +3108,7 @@ export namespace Prisma {
     currency?: true
     createdAt?: true
     updatedAt?: true
+    channexId?: true
   }
 
   export type PropertyMaxAggregateInputType = {
@@ -3071,12 +3121,19 @@ export namespace Prisma {
     fullDescription?: true
     hostName?: true
     propertyType?: true
+    category?: true
+    accommodationType?: true
     maxGuests?: true
     bedrooms?: true
     beds?: true
     bathrooms?: true
     allowsPets?: true
     maxPets?: true
+    buildingFloors?: true
+    floorNumber?: true
+    constructionYear?: true
+    propertySize?: true
+    propertySizeUnit?: true
     street?: true
     streetNumber?: true
     neighborhood?: true
@@ -3096,6 +3153,7 @@ export namespace Prisma {
     currency?: true
     createdAt?: true
     updatedAt?: true
+    channexId?: true
   }
 
   export type PropertyCountAggregateInputType = {
@@ -3108,12 +3166,19 @@ export namespace Prisma {
     fullDescription?: true
     hostName?: true
     propertyType?: true
+    category?: true
+    accommodationType?: true
     maxGuests?: true
     bedrooms?: true
     beds?: true
     bathrooms?: true
     allowsPets?: true
     maxPets?: true
+    buildingFloors?: true
+    floorNumber?: true
+    constructionYear?: true
+    propertySize?: true
+    propertySizeUnit?: true
     street?: true
     streetNumber?: true
     neighborhood?: true
@@ -3133,6 +3198,7 @@ export namespace Prisma {
     currency?: true
     createdAt?: true
     updatedAt?: true
+    channexId?: true
     _all?: true
   }
 
@@ -3232,12 +3298,19 @@ export namespace Prisma {
     fullDescription: string | null
     hostName: string | null
     propertyType: string | null
+    category: string | null
+    accommodationType: string | null
     maxGuests: number
     bedrooms: number
     beds: number
     bathrooms: number
     allowsPets: boolean
     maxPets: number
+    buildingFloors: number | null
+    floorNumber: number | null
+    constructionYear: number | null
+    propertySize: number | null
+    propertySizeUnit: string | null
     street: string | null
     streetNumber: string | null
     neighborhood: string | null
@@ -3257,6 +3330,7 @@ export namespace Prisma {
     currency: string
     createdAt: Date
     updatedAt: Date
+    channexId: string | null
     _count: PropertyCountAggregateOutputType | null
     _avg: PropertyAvgAggregateOutputType | null
     _sum: PropertySumAggregateOutputType | null
@@ -3288,12 +3362,19 @@ export namespace Prisma {
     fullDescription?: boolean
     hostName?: boolean
     propertyType?: boolean
+    category?: boolean
+    accommodationType?: boolean
     maxGuests?: boolean
     bedrooms?: boolean
     beds?: boolean
     bathrooms?: boolean
     allowsPets?: boolean
     maxPets?: boolean
+    buildingFloors?: boolean
+    floorNumber?: boolean
+    constructionYear?: boolean
+    propertySize?: boolean
+    propertySizeUnit?: boolean
     street?: boolean
     streetNumber?: boolean
     neighborhood?: boolean
@@ -3313,6 +3394,7 @@ export namespace Prisma {
     currency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    channexId?: boolean
     reservations?: boolean | Property$reservationsArgs<ExtArgs>
     blockedDates?: boolean | Property$blockedDatesArgs<ExtArgs>
     nightlyOverrides?: boolean | Property$nightlyOverridesArgs<ExtArgs>
@@ -3337,12 +3419,19 @@ export namespace Prisma {
     fullDescription?: boolean
     hostName?: boolean
     propertyType?: boolean
+    category?: boolean
+    accommodationType?: boolean
     maxGuests?: boolean
     bedrooms?: boolean
     beds?: boolean
     bathrooms?: boolean
     allowsPets?: boolean
     maxPets?: boolean
+    buildingFloors?: boolean
+    floorNumber?: boolean
+    constructionYear?: boolean
+    propertySize?: boolean
+    propertySizeUnit?: boolean
     street?: boolean
     streetNumber?: boolean
     neighborhood?: boolean
@@ -3362,6 +3451,7 @@ export namespace Prisma {
     currency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    channexId?: boolean
   }, ExtArgs["result"]["property"]>
 
   export type PropertySelectScalar = {
@@ -3374,12 +3464,19 @@ export namespace Prisma {
     fullDescription?: boolean
     hostName?: boolean
     propertyType?: boolean
+    category?: boolean
+    accommodationType?: boolean
     maxGuests?: boolean
     bedrooms?: boolean
     beds?: boolean
     bathrooms?: boolean
     allowsPets?: boolean
     maxPets?: boolean
+    buildingFloors?: boolean
+    floorNumber?: boolean
+    constructionYear?: boolean
+    propertySize?: boolean
+    propertySizeUnit?: boolean
     street?: boolean
     streetNumber?: boolean
     neighborhood?: boolean
@@ -3399,6 +3496,7 @@ export namespace Prisma {
     currency?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    channexId?: boolean
   }
 
   export type PropertyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3442,12 +3540,19 @@ export namespace Prisma {
       fullDescription: string | null
       hostName: string | null
       propertyType: string | null
+      category: string | null
+      accommodationType: string | null
       maxGuests: number
       bedrooms: number
       beds: number
       bathrooms: number
       allowsPets: boolean
       maxPets: number
+      buildingFloors: number | null
+      floorNumber: number | null
+      constructionYear: number | null
+      propertySize: number | null
+      propertySizeUnit: string | null
       street: string | null
       streetNumber: string | null
       neighborhood: string | null
@@ -3467,6 +3572,7 @@ export namespace Prisma {
       currency: string
       createdAt: Date
       updatedAt: Date
+      channexId: string | null
     }, ExtArgs["result"]["property"]>
     composites: {}
   }
@@ -3880,12 +3986,19 @@ export namespace Prisma {
     readonly fullDescription: FieldRef<"Property", 'String'>
     readonly hostName: FieldRef<"Property", 'String'>
     readonly propertyType: FieldRef<"Property", 'String'>
+    readonly category: FieldRef<"Property", 'String'>
+    readonly accommodationType: FieldRef<"Property", 'String'>
     readonly maxGuests: FieldRef<"Property", 'Int'>
     readonly bedrooms: FieldRef<"Property", 'Int'>
     readonly beds: FieldRef<"Property", 'Int'>
     readonly bathrooms: FieldRef<"Property", 'Int'>
     readonly allowsPets: FieldRef<"Property", 'Boolean'>
     readonly maxPets: FieldRef<"Property", 'Int'>
+    readonly buildingFloors: FieldRef<"Property", 'Int'>
+    readonly floorNumber: FieldRef<"Property", 'Int'>
+    readonly constructionYear: FieldRef<"Property", 'Int'>
+    readonly propertySize: FieldRef<"Property", 'Float'>
+    readonly propertySizeUnit: FieldRef<"Property", 'String'>
     readonly street: FieldRef<"Property", 'String'>
     readonly streetNumber: FieldRef<"Property", 'String'>
     readonly neighborhood: FieldRef<"Property", 'String'>
@@ -3905,6 +4018,7 @@ export namespace Prisma {
     readonly currency: FieldRef<"Property", 'String'>
     readonly createdAt: FieldRef<"Property", 'DateTime'>
     readonly updatedAt: FieldRef<"Property", 'DateTime'>
+    readonly channexId: FieldRef<"Property", 'String'>
   }
     
 
@@ -23510,12 +23624,19 @@ export namespace Prisma {
     fullDescription: 'fullDescription',
     hostName: 'hostName',
     propertyType: 'propertyType',
+    category: 'category',
+    accommodationType: 'accommodationType',
     maxGuests: 'maxGuests',
     bedrooms: 'bedrooms',
     beds: 'beds',
     bathrooms: 'bathrooms',
     allowsPets: 'allowsPets',
     maxPets: 'maxPets',
+    buildingFloors: 'buildingFloors',
+    floorNumber: 'floorNumber',
+    constructionYear: 'constructionYear',
+    propertySize: 'propertySize',
+    propertySizeUnit: 'propertySizeUnit',
     street: 'street',
     streetNumber: 'streetNumber',
     neighborhood: 'neighborhood',
@@ -23534,7 +23655,8 @@ export namespace Prisma {
     minimumNights: 'minimumNights',
     currency: 'currency',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    channexId: 'channexId'
   };
 
   export type PropertyScalarFieldEnum = (typeof PropertyScalarFieldEnum)[keyof typeof PropertyScalarFieldEnum]
@@ -24042,12 +24164,19 @@ export namespace Prisma {
     fullDescription?: StringNullableFilter<"Property"> | string | null
     hostName?: StringNullableFilter<"Property"> | string | null
     propertyType?: StringNullableFilter<"Property"> | string | null
+    category?: StringNullableFilter<"Property"> | string | null
+    accommodationType?: StringNullableFilter<"Property"> | string | null
     maxGuests?: IntFilter<"Property"> | number
     bedrooms?: IntFilter<"Property"> | number
     beds?: IntFilter<"Property"> | number
     bathrooms?: IntFilter<"Property"> | number
     allowsPets?: BoolFilter<"Property"> | boolean
     maxPets?: IntFilter<"Property"> | number
+    buildingFloors?: IntNullableFilter<"Property"> | number | null
+    floorNumber?: IntNullableFilter<"Property"> | number | null
+    constructionYear?: IntNullableFilter<"Property"> | number | null
+    propertySize?: FloatNullableFilter<"Property"> | number | null
+    propertySizeUnit?: StringNullableFilter<"Property"> | string | null
     street?: StringNullableFilter<"Property"> | string | null
     streetNumber?: StringNullableFilter<"Property"> | string | null
     neighborhood?: StringNullableFilter<"Property"> | string | null
@@ -24067,6 +24196,7 @@ export namespace Prisma {
     currency?: StringFilter<"Property"> | string
     createdAt?: DateTimeFilter<"Property"> | Date | string
     updatedAt?: DateTimeFilter<"Property"> | Date | string
+    channexId?: StringNullableFilter<"Property"> | string | null
     reservations?: ReservationListRelationFilter
     blockedDates?: BlockedDateListRelationFilter
     nightlyOverrides?: NightlyOverrideListRelationFilter
@@ -24090,12 +24220,19 @@ export namespace Prisma {
     fullDescription?: SortOrderInput | SortOrder
     hostName?: SortOrderInput | SortOrder
     propertyType?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
+    accommodationType?: SortOrderInput | SortOrder
     maxGuests?: SortOrder
     bedrooms?: SortOrder
     beds?: SortOrder
     bathrooms?: SortOrder
     allowsPets?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrderInput | SortOrder
+    floorNumber?: SortOrderInput | SortOrder
+    constructionYear?: SortOrderInput | SortOrder
+    propertySize?: SortOrderInput | SortOrder
+    propertySizeUnit?: SortOrderInput | SortOrder
     street?: SortOrderInput | SortOrder
     streetNumber?: SortOrderInput | SortOrder
     neighborhood?: SortOrderInput | SortOrder
@@ -24115,6 +24252,7 @@ export namespace Prisma {
     currency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    channexId?: SortOrderInput | SortOrder
     reservations?: ReservationOrderByRelationAggregateInput
     blockedDates?: BlockedDateOrderByRelationAggregateInput
     nightlyOverrides?: NightlyOverrideOrderByRelationAggregateInput
@@ -24131,6 +24269,7 @@ export namespace Prisma {
   export type PropertyWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     slug?: string
+    channexId?: string
     AND?: PropertyWhereInput | PropertyWhereInput[]
     OR?: PropertyWhereInput[]
     NOT?: PropertyWhereInput | PropertyWhereInput[]
@@ -24141,12 +24280,19 @@ export namespace Prisma {
     fullDescription?: StringNullableFilter<"Property"> | string | null
     hostName?: StringNullableFilter<"Property"> | string | null
     propertyType?: StringNullableFilter<"Property"> | string | null
+    category?: StringNullableFilter<"Property"> | string | null
+    accommodationType?: StringNullableFilter<"Property"> | string | null
     maxGuests?: IntFilter<"Property"> | number
     bedrooms?: IntFilter<"Property"> | number
     beds?: IntFilter<"Property"> | number
     bathrooms?: IntFilter<"Property"> | number
     allowsPets?: BoolFilter<"Property"> | boolean
     maxPets?: IntFilter<"Property"> | number
+    buildingFloors?: IntNullableFilter<"Property"> | number | null
+    floorNumber?: IntNullableFilter<"Property"> | number | null
+    constructionYear?: IntNullableFilter<"Property"> | number | null
+    propertySize?: FloatNullableFilter<"Property"> | number | null
+    propertySizeUnit?: StringNullableFilter<"Property"> | string | null
     street?: StringNullableFilter<"Property"> | string | null
     streetNumber?: StringNullableFilter<"Property"> | string | null
     neighborhood?: StringNullableFilter<"Property"> | string | null
@@ -24177,7 +24323,7 @@ export namespace Prisma {
     integrations?: IntegrationListRelationFilter
     syncLogs?: SyncLogListRelationFilter
     reservationLinks?: ReservationLinkListRelationFilter
-  }, "id" | "slug">
+  }, "id" | "slug" | "channexId">
 
   export type PropertyOrderByWithAggregationInput = {
     id?: SortOrder
@@ -24189,12 +24335,19 @@ export namespace Prisma {
     fullDescription?: SortOrderInput | SortOrder
     hostName?: SortOrderInput | SortOrder
     propertyType?: SortOrderInput | SortOrder
+    category?: SortOrderInput | SortOrder
+    accommodationType?: SortOrderInput | SortOrder
     maxGuests?: SortOrder
     bedrooms?: SortOrder
     beds?: SortOrder
     bathrooms?: SortOrder
     allowsPets?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrderInput | SortOrder
+    floorNumber?: SortOrderInput | SortOrder
+    constructionYear?: SortOrderInput | SortOrder
+    propertySize?: SortOrderInput | SortOrder
+    propertySizeUnit?: SortOrderInput | SortOrder
     street?: SortOrderInput | SortOrder
     streetNumber?: SortOrderInput | SortOrder
     neighborhood?: SortOrderInput | SortOrder
@@ -24214,6 +24367,7 @@ export namespace Prisma {
     currency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    channexId?: SortOrderInput | SortOrder
     _count?: PropertyCountOrderByAggregateInput
     _avg?: PropertyAvgOrderByAggregateInput
     _max?: PropertyMaxOrderByAggregateInput
@@ -24234,12 +24388,19 @@ export namespace Prisma {
     fullDescription?: StringNullableWithAggregatesFilter<"Property"> | string | null
     hostName?: StringNullableWithAggregatesFilter<"Property"> | string | null
     propertyType?: StringNullableWithAggregatesFilter<"Property"> | string | null
+    category?: StringNullableWithAggregatesFilter<"Property"> | string | null
+    accommodationType?: StringNullableWithAggregatesFilter<"Property"> | string | null
     maxGuests?: IntWithAggregatesFilter<"Property"> | number
     bedrooms?: IntWithAggregatesFilter<"Property"> | number
     beds?: IntWithAggregatesFilter<"Property"> | number
     bathrooms?: IntWithAggregatesFilter<"Property"> | number
     allowsPets?: BoolWithAggregatesFilter<"Property"> | boolean
     maxPets?: IntWithAggregatesFilter<"Property"> | number
+    buildingFloors?: IntNullableWithAggregatesFilter<"Property"> | number | null
+    floorNumber?: IntNullableWithAggregatesFilter<"Property"> | number | null
+    constructionYear?: IntNullableWithAggregatesFilter<"Property"> | number | null
+    propertySize?: FloatNullableWithAggregatesFilter<"Property"> | number | null
+    propertySizeUnit?: StringNullableWithAggregatesFilter<"Property"> | string | null
     street?: StringNullableWithAggregatesFilter<"Property"> | string | null
     streetNumber?: StringNullableWithAggregatesFilter<"Property"> | string | null
     neighborhood?: StringNullableWithAggregatesFilter<"Property"> | string | null
@@ -24259,6 +24420,7 @@ export namespace Prisma {
     currency?: StringWithAggregatesFilter<"Property"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Property"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Property"> | Date | string
+    channexId?: StringNullableWithAggregatesFilter<"Property"> | string | null
   }
 
   export type GuestWhereInput = {
@@ -25660,12 +25822,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -25685,6 +25854,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -25708,12 +25878,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -25733,6 +25910,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -25756,12 +25934,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25781,6 +25966,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -25804,12 +25990,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25829,6 +26022,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -25852,12 +26046,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -25877,6 +26078,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
   }
 
   export type PropertyUpdateManyMutationInput = {
@@ -25889,12 +26091,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25914,6 +26123,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PropertyUncheckedUpdateManyInput = {
@@ -25926,12 +26136,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25951,6 +26168,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type GuestCreateInput = {
@@ -27486,6 +27704,17 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type FloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -27644,12 +27873,19 @@ export namespace Prisma {
     fullDescription?: SortOrder
     hostName?: SortOrder
     propertyType?: SortOrder
+    category?: SortOrder
+    accommodationType?: SortOrder
     maxGuests?: SortOrder
     bedrooms?: SortOrder
     beds?: SortOrder
     bathrooms?: SortOrder
     allowsPets?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrder
+    floorNumber?: SortOrder
+    constructionYear?: SortOrder
+    propertySize?: SortOrder
+    propertySizeUnit?: SortOrder
     street?: SortOrder
     streetNumber?: SortOrder
     neighborhood?: SortOrder
@@ -27669,6 +27905,7 @@ export namespace Prisma {
     currency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    channexId?: SortOrder
   }
 
   export type PropertyAvgOrderByAggregateInput = {
@@ -27677,6 +27914,10 @@ export namespace Prisma {
     beds?: SortOrder
     bathrooms?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrder
+    floorNumber?: SortOrder
+    constructionYear?: SortOrder
+    propertySize?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
     publicLatitude?: SortOrder
@@ -27696,12 +27937,19 @@ export namespace Prisma {
     fullDescription?: SortOrder
     hostName?: SortOrder
     propertyType?: SortOrder
+    category?: SortOrder
+    accommodationType?: SortOrder
     maxGuests?: SortOrder
     bedrooms?: SortOrder
     beds?: SortOrder
     bathrooms?: SortOrder
     allowsPets?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrder
+    floorNumber?: SortOrder
+    constructionYear?: SortOrder
+    propertySize?: SortOrder
+    propertySizeUnit?: SortOrder
     street?: SortOrder
     streetNumber?: SortOrder
     neighborhood?: SortOrder
@@ -27721,6 +27969,7 @@ export namespace Prisma {
     currency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    channexId?: SortOrder
   }
 
   export type PropertyMinOrderByAggregateInput = {
@@ -27733,12 +27982,19 @@ export namespace Prisma {
     fullDescription?: SortOrder
     hostName?: SortOrder
     propertyType?: SortOrder
+    category?: SortOrder
+    accommodationType?: SortOrder
     maxGuests?: SortOrder
     bedrooms?: SortOrder
     beds?: SortOrder
     bathrooms?: SortOrder
     allowsPets?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrder
+    floorNumber?: SortOrder
+    constructionYear?: SortOrder
+    propertySize?: SortOrder
+    propertySizeUnit?: SortOrder
     street?: SortOrder
     streetNumber?: SortOrder
     neighborhood?: SortOrder
@@ -27758,6 +28014,7 @@ export namespace Prisma {
     currency?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    channexId?: SortOrder
   }
 
   export type PropertySumOrderByAggregateInput = {
@@ -27766,6 +28023,10 @@ export namespace Prisma {
     beds?: SortOrder
     bathrooms?: SortOrder
     maxPets?: SortOrder
+    buildingFloors?: SortOrder
+    floorNumber?: SortOrder
+    constructionYear?: SortOrder
+    propertySize?: SortOrder
     latitude?: SortOrder
     longitude?: SortOrder
     publicLatitude?: SortOrder
@@ -27833,6 +28094,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -27983,17 +28260,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type UserRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
@@ -28055,22 +28321,6 @@ export namespace Prisma {
 
   export type AccountSumOrderByAggregateInput = {
     expires_at?: SortOrder
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type SessionCountOrderByAggregateInput = {
@@ -29120,6 +29370,14 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type NullableFloatFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -29514,14 +29772,6 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutAccountsInput, UserUncheckedCreateWithoutAccountsInput>
     connectOrCreate?: UserCreateOrConnectWithoutAccountsInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type UserUpdateOneRequiredWithoutAccountsNestedInput = {
@@ -30084,6 +30334,17 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel> | null
     in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
@@ -30151,17 +30412,6 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -30184,6 +30434,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -30255,22 +30521,6 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
@@ -31559,12 +31809,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -31584,6 +31841,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
     pricingRules?: PricingRuleCreateNestedManyWithoutPropertyInput
@@ -31606,12 +31864,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -31631,6 +31896,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
     pricingRules?: PricingRuleUncheckedCreateNestedManyWithoutPropertyInput
@@ -31802,12 +32068,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31827,6 +32100,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
     pricingRules?: PricingRuleUpdateManyWithoutPropertyNestedInput
@@ -31849,12 +32123,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -31874,6 +32155,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
     pricingRules?: PricingRuleUncheckedUpdateManyWithoutPropertyNestedInput
@@ -32207,12 +32489,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32232,6 +32521,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
     pricingRules?: PricingRuleCreateNestedManyWithoutPropertyInput
@@ -32254,12 +32544,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32279,6 +32576,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
     pricingRules?: PricingRuleUncheckedCreateNestedManyWithoutPropertyInput
@@ -32360,12 +32658,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32385,6 +32690,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
     pricingRules?: PricingRuleUpdateManyWithoutPropertyNestedInput
@@ -32407,12 +32713,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32432,6 +32745,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
     pricingRules?: PricingRuleUncheckedUpdateManyWithoutPropertyNestedInput
@@ -32503,12 +32817,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32528,6 +32849,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -32550,12 +32872,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32575,6 +32904,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -32613,12 +32943,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32638,6 +32975,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -32660,12 +32998,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32685,6 +33030,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -32707,12 +33053,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32732,6 +33085,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     pricingRules?: PricingRuleCreateNestedManyWithoutPropertyInput
@@ -32754,12 +33108,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32779,6 +33140,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     pricingRules?: PricingRuleUncheckedCreateNestedManyWithoutPropertyInput
@@ -32817,12 +33179,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32842,6 +33211,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     pricingRules?: PricingRuleUpdateManyWithoutPropertyNestedInput
@@ -32864,12 +33234,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -32889,6 +33266,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     pricingRules?: PricingRuleUncheckedUpdateManyWithoutPropertyNestedInput
@@ -32911,12 +33289,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32936,6 +33321,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -32958,12 +33344,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -32983,6 +33376,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -33021,12 +33415,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33046,6 +33447,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -33068,12 +33470,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33093,6 +33502,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -33115,12 +33525,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33140,6 +33557,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -33162,12 +33580,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33187,6 +33612,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -33225,12 +33651,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33250,6 +33683,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -33272,12 +33706,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33297,6 +33738,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -33319,12 +33761,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33344,6 +33793,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -33366,12 +33816,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33391,6 +33848,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -33429,12 +33887,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33454,6 +33919,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -33476,12 +33942,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33501,6 +33974,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -33523,12 +33997,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33548,6 +34029,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -33570,12 +34052,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33595,6 +34084,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -33633,12 +34123,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33658,6 +34155,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -33680,12 +34178,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33705,6 +34210,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -33727,12 +34233,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33752,6 +34265,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -33774,12 +34288,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33799,6 +34320,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -33837,12 +34359,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33862,6 +34391,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -33884,12 +34414,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33909,6 +34446,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -33931,12 +34469,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -33956,6 +34501,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -33978,12 +34524,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -34003,6 +34556,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -34041,12 +34595,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34066,6 +34627,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -34088,12 +34650,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34113,6 +34682,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
@@ -34135,12 +34705,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -34160,6 +34737,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideCreateNestedManyWithoutPropertyInput
@@ -34182,12 +34760,19 @@ export namespace Prisma {
     fullDescription?: string | null
     hostName?: string | null
     propertyType?: string | null
+    category?: string | null
+    accommodationType?: string | null
     maxGuests?: number
     bedrooms?: number
     beds?: number
     bathrooms?: number
     allowsPets?: boolean
     maxPets?: number
+    buildingFloors?: number | null
+    floorNumber?: number | null
+    constructionYear?: number | null
+    propertySize?: number | null
+    propertySizeUnit?: string | null
     street?: string | null
     streetNumber?: string | null
     neighborhood?: string | null
@@ -34207,6 +34792,7 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    channexId?: string | null
     reservations?: ReservationUncheckedCreateNestedManyWithoutPropertyInput
     blockedDates?: BlockedDateUncheckedCreateNestedManyWithoutPropertyInput
     nightlyOverrides?: NightlyOverrideUncheckedCreateNestedManyWithoutPropertyInput
@@ -34245,12 +34831,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34270,6 +34863,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUpdateManyWithoutPropertyNestedInput
@@ -34292,12 +34886,19 @@ export namespace Prisma {
     fullDescription?: NullableStringFieldUpdateOperationsInput | string | null
     hostName?: NullableStringFieldUpdateOperationsInput | string | null
     propertyType?: NullableStringFieldUpdateOperationsInput | string | null
+    category?: NullableStringFieldUpdateOperationsInput | string | null
+    accommodationType?: NullableStringFieldUpdateOperationsInput | string | null
     maxGuests?: IntFieldUpdateOperationsInput | number
     bedrooms?: IntFieldUpdateOperationsInput | number
     beds?: IntFieldUpdateOperationsInput | number
     bathrooms?: IntFieldUpdateOperationsInput | number
     allowsPets?: BoolFieldUpdateOperationsInput | boolean
     maxPets?: IntFieldUpdateOperationsInput | number
+    buildingFloors?: NullableIntFieldUpdateOperationsInput | number | null
+    floorNumber?: NullableIntFieldUpdateOperationsInput | number | null
+    constructionYear?: NullableIntFieldUpdateOperationsInput | number | null
+    propertySize?: NullableFloatFieldUpdateOperationsInput | number | null
+    propertySizeUnit?: NullableStringFieldUpdateOperationsInput | string | null
     street?: NullableStringFieldUpdateOperationsInput | string | null
     streetNumber?: NullableStringFieldUpdateOperationsInput | string | null
     neighborhood?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34317,6 +34918,7 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    channexId?: NullableStringFieldUpdateOperationsInput | string | null
     reservations?: ReservationUncheckedUpdateManyWithoutPropertyNestedInput
     blockedDates?: BlockedDateUncheckedUpdateManyWithoutPropertyNestedInput
     nightlyOverrides?: NightlyOverrideUncheckedUpdateManyWithoutPropertyNestedInput
