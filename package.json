@@ -25,6 +25,7 @@
     "lucide-react": "^0.378.0",
     "next": "14.2.3",
     "next-auth": "^4.24.7",
+    "node-ical": "^0.25.5",
     "react": "^18",
     "react-big-calendar": "^1.19.4",
     "react-dom": "^18",

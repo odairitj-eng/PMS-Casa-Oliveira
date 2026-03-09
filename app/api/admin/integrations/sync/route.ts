@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { syncIcalEvents } from '@/lib/calendar';
 
 export async function POST(req: NextRequest) {
     try {
@@ -14,27 +15,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Integração não encontrada.' }, { status: 404 });
         }
 
-        // Simulando o processo de sincronização iCal
-        // Em produção, aqui baixaríamos o .ics, faríamos o parse e atualizaríamos BlockedDates
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // CHAMADA REAL DA SINCRONIZAÇÃO
+        const result = await syncIcalEvents(integration.propertyId, integration.id);
 
-        await db.integration.update({
-            where: { id: integrationId },
-            data: { lastSyncAt: new Date() }
+        return NextResponse.json({
+            success: true,
+            message: `Sincronização concluída. ${result.count} noites bloqueadas.`
         });
-
-        await db.syncLog.create({
-            data: {
-                platform: integration.platform,
-                status: 'SUCCESS',
-                eventsAdded: Math.floor(Math.random() * 5),
-                errorMessage: `Sincronização manual do ${integration.platform} concluída.`
-            }
-        });
-
-        return NextResponse.json({ success: true, message: 'Sincronização concluída com sucesso.' });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Manual Sync Error:', error);
-        return NextResponse.json({ error: 'Erro ao sincronizar calendário.' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Erro ao sincronizar calendário.' }, { status: 500 });
     }
 }
