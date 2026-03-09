@@ -79,7 +79,7 @@ export async function POST(req: Request) {
                     last_name: name.split(' ').slice(1).join(' ') || "Hóspede",
                     identification: {
                         type: "CPF",
-                        number: document.replace(/\D/g, '')
+                        number: (document || "").replace(/\D/g, '')
                     }
                 },
                 external_reference: externalId
