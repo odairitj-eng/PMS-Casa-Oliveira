@@ -12,13 +12,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../ui/select";
-import { Save, Loader2, Minus, Plus } from "lucide-react";
+import { Save, Loader2, Minus, Plus, Wand2, ArrowDownToLine, Zap } from "lucide-react";
 import toast from "react-hot-toast";
 import axios from "axios";
 
 export function PropertyForm({ property, onSave }: { property: any, onSave: (p: any) => Promise<void> }) {
     const [data, setData] = useState(property || {});
     const [isSaving, setIsSaving] = useState(false);
+    const [airbnbUrl, setAirbnbUrl] = useState("");
+    const [isImporting, setIsImporting] = useState(false);
+
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -33,6 +36,35 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
             setIsSaving(false);
         }
     };
+
+    const handleImportAirbnb = async () => {
+        if (!airbnbUrl || !airbnbUrl.includes("airbnb")) {
+            toast.error("Por favor, insira uma URL válida do Airbnb.");
+            return;
+        }
+
+        setIsImporting(true);
+        const tid = toast.loading("Extraindo dados do Airbnb...");
+        try {
+            const response = await axios.post("/api/admin/properties/import-airbnb", { url: airbnbUrl });
+            const importedData = response.data.data;
+
+            // Merge com os dados existentes, dando prioridade aos importados
+            setData({
+                ...data,
+                ...importedData
+            });
+
+            toast.success("Dados importados! Revise os campos abaixo.", { id: tid });
+            setAirbnbUrl("");
+        } catch (error: any) {
+            console.error("ERRO AO IMPORTAR:", error);
+            toast.error(error.response?.data?.error || "Falha na importação. Tente preenchimento manual.", { id: tid });
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
 
     return (
         <Card className="shadow-sm border-olive-900/10">
@@ -58,6 +90,48 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     </Button>
                 </div>
             </CardHeader>
+
+            {/* SEÇÃO DE IMPORTAÇÃO MÁGICA */}
+            {!property?.id && (
+                <div className="mx-6 mb-6 p-6 bg-gradient-to-br from-olive-900 via-olive-950 to-black rounded-[2rem] shadow-xl border border-white/10 group overflow-hidden relative">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Wand2 className="w-32 h-32 text-white" />
+                    </div>
+
+                    <div className="relative z-10 space-y-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-yellow-400 rounded-lg">
+                                <Zap className="w-5 h-5 text-olive-900 fill-current" />
+                            </div>
+                            <h3 className="text-xl font-black text-white tracking-tight">Importação Mágica</h3>
+                        </div>
+                        <p className="text-white/60 text-sm font-medium max-w-md">
+                            Cole o link do seu anúncio no **Airbnb** e nós preencheremos os nomes, descrições e capacidades para você instantaneamente.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                            <div className="flex-1 relative">
+                                <Input
+                                    placeholder="https://www.airbnb.com.br/rooms/..."
+                                    className="h-14 bg-white/10 border-white/20 text-white placeholder:text-white/30 rounded-xl focus-visible:ring-yellow-400/50 pl-4"
+                                    value={airbnbUrl}
+                                    onChange={(e) => setAirbnbUrl(e.target.value)}
+                                    disabled={isImporting}
+                                />
+                            </div>
+                            <Button
+                                onClick={handleImportAirbnb}
+                                disabled={isImporting}
+                                className="h-14 px-8 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-xl gap-2 shadow-lg shadow-yellow-400/20 active:scale-95 transition-all"
+                            >
+                                {isImporting ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowDownToLine className="w-5 h-5" />}
+                                Sincronizar Dados
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
