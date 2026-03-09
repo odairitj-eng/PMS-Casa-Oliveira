@@ -3,6 +3,6 @@
   "/_not-found/page": "app/_not-found/page.js",
   "/[slug]/page": "app/[slug]/page.js",
   "/admin/properties/[id]/settings/page": "app/admin/properties/[id]/settings/page.js",
-  "/admin/properties/page": "app/admin/properties/page.js",
-  "/admin/guests/page": "app/admin/guests/page.js"
+  "/admin/guests/page": "app/admin/guests/page.js",
+  "/admin/properties/page": "app/admin/properties/page.js"
 }
