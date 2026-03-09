@@ -16,11 +16,8 @@ const nextConfig = {
             },
         ],
     },
-    webpack: (config, { isServer }) => {
-        if (isServer) {
-            config.externals.push('node-ical');
-        }
-        return config;
+    experimental: {
+        serverComponentsExternalPackages: ['node-ical'],
     },
 };
 
