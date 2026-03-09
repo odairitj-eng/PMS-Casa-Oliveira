@@ -1,7 +1,7 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 
-export const dynamic = 'force-dynamic';
 import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
 import { getDateAvailabilityStatus } from "@/lib/availability";

@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateIcalFeed } from '@/lib/calendar';
 import { db } from '@/lib/db';
