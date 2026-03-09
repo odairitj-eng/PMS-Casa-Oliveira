@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Image from "next/image";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { SidebarNav } from "@/components/admin/SidebarNav";
