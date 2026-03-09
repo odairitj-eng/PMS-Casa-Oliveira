@@ -34,21 +34,43 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             alog(`JWT CALLBACK: token.id=${token.id}, user.id=${user?.id}`);
+
             if (user) {
                 token.id = user.id;
+                token.email = user.email;
             }
 
             if (token.id) {
-                // Busca sempre no banco para garantir consistência total (indispensável para Admin)
-                const dbUser = await db.user.findUnique({
-                    where: { id: token.id as string },
-                    select: { role: true }
-                });
-                if (dbUser) {
-                    token.role = dbUser.role;
-                    alog(`JWT ROLE FETCH: ${dbUser.role}`);
+                // Promoção Automática via Variável de Ambiente (Reforço no JWT)
+                const adminEmail = process.env.ADMIN_EMAIL;
+                const currentEmail = token.email as string;
+
+                if (adminEmail && currentEmail && currentEmail.toLowerCase() === adminEmail.toLowerCase()) {
+                    // Busca o usuário para ver se já é ADMIN
+                    const dbUser = await db.user.findUnique({
+                        where: { id: token.id as string },
+                        select: { role: true }
+                    });
+
+                    if (dbUser && dbUser.role !== 'ADMIN') {
+                        await db.user.update({
+                            where: { id: token.id as string },
+                            data: { role: 'ADMIN' }
+                        });
+                        token.role = 'ADMIN';
+                        alog(`JWT: User promoted to ADMIN in DB and Token`);
+                    } else if (dbUser) {
+                        token.role = dbUser.role;
+                    }
                 } else {
-                    alog(`JWT ERROR: User not found in DB for ID ${token.id}`);
+                    // Usuário normal, apenas busca a role
+                    const dbUser = await db.user.findUnique({
+                        where: { id: token.id as string },
+                        select: { role: true }
+                    });
+                    if (dbUser) {
+                        token.role = dbUser.role;
+                    }
                 }
             }
             return token;
