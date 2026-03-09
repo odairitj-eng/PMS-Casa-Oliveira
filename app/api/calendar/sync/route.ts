@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { fetchAndParseICal, getSourceFromPlatform } from '@/lib/ical';
@@ -11,11 +12,11 @@ export async function POST(req: NextRequest) {
         const integrations = await db.integration.findMany({
             where: propertyId ? { propertyId } : {},
             include: { property: true }
-        });
+        } as any);
 
         const results = [];
 
-        for (const integration of integrations) {
+        for (const integration of integrations as any[]) {
             try {
                 const events = await fetchAndParseICal(integration.icalUrl);
                 const source = getSourceFromPlatform(integration.platform);
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
                             propertyId: integration.propertyId,
                             source: source
                         }
-                    });
+                    } as any);
 
                     // 2. Criar novos bloqueios baseados nos eventos
                     const dateEntries: { propertyId: string; date: Date; source: any; reason: string }[] = [];
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
                             platform: integration.platform,
                             status: 'SUCCESS',
                             eventsAdded: uniqueEntries.length
-                        }
+                        } as any
                     });
                 });
 
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
                         platform: integration.platform,
                         status: 'FAILED',
                         errorMessage: err.message
-                    }
+                    } as any
                 });
                 results.push({ platform: integration.platform, status: 'FAILED', error: err.message });
             }

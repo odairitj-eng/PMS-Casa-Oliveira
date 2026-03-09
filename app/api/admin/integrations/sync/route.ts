@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
         const integration = await db.integration.findUnique({
             where: { id: integrationId }
-        });
+        }) as any;
 
         if (!integration) {
             return NextResponse.json({ error: 'Integração não encontrada.' }, { status: 404 });
