@@ -5,15 +5,20 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
-        // Tenta uma consulta simples
-        const propertyCount = await db.property.count();
+        // Tenta uma consulta simples em várias tabelas para diagnóstico
+        const counts = {
+            properties: await db.property.count(),
+            reservations: await db.reservation.count(),
+            guests: await db.guest.count(),
+            users: await db.user.count(),
+            syncLogs: await db.syncLog.count(),
+            integrations: await db.integration.count(),
+        };
 
         return NextResponse.json({
             status: 'success',
             message: 'Conexão com o banco de dados está funcionando.',
-            data: {
-                propertyCount
-            }
+            data: counts
         });
     } catch (error: any) {
         console.error('[DATABASE DIAGNOSTIC ERROR]:', error);
