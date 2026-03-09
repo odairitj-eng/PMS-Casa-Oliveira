@@ -3,60 +3,83 @@ import { db } from "@/lib/db";
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
 
+import { reservationSchema } from "@/lib/validations/schemas";
+
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { propertyId, checkIn, checkOut, guests, paymentMethod, email, document, name } = body;
 
-        // 1. Validar propriedade e calcular total real
-        const property = await db.property.findFirst();
-        if (!property) return NextResponse.json({ error: "Propriedade indisponível" }, { status: 404 });
+        // 1. VALIDAÇÃO RIGOROSA COM ZOD
+        const validation = reservationSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({
+                error: "Dados de reserva inválidos",
+                details: validation.error.flatten().fieldErrors
+            }, { status: 400 });
+        }
+
+        const { propertyId, checkIn, checkOut, guests, paymentMethod, email, document, name, phone } = validation.data;
+
+        // 2. Validar propriedade e recalcular preços no SERVER-SIDE (Proteção contra adulteração)
+        const property = await db.property.findUnique({
+            where: { id: propertyId }
+        });
+
+        if (!property || !property.isActive) {
+            return NextResponse.json({ error: "Propriedade indisponível ou inativa" }, { status: 404 });
+        }
 
         const d1 = new Date(checkIn);
         const d2 = new Date(checkOut);
-        const diffTime = Math.abs(d2.getTime() - d1.getTime());
+
+        // Proteção contra datas no passado
+        if (d1 < new Date(new Date().setHours(0, 0, 0, 0))) {
+            return NextResponse.json({ error: "Não é possível reservar datas no passado" }, { status: 400 });
+        }
+
+        const diffTime = d2.getTime() - d1.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays < 1) return NextResponse.json({ error: "Datas inválidas" }, { status: 400 });
+        if (diffDays < (property.minimumNights || 1)) {
+            return NextResponse.json({ error: `Mínimo de ${property.minimumNights || 1} noites necessário` }, { status: 400 });
+        }
 
-        const totalAmount = (property.basePrice * diffDays) + property.cleaningFee;
+        // CÁLCULO SEGURO NO SERVIDOR
+        const subtotal = property.basePrice * diffDays;
+        const totalAmount = subtotal + property.cleaningFee;
 
-        // 2. Criar a intenção de reserva e salvar o pagamento pendente
-        // No esquema atual, adicionamos na tabela Reservation ou Payment. 
-        // Como o esquema de reservations complexo pode não estar pronto, usaremos Payment tracking.
-        const externalId = uuidv4(); // Referência única nossa
+        const externalId = uuidv4();
 
-        // 3. Fazer chamada para o Mercado Pago (se Access Token estiver configurado)
         const mpAccessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
 
         if (!mpAccessToken) {
-            // Emulação de sucesso para modo desenvolvimento / sem chaves reais adicionadas ainda
+            console.warn("[SECURITY] Running checkout in MOCK mode (missing MERCADOPAGO_ACCESS_TOKEN)");
             return NextResponse.json({
                 success: true,
                 gatewayId: "sandbox_" + Math.random().toString(36).substring(7),
                 paymentMethod,
                 qrCode: "00020101021243650016COM.MERCADOLIBRE020130636fb1cf200-d8ab-41dd-9cf0...sandbox_pix",
-                qrCodeBase64: "", // Sem imagem gráfica na sandbox mockada
+                qrCodeBase64: "",
                 ticketUrl: "https://sandbox.mercadopago.com/ticket",
                 externalId,
                 totalAmount
             });
         }
 
-        // Se houver chaves, tentamos criar o PIX de verdade.
         if (paymentMethod === 'PIX') {
             const idempotencyKey = uuidv4();
             const mpPayload = {
                 transaction_amount: Number(totalAmount.toFixed(2)),
-                description: `Reserva ${(property as any).publicTitle || property.name} (${diffDays} noites)`,
+                description: `Reserva ${property.publicTitle || property.name} - Casa Oliveira`,
                 payment_method_id: 'pix',
+                notification_url: `${process.env.NEXTAUTH_URL}/api/webhooks/mercadopago`,
                 payer: {
-                    email: email || "test_user@sandbox.mercadopago.com",
-                    first_name: name?.split(' ')[0] || "Hóspede",
-                    last_name: name?.split(' ')[1] || "Teste",
+                    email: email,
+                    first_name: name.split(' ')[0],
+                    last_name: name.split(' ').slice(1).join(' ') || "Hóspede",
                     identification: {
                         type: "CPF",
-                        number: document?.replace(/\D/g, '') || "19119119100"
+                        number: document.replace(/\D/g, '')
                     }
                 },
                 external_reference: externalId
@@ -71,9 +94,6 @@ export async function POST(req: Request) {
 
             const data = mpResponse.data;
 
-            // Salva no banco (Simulação, crie a tabela Payment atrelada à reserva se necessário)
-            // Aqui você persistiria a Reserva PENDENTE + respectivo Payment row contendo external_reference
-
             return NextResponse.json({
                 success: true,
                 gatewayId: data.id.toString(),
@@ -86,10 +106,10 @@ export async function POST(req: Request) {
             });
         }
 
-        return NextResponse.json({ error: "Método não suportado nesta fase inicial" }, { status: 400 });
+        return NextResponse.json({ error: "Método não suportado" }, { status: 400 });
 
     } catch (error: any) {
-        console.error("ERRO CHECKOUT MP:", error.response?.data || error.message);
-        return NextResponse.json({ error: "Erro ao processar pagamento" }, { status: 500 });
+        console.error("[SECURITY CHECKOUT ERROR]:", error.response?.data || error.message);
+        return NextResponse.json({ error: "Erro ao processar pagamento de forma segura" }, { status: 500 });
     }
 }

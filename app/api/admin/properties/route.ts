@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/options';
 
+import { propertySchema } from '@/lib/validations/schemas';
+
 function generateSlug(name: string): string {
     return name
         .toLowerCase()
@@ -20,11 +22,11 @@ export async function GET(req: NextRequest) {
         const session = await getServerSession(authOptions);
 
         if (!session || (session.user as any)?.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
+            return NextResponse.json({ error: 'Não autorizado. Acesso restrito a administradores.' }, { status: 403 });
         }
 
         const properties = await db.property.findMany({
-            orderBy: { createdAt: 'asc' },
+            orderBy: { createdAt: 'desc' }, // Novas primeiro por segurança/UX
             select: {
                 id: true,
                 name: true,
@@ -43,24 +45,30 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json(properties);
     } catch (err: any) {
-        console.error('[PROPERTIES API] Error:', err);
-        return NextResponse.json({ error: 'Erro interno no servidor.' }, { status: 500 });
+        console.error('[SECURITY AUDIT] Unauthorized access attempt or error:', err.message);
+        return NextResponse.json({ error: 'Erro ao processar requisição.' }, { status: 500 });
     }
 }
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any)?.role !== 'ADMIN') {
-        return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
-    }
-
     try {
-        const body = await req.json();
-        const { name, basePrice, ...rest } = body;
-
-        if (!name || !basePrice) {
-            return NextResponse.json({ error: 'Nome e preço base são obrigatórios.' }, { status: 400 });
+        const session = await getServerSession(authOptions);
+        if (!session || (session.user as any)?.role !== 'ADMIN') {
+            return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
         }
+
+        const body = await req.json();
+
+        // VALIDAÇÃO RIGOROSA COM ZOD
+        const validation = propertySchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({
+                error: 'Dados inválidos.',
+                details: validation.error.flatten().fieldErrors
+            }, { status: 400 });
+        }
+
+        const { name, basePrice, ...rest } = validation.data;
 
         // Generate a unique slug
         let slug = generateSlug(name);
@@ -73,14 +81,14 @@ export async function POST(req: NextRequest) {
             data: {
                 name,
                 slug,
-                basePrice: parseFloat(basePrice),
+                basePrice,
                 ...rest,
             },
         });
 
         return NextResponse.json(property, { status: 201 });
     } catch (error: any) {
-        console.error('[Properties POST Error]', error);
+        console.error('[Properties POST Error]', error.message);
         return NextResponse.json({ error: 'Erro ao criar imóvel.' }, { status: 500 });
     }
 }
