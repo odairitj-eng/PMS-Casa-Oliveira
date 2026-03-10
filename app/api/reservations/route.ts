@@ -4,10 +4,11 @@ import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
 import { createPixPayment } from "@/lib/payments";
 import { getDateAvailabilityStatus } from "@/lib/availability";
-import { startOfDay, format } from "date-fns";
+import { startOfDay, format, differenceInDays } from "date-fns";
 import { channex } from "@/lib/channex";
 import { reservationSchema } from "@/lib/validations/schemas";
 import { rateLimit, rateLimitResponse } from "@/lib/rate-limit";
+import { calculateSmartPrice } from "@/lib/pricing";
 
 export async function POST(req: NextRequest) {
     try {
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
         }
 
         const { propertyId, checkIn, checkOut, guestName, guestEmail, guestPhone,
-            totalAmount, nightlyRate, cleaningFee, totalNights, guests, occupants = [] } = parseResult.data as any;
+            guests, infants, pets, occupants = [], paymentMethod = "PIX" } = parseResult.data as any;
 
         if (guestEmail !== session.user.email) {
             return NextResponse.json({ error: 'Identidade do hóspede inválida para esta sessão.' }, { status: 403 });
@@ -45,7 +46,22 @@ export async function POST(req: NextRequest) {
             // Usamos 1001 como um identificador numérico constante para a trava (advisory lock)
             await tx.$executeRaw`SELECT pg_advisory_xact_lock(1001)`;
 
-            // 1. Verificar disponibilidade dia a dia usando o serviço central
+            // 2. Criar/Atualizar Hóspede (CRM)
+            const property = await tx.property.findUnique({ where: { id: propertyId } });
+            if (!property || !property.isActive) throw new Error("Propriedade indisponível.");
+
+            const pricing = await calculateSmartPrice(propertyId, inDate, outDate, tx);
+            const totalNights = pricing.totalNights;
+            const totalAmount = pricing.total;
+            const cleaningFee = pricing.cleaningFee;
+            const nightlyRate = pricing.nightlyRate;
+
+            // 1.5 Validar Lotação e Pets
+            if (guests > property.maxGuests) throw new Error(`Máximo de ${property.maxGuests} hóspedes permitido.`);
+            if (pets > 0 && !property.allowsPets) throw new Error("Animais não são permitidos nesta propriedade.");
+            if (pets > property.maxPets) throw new Error(`Máximo de ${property.maxPets} pets permitido.`);
+
+            // 1.6 Verificar disponibilidade dia a dia
             let dt = new Date(inDate);
             while (dt < outDate) {
                 const status = await getDateAvailabilityStatus(propertyId, dt, tx);
@@ -64,7 +80,7 @@ export async function POST(req: NextRequest) {
                     userId: (session.user as any).id,
                     lastReservationAt: new Date(),
                     totalBookings: { increment: 1 },
-                    sourceChannel: 'DIRECT' // Reservas pelo site são diretas
+                    sourceChannel: 'DIRECT'
                 },
                 create: {
                     email: guestEmail,
@@ -76,6 +92,22 @@ export async function POST(req: NextRequest) {
                     sourceChannel: 'DIRECT'
                 },
             });
+
+            // 0. IDEMPOTÊNCIA (Prevenção de duplicidade)
+            const existingPending = await tx.reservation.findFirst({
+                where: {
+                    guestId: guest.id,
+                    propertyId,
+                    checkIn: inDate,
+                    checkOut: outDate,
+                    status: 'PENDING_PAYMENT',
+                    createdAt: { gte: new Date(Date.now() - 5 * 60 * 1000) }
+                }
+            });
+
+            if (existingPending) {
+                return existingPending;
+            }
 
             // 3. Criar Reserva (Hold de 30 minutos)
             const expiresAt = new Date();
@@ -133,31 +165,62 @@ export async function POST(req: NextRequest) {
             format(outDate, "yyyy-MM-dd")
         ).catch(err => console.error("[Channex Sync Error]:", err));
 
-        const pixData = await createPixPayment({
-            amount: result.totalAmount,
-            description: `Reserva Casa Oliveira (${totalNights} noites)`,
-            email: guestEmail,
-            externalId: result.id
-        });
-
-        await db.payment.create({
-            data: {
-                reservationId: result.id,
-                gatewayTransactionId: pixData.id,
-                method: 'PIX',
+        if (paymentMethod === "PIX") {
+            const pixData = await createPixPayment({
                 amount: result.totalAmount,
-                status: 'PENDING'
-            }
-        });
+                description: `Reserva Casa Oliveira (${result.totalNights} noites)`,
+                email: guestEmail,
+                externalId: result.id
+            });
 
-        return NextResponse.json({
-            success: true,
-            reservationId: result.id,
-            pix: pixData.point_of_interaction.transaction_data
-        }, { status: 201 });
+            await db.payment.create({
+                data: {
+                    reservationId: result.id,
+                    gatewayTransactionId: pixData.id,
+                    method: 'PIX',
+                    amount: result.totalAmount,
+                    status: 'PENDING'
+                }
+            });
+
+            return NextResponse.json({
+                success: true,
+                reservationId: result.id,
+                pix: pixData.point_of_interaction.transaction_data
+            }, { status: 201 });
+        } else {
+            // FluxO CARTÃO (Redirecionamento Seguro / Preference)
+            const { createCheckoutPreference } = await import("@/lib/payments");
+            const preference = await createCheckoutPreference({
+                amount: result.totalAmount,
+                description: `Reserva Casa Oliveira (${result.totalNights} noites)`,
+                email: guestEmail,
+                externalId: result.id
+            });
+
+            await db.payment.create({
+                data: {
+                    reservationId: result.id,
+                    gatewayTransactionId: preference.id?.toString() || "pending_pref",
+                    method: 'CREDIT_CARD',
+                    amount: result.totalAmount,
+                    status: 'PENDING'
+                }
+            });
+
+            return NextResponse.json({
+                success: true,
+                reservationId: result.id,
+                checkoutUrl: preference.init_point
+            }, { status: 201 });
+        }
 
     } catch (error: any) {
-        console.error('Reservation Error:', error);
-        return NextResponse.json({ error: error.message || 'Erro interno.' }, { status: 400 });
+        console.error('[SECURITY RESERVATION ERROR]:', error);
+        // Não retornar o erro bruto se não for uma mensagem controlada (Error)
+        const isClientError = error instanceof Error && !error.message.includes('Prisma') && !error.message.includes('axios');
+        return NextResponse.json({
+            error: isClientError ? error.message : 'Não foi possível processar sua reserva no momento. Tente novamente mais tarde.'
+        }, { status: 400 });
     }
 }

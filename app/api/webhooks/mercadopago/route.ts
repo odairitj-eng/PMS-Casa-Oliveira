@@ -83,6 +83,8 @@ export async function POST(req: NextRequest) {
 
         const paymentData = await mpRes.json();
         const status = paymentData.status;
+        const amountFromMp = paymentData.transaction_amount;
+        const currencyFromMp = paymentData.currency_id;
 
         if (status === "approved") {
             const paymentRecord = await db.payment.findFirst({
@@ -95,7 +97,25 @@ export async function POST(req: NextRequest) {
                 include: { reservation: true }
             });
 
-            if (paymentRecord && paymentRecord.status !== 'APPROVED') {
+            if (!paymentRecord) {
+                console.error(`[SECURITY ALERT] Webhook received for unknown payment ID: ${id}`);
+                return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
+            }
+
+            // 🛡️ VALIDAÇÃO DE INTEGRIDADE (HARDENING)
+            const expectedAmount = paymentRecord.reservation.totalAmount;
+
+            if (Math.abs(amountFromMp - expectedAmount) > 0.01) {
+                console.error(`[SECURITY CRITICAL] Price Tampering Detected! Webhook amount (${amountFromMp}) does not match expected (${expectedAmount}) for Reservation ${paymentRecord.reservationId}`);
+                return NextResponse.json({ error: 'Price mismatch' }, { status: 400 });
+            }
+
+            if (currencyFromMp !== 'BRL') {
+                console.error(`[SECURITY ALERT] Invalid Currency detected: ${currencyFromMp}`);
+                return NextResponse.json({ error: 'Invalid currency' }, { status: 400 });
+            }
+
+            if (paymentRecord.status !== 'APPROVED') {
                 await db.$transaction([
                     db.payment.update({
                         where: { id: paymentRecord.id },
@@ -125,7 +145,9 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: true }, { status: 200 });
 
     } catch (error: any) {
-        console.error('[Webhook Error]:', error.message);
+        console.error('[SECURITY WEBHOOK ERROR]:', error.message);
+        // Webhooks devem sempre tentar retornar 200/202 para o provider se o erro for interno,
+        // mas aqui vamos manter 500 para debug de fase de hardening, apenas omitindo detalhes.
         return NextResponse.json({ error: 'Internal processing error' }, { status: 500 });
     }
 }

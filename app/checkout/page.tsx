@@ -29,6 +29,7 @@ function CheckoutContent() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [pixData, setPixData] = useState<any>(null);
     const [occupants, setOccupants] = useState<any[]>([]);
+    const [paymentMethod, setPaymentMethod] = useState<"PIX" | "CREDIT_CARD">("PIX");
 
     useEffect(() => {
         // Inicializar array de ocupantes baseado no número de hóspedes (excluindo o organizador)
@@ -89,11 +90,22 @@ function CheckoutContent() {
                 cleaningFee: pricing.cleaningFee,
                 totalNights: pricing.breakdown.length,
                 guests: parseInt(guestsCount),
-                occupants: occupants.filter(o => o.name) // Enviar apenas os preenchidos
+                occupants: occupants.filter(o => o.name),
+                paymentMethod // Novo campo
             });
 
-            toast.success("Reserva realizada com sucesso!", { id: idToast });
-            setPixData(response.data.pix);
+            if (paymentMethod === "PIX") {
+                toast.success("Reserva realizada com sucesso!", { id: idToast });
+                setPixData(response.data.pix);
+            } else {
+                toast.success("Redirecionando para pagamento seguro...", { id: idToast });
+                // Supondo que o backend retornará a URL de checkout se for Card
+                if (response.data.checkoutUrl) {
+                    window.location.href = response.data.checkoutUrl;
+                } else {
+                    toast.error("Erro ao gerar link de pagamento.");
+                }
+            }
         } catch (error: any) {
             const msg = error.response?.data?.error || "Erro ao processar reserva.";
             toast.error(msg, { id: idToast });
@@ -183,6 +195,37 @@ function CheckoutContent() {
                                     className="h-12 rounded-xl border-olive-900/20 focus:border-olive-900 text-lg"
                                 />
                                 <p className="text-xs text-olive-900/40 font-medium mt-2">Usaremos este número apenas para comunicações sobre sua reserva.</p>
+                            </div>
+
+                            <div className="pt-8 border-t border-olive-900/5">
+                                <Label className="font-bold text-olive-900 mb-4 block">Forma de Pagamento</Label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div
+                                        onClick={() => setPaymentMethod("PIX")}
+                                        className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 ${paymentMethod === "PIX" ? "border-olive-900 bg-olive-900/5" : "border-olive-900/10"}`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "PIX" ? "border-olive-900" : "border-olive-900/20"}`}>
+                                            {paymentMethod === "PIX" && <div className="w-2.5 h-2.5 bg-olive-900 rounded-full" />}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-olive-900">Pix</p>
+                                            <p className="text-[10px] text-olive-900/60 uppercase font-bold tracking-wider">Aprovação Imediata</p>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        onClick={() => setPaymentMethod("CREDIT_CARD")}
+                                        className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center gap-4 ${paymentMethod === "CREDIT_CARD" ? "border-olive-900 bg-olive-900/5" : "border-olive-900/10"}`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === "CREDIT_CARD" ? "border-olive-900" : "border-olive-900/20"}`}>
+                                            {paymentMethod === "CREDIT_CARD" && <div className="w-2.5 h-2.5 bg-olive-900 rounded-full" />}
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-olive-900">Cartão de Crédito</p>
+                                            <p className="text-[10px] text-olive-900/60 uppercase font-bold tracking-wider">Pagamento Seguro (MP)</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             {occupants.length > 0 && (

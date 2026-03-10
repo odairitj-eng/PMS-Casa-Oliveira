@@ -1,5 +1,5 @@
 import { db } from './db';
-import { isWeekend, differenceInDays, startOfDay } from 'date-fns';
+import { isWeekend, differenceInDays, startOfDay, eachDayOfInterval } from 'date-fns';
 
 export interface PricingResult {
     total: number;
@@ -11,17 +11,23 @@ export interface PricingResult {
     }>;
     basePrice: number;
     cleaningFee: number;
+    totalNights: number;
+    nightlyRate: number;
 }
 
 /**
- * Calcula o preço inteligente para uma estadia.
+ * Calcula o preço inteligente para uma estadia no servidor.
+ * Proteção contra Price Tampering.
  */
 export async function calculateSmartPrice(
     propertyId: string,
     checkIn: Date,
-    checkOut: Date
+    checkOut: Date,
+    tx?: any
 ): Promise<PricingResult> {
-    const property = await db.property.findUnique({
+    const client = tx || db;
+
+    const property = await client.property.findUnique({
         where: { id: propertyId },
         include: {
             pricingRules: { where: { isActive: true } },
@@ -38,21 +44,31 @@ export async function calculateSmartPrice(
 
     if (!property) throw new Error('Propriedade não encontrada.');
 
-    const nights = differenceInDays(checkOut, checkIn);
+    const dIn = startOfDay(checkIn);
+    const dOut = startOfDay(checkOut);
+    const nights = differenceInDays(dOut, dIn);
+
+    if (nights <= 0) throw new Error('Datas de check-in e check-out inválidas.');
+    if (nights < (property.minimumNights || 1)) {
+        throw new Error(`O mínimo de noites para este imóvel é ${property.minimumNights}.`);
+    }
+
+    const interval = eachDayOfInterval({
+        start: dIn,
+        end: new Date(dOut.getTime() - 1000)
+    });
+
     const breakdown = [];
     let totalNightsPrice = 0;
+    const now = startOfDay(new Date());
 
-    for (let i = 0; i < nights; i++) {
-        const currentDate = new Date(checkIn);
-        currentDate.setDate(currentDate.getDate() + i);
-        const dateOnly = startOfDay(currentDate);
-
+    for (const dateOnly of interval) {
         let finalPrice = property.basePrice;
         const appliedRules: string[] = [];
 
         // 1. Verificar Overrides Manuais (Prioridade Máxima)
         const override = property.nightlyOverrides.find(
-            (o: any) => o.date.getTime() === dateOnly.getTime()
+            (o: any) => startOfDay(o.date).getTime() === dateOnly.getTime()
         );
 
         if (override) {
@@ -60,7 +76,6 @@ export async function calculateSmartPrice(
             appliedRules.push('Ajuste Manual');
         } else {
             // 2. Aplicar Regras Automáticas
-            const now = startOfDay(new Date());
             for (const rule of property.pricingRules) {
                 // Aumento de Fim de Semana
                 if (rule.type === 'WEEKEND_SURGE' && isWeekend(dateOnly)) {
@@ -68,9 +83,9 @@ export async function calculateSmartPrice(
                     appliedRules.push(`Fim de Semana (+${Math.round((rule.value - 1) * 100)}%)`);
                 }
 
-                // Reserva de Última Hora (Dinâmico)
+                // Reserva de Última Hora
                 if (rule.type === 'LAST_MINUTE') {
-                    const daysToCheckIn = differenceInDays(startOfDay(checkIn), now);
+                    const daysToCheckIn = differenceInDays(dIn, now);
                     const threshold = rule.minDays || 7;
                     if (daysToCheckIn <= threshold) {
                         finalPrice *= rule.value;
@@ -80,7 +95,7 @@ export async function calculateSmartPrice(
 
                 // Reserva Antecipada (Early Bird)
                 if (rule.type === 'EARLY_BIRD') {
-                    const daysToCheckIn = differenceInDays(startOfDay(checkIn), now);
+                    const daysToCheckIn = differenceInDays(dIn, now);
                     const threshold = rule.minDays || 30;
                     if (daysToCheckIn >= threshold) {
                         finalPrice *= rule.value;
@@ -88,7 +103,7 @@ export async function calculateSmartPrice(
                     }
                 }
 
-                // Sazonalidade (Datas Específicas)
+                // Sazonalidade
                 if (rule.type === 'SEASONAL' && rule.startDate && rule.endDate) {
                     const s = startOfDay(new Date(rule.startDate));
                     const e = startOfDay(new Date(rule.endDate));
@@ -100,20 +115,25 @@ export async function calculateSmartPrice(
             }
         }
 
+        const roundedPrice = Number(finalPrice.toFixed(2));
         breakdown.push({
             date: dateOnly,
             originalPrice: property.basePrice,
-            finalPrice: Math.round(finalPrice),
+            finalPrice: roundedPrice,
             appliedRules,
         });
 
-        totalNightsPrice += finalPrice;
+        totalNightsPrice += roundedPrice;
     }
 
+    const total = Number((totalNightsPrice + property.cleaningFee).toFixed(2));
+
     return {
-        total: Math.round(totalNightsPrice + property.cleaningFee),
+        total,
         breakdown,
         basePrice: property.basePrice,
         cleaningFee: property.cleaningFee,
+        totalNights: nights,
+        nightlyRate: Number((totalNightsPrice / nights).toFixed(2))
     };
 }
