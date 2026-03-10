@@ -401,10 +401,10 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         <div className="relative z-10 flex flex-col h-full">
                             <div className="flex justify-between items-start">
                                 <span className={cn(
-                                    "text-lg font-black mb-1",
+                                    "text-lg font-black mb-1 transition-colors",
                                     isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
-                                    isSelected ? "text-olive-900" : (inWindow ? "text-olive-900" : "text-olive-900/60"),
-                                    !isCurrentMonth && "text-olive-900/10"
+                                    isSelected ? "text-olive-900" : (isAvailable ? "text-olive-900" : "text-olive-900/10"),
+                                    !isCurrentMonth && "text-olive-900/0"
                                 )}>
                                     {format(cloneDay, "d")}
                                 </span>

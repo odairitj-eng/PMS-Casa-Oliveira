@@ -273,17 +273,17 @@ export function DateSelectionModal({
                                 className={cn(
                                     "h-14 md:h-20 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
                                     !isCurrentMonth && "opacity-0 pointer-events-none",
-                                    isCurrentMonth && !isAvailable && "text-olive-900/10 cursor-not-allowed",
+                                    isCurrentMonth && !isAvailable && "opacity-30 cursor-not-allowed grayscale",
                                     isAvailable && isCurrentMonth && "hover:bg-olive-900/5 rounded-2xl",
                                     (isInRange || isHovered) && "bg-olive-900/5 rounded-none",
-                                    isSelectedStart && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20",
-                                    isSelectedEnd && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20",
+                                    isSelectedStart && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
+                                    isSelectedEnd && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
                                     isToday && !isSelectedStart && !isSelectedEnd && "underline underline-offset-4 decoration-2 decoration-olive-900/30"
                                 )}
                             >
                                 <span className={cn(
-                                    "relative z-10 font-black block text-lg",
-                                    (isSelectedStart || isSelectedEnd) ? "text-white" : "text-olive-900"
+                                    "relative z-10 font-black block text-lg transition-colors",
+                                    (isSelectedStart || isSelectedEnd) ? "text-white" : (isAvailable ? "text-olive-900" : "text-olive-900/20")
                                 )}>
                                     {format(date, "d")}
                                 </span>
