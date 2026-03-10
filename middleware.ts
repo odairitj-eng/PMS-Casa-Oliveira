@@ -18,9 +18,9 @@ export default withAuth(
         // 🛡️ HEADERS DE SEGURANÇA (PRODUÇÃO HARDENING)
         const cspHeader = `
             default-src 'self';
-            script-src 'self' https://*.mercadopago.com https://*.vercel-scripts.com;
+            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.mercadopago.com https://*.vercel-scripts.com;
             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-            img-src 'self' blob: data: https://*.mercadopago.com https://*.githubusercontent.com https://*.googleusercontent.com https://*.airbnb.com;
+            img-src 'self' blob: data: https://*.mercadopago.com https://*.githubusercontent.com https://*.googleusercontent.com https://*.airbnb.com https://*.fbsbx.com https://*.fbcdn.net;
             font-src 'self' https://fonts.gstatic.com;
             object-src 'none';
             base-uri 'self';
