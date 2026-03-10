@@ -14,7 +14,6 @@ export function SidebarNav() {
         { href: "/admin/properties", label: "Imóveis", icon: Building2 },
         { href: "/admin/guests", label: "Hóspedes & CRM", icon: Users },
         { href: "/admin/integrations", label: "Integrações & API", icon: Globe },
-        { href: "/admin/settings", label: "Configurações", icon: Settings },
     ];
 
     return (
