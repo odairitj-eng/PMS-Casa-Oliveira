@@ -323,10 +323,12 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
                 const isPast = isBefore(cloneDay, startOfDay(new Date()));
 
+                const isAvailable = inWindow && !dayBlock && !dayReservation && !isPast;
+
                 // Verificar se está no range de arraste atual
                 const isInDragRange = getIsDateInDragRange(cloneDay);
 
-                const isSelected = (selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
+                const isSelected = isAvailable && ((selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange);
 
                 // --- Cálculo de Preço Inteligente (Smart Pricing) ---
                 let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
@@ -348,14 +350,14 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         className={cn(
                             "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
-                            (isPast || !inWindow || dayBlock) && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
-                            inWindow && isCurrentMonth && !isPast && !dayBlock && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
+                            (!isAvailable) && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
+                            isAvailable && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
                         )}
-                        onClick={() => onDateClick(cloneDay)}
-                        onPointerDown={(e) => handlePointerDown(e, cloneDay)}
-                        onPointerEnter={() => handlePointerEnter(cloneDay)}
+                        onClick={() => isAvailable && onDateClick(cloneDay)}
+                        onPointerDown={(e) => isAvailable && handlePointerDown(e, cloneDay)}
+                        onPointerEnter={() => isAvailable && handlePointerEnter(cloneDay)}
                         onContextMenu={(e) => e.preventDefault()}
                     >
                         <div className="relative z-10 flex flex-col h-full">
@@ -492,9 +494,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 const isCurrentMonth = isSameMonth(day, month);
                                 const inWindow = isDateInWindow(day);
                                 const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), day));
+                                const isPast = isBefore(day, startOfDay(new Date()));
+                                const isAvailable = inWindow && !dayBlock && !isPast;
                                 const isInDragRange = getIsDateInDragRange(day);
 
-                                const isSelected = (selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
+                                const isSelected = isAvailable && ((selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange);
 
                                 return (
                                     <div
@@ -503,12 +507,12 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             "h-8 rounded-lg flex items-center justify-center text-[10px] font-bold cursor-pointer transition-all",
                                             !isCurrentMonth && "opacity-0 pointer-events-none",
                                             isSelected ? "bg-olive-900 text-white" :
-                                                (!inWindow || dayBlock) ? "bg-gray-100/50 text-olive-900/20" :
+                                                (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
                                                     "hover:bg-sand-50 text-olive-900/60"
                                         )}
-                                        onClick={() => onDateClick(day)}
-                                        onPointerDown={(e) => handlePointerDown(e, day)}
-                                        onPointerEnter={() => handlePointerEnter(day)}
+                                        onClick={() => isAvailable && onDateClick(day)}
+                                        onPointerDown={(e) => isAvailable && handlePointerDown(e, day)}
+                                        onPointerEnter={() => isAvailable && handlePointerEnter(day)}
                                         onContextMenu={(e) => e.preventDefault()}
                                     >
                                         {format(day, "d")}
