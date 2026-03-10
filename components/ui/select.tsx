@@ -71,12 +71,11 @@ const SelectTrigger = ({ className, children, ...props }: any) => {
 const SelectContent = ({ className, children, ...props }: any) => {
     const { open } = useSelect();
 
-    if (!open) return null;
-
     return (
         <div
             className={cn(
                 "absolute top-full left-0 z-50 mt-1 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 bg-white border-olive-900/10 select-content",
+                !open && "hidden",
                 className
             )}
             {...props}

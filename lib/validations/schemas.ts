@@ -22,6 +22,26 @@ export const propertySchema = z.object({
     channexId: z.string().nullable().optional(),
     latitude: z.number().nullable().optional(),
     longitude: z.number().nullable().optional(),
+
+    // Campos adicionados para persistência total
+    category: z.string().optional(),
+    propertyType: z.string().optional(),
+    accommodationType: z.string().optional(),
+    buildingFloors: z.number().int().nonnegative().optional(),
+    floorNumber: z.number().int().nonnegative().optional(),
+    constructionYear: z.number().int().optional(),
+    propertySize: z.number().optional(),
+    propertySizeUnit: z.string().optional(),
+    hostName: z.string().optional(),
+    locationText: z.string().optional(),
+    allowsPets: z.boolean().optional(),
+    maxPets: z.number().int().nonnegative().optional(),
+    publicLatitude: z.number().nullable().optional(),
+    publicLongitude: z.number().nullable().optional(),
+    neighborhood: z.string().optional(),
+    postalCode: z.string().optional(),
+    street: z.string().optional(),
+    streetNumber: z.string().optional(),
 });
 
 // Schema para Ocupante
