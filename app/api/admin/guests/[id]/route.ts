@@ -9,15 +9,17 @@ import { authOptions } from "@/lib/auth/options";
  */
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'ADMIN') {
         return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
+    const { id } = await context.params;
+
     const guest = await db.guest.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             reservations: {
                 orderBy: { checkIn: 'desc' },
@@ -37,7 +39,7 @@ export async function GET(
 
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'ADMIN') {
@@ -45,11 +47,12 @@ export async function PATCH(
     }
 
     try {
+        const { id } = await context.params;
         const body = await req.json();
         const { isVip, isFiveStar, status, notes, name, email, phone, sourceChannel } = body;
 
         const updated = await db.guest.update({
-            where: { id: params.id },
+            where: { id },
             data: {
                 isVip,
                 isFiveStar,

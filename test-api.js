@@ -1,13 +1,12 @@
-const axios = require('axios');
+const https = require('https');
 
-async function testApi() {
-    try {
-        // Note: This won't work directly because of session/auth
-        // But I can try to see if the route itself has a syntax error that prevents loading
-        console.log("Checking API route...");
-    } catch (e) {
-        console.error(e);
-    }
-}
-
-testApi();
+https.get('https://www.casaoliveira.company/api/admin/dashboard', (res) => {
+    console.log('Status Code:', res.statusCode);
+    let data = '';
+    res.on('data', chunk => data += chunk);
+    res.on('end', () => {
+        console.log('Response body:', data);
+    });
+}).on('error', (err) => {
+    console.error('Network Error:', err.message);
+});

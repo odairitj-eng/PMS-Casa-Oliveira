@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
     req: Request,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -14,7 +14,7 @@ export async function PATCH(
             return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await context.params;
         const body = await req.json();
         const { name, email, phone, isVip, notes } = body;
 
@@ -38,7 +38,7 @@ export async function PATCH(
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getServerSession(authOptions);
@@ -47,7 +47,7 @@ export async function DELETE(
             return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await context.params;
 
         // Verifica se existem reservas vinculadas
         const reservationsCount = await db.reservation.count({

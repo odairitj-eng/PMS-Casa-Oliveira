@@ -10,11 +10,13 @@ import { db } from '@/lib/db';
  */
 export async function GET(
     _req: NextRequest,
-    { params }: { params: { slug: string } }
+    context: { params: Promise<{ slug: string }> }
 ) {
     try {
+        const { slug } = await context.params;
+
         const property = await db.property.findUnique({
-            where: { slug: params.slug },
+            where: { slug },
             select: { id: true, name: true, isActive: true },
         });
 
@@ -24,7 +26,7 @@ export async function GET(
 
         const icsContent = await generateIcalFeed(property.id);
 
-        const safeFilename = params.slug.replace(/[^a-z0-9-]/gi, '-');
+        const safeFilename = slug.replace(/[^a-z0-9-]/gi, '-');
         return new NextResponse(icsContent, {
             headers: {
                 'Content-Type': 'text/calendar; charset=utf-8',

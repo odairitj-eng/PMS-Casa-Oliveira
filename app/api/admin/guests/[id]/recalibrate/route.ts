@@ -9,7 +9,7 @@ import { authOptions } from "@/lib/auth/options";
  */
 export async function POST(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'ADMIN') {
@@ -17,7 +17,8 @@ export async function POST(
     }
 
     try {
-        const userId = params.id;
+        const { id: userId } = await context.params;
+
 
         const reservations = await db.reservation.findMany({
             where: { guestId: userId },

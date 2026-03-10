@@ -8,15 +8,17 @@ import { propertySchema } from '@/lib/validations/schemas';
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'ADMIN') {
         return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 });
     }
 
+    const { id } = await context.params;
+
     const property = await db.property.findUnique({
-        where: { id: params.id },
+        where: { id },
         include: {
             photos: { orderBy: { sortOrder: 'asc' } },
             amenities: { orderBy: { sortOrder: 'asc' } },
@@ -34,7 +36,7 @@ export async function GET(
 
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'ADMIN') {
@@ -42,6 +44,7 @@ export async function PATCH(
     }
 
     try {
+        const { id } = await context.params;
         const body = await req.json();
 
         // VALIDAÇÃO ZOD PARCIAL
@@ -58,7 +61,7 @@ export async function PATCH(
         delete (data as any).updatedAt;
 
         const updated = await db.property.update({
-            where: { id: params.id },
+            where: { id },
             data,
         });
 
@@ -71,7 +74,7 @@ export async function PATCH(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     const session = await getServerSession(authOptions);
     if (!session || (session.user as any)?.role !== 'ADMIN') {
@@ -79,9 +82,10 @@ export async function DELETE(
     }
 
     try {
+        const { id } = await context.params;
         // Soft delete: just deactivate
         const updated = await db.property.update({
-            where: { id: params.id },
+            where: { id },
             data: { isActive: false },
         });
         return NextResponse.json(updated);
