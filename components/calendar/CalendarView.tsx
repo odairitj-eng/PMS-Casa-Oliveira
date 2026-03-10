@@ -16,7 +16,8 @@ import {
     startOfDay,
     isWithinInterval,
     isWeekend,
-    differenceInDays
+    differenceInDays,
+    eachDayOfInterval
 } from "date-fns";
 import { ptBR } from "date-fns/locale/pt-BR";
 import { ChevronLeft, ChevronRight, Lock, Clock, Info, X, Calendar, Minus } from "lucide-react";
@@ -68,21 +69,22 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         const clickedDay = startOfDay(day);
         const today = startOfDay(new Date());
 
-        // Não permitir selecionar datas passadas no admin para edição
         if (isBefore(clickedDay, today)) return;
-
-        // Se a data clicada estiver bloqueada, só permitimos se for para ser o FIM de uma seleção
-        const isBlocked = data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), clickedDay)) ||
-            data?.reservations?.some((r: any) => {
-                const start = startOfDay(parseLocal(r.checkIn));
-                const end = startOfDay(parseLocal(r.checkOut));
-                return clickedDay >= start && clickedDay < end;
-            });
 
         const isStartingSelection = !selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end));
 
         if (isStartingSelection) {
-            if (isBlocked) {
+            // Para começar, o dia precisa estar livre (Smart logic: isDateInWindow && !block && !res)
+            // Usamos a mesma lógica de renderização para consistência
+            const inWindow = isDateInWindow(clickedDay);
+            const dayReservation = data?.reservations?.find((r: any) => {
+                const s = startOfDay(parseLocal(r.checkIn));
+                const e = startOfDay(parseLocal(r.checkOut));
+                return clickedDay >= s && clickedDay < e;
+            });
+            const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), clickedDay));
+
+            if (!inWindow || dayReservation || dayBlock) {
                 toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
                 return;
             }
@@ -90,21 +92,35 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         } else {
             // Tentando fechar o range
             if (isBefore(clickedDay, selectedRange.start)) {
-                if (isBlocked) {
+                // Inverter se clicou antes e validar o novo início
+                const inWindow = isDateInWindow(clickedDay);
+                const dayReservation = data?.reservations?.find((r: any) => {
+                    const s = startOfDay(parseLocal(r.checkIn));
+                    const e = startOfDay(parseLocal(r.checkOut));
+                    return clickedDay >= s && clickedDay < e;
+                });
+                const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), clickedDay));
+                if (!inWindow || dayReservation || dayBlock) {
                     toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
                     return;
                 }
                 setSelectedRange({ start: clickedDay, end: selectedRange.start });
+            } else if (isSameDay(clickedDay, selectedRange.start)) {
+                setSelectedRange(null);
             } else {
-                // Verificar se há bloqueios NO MEIO do caminho (excluindo o dia de saída)
-                const hasBlockInRange = data?.blockedDates?.some((b: any) => {
-                    const d = startOfDay(parseLocal(b.date));
-                    return d > selectedRange.start && d < clickedDay;
-                }) || data?.reservations?.some((r: any) => {
-                    const rs = startOfDay(parseLocal(r.checkIn));
-                    const re = startOfDay(parseLocal(r.checkOut));
-                    // Se a reserva alheia começa antes do nosso checkout e termina depois do nosso checkin
-                    return rs < clickedDay && re > selectedRange.start;
+                // Verificar se há bloqueios NO MEIO do caminho (excluindo o dia de saída clickedDay)
+                const interval = eachDayOfInterval({ start: selectedRange.start, end: clickedDay });
+                const nights = interval.slice(0, -1);
+
+                const hasBlockInRange = nights.some((date: Date) => {
+                    const dayRes = data?.reservations?.some((r: any) => {
+                        const s = startOfDay(parseLocal(r.checkIn));
+                        const e = startOfDay(parseLocal(r.checkOut));
+                        return date >= s && date < e;
+                    });
+                    const dayBlk = data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), date));
+                    const win = isDateInWindow(date);
+                    return !win || dayRes || dayBlk;
                 });
 
                 if (hasBlockInRange) {
@@ -457,146 +473,149 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             return (
                                                 <div className={cn(
                                                     "flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-full",
-                                                    bgClass, textClass
-                                                )}>
-                                                    <Minus className="w-2.5 h-2.5" />
-                                                    <span className="truncate">{reason}</span>
+                const isNightAvailable= isDateInWindow(cloneDay) && !data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay)) && !data?.reservations?.some((r: any) => {
+                                                        const s = startOfDay(parseLocal(r.checkIn));
+                                                        const e = startOfDay(parseLocal(r.checkOut));
+                                                        return cloneDay >= s && cloneDay < e;
+                                                    });
+                                            const isStartBlock = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), cloneDay)) ||
+                                                data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay));
+                                            const isVivid = isNightAvailable || isStartBlock;
+
+                                            days.push(
+                                                <div
+                                                    key={day.toString()}
+                                                    className={cn(
+                                                        "calendar-day border-r border-b min-h-24 p-2 transition-all cursor-pointer relative",
+                                                        !isCurrentMonth && "bg-gray-50/50",
+                                                        isVivid ? "bg-white hover:bg-olive-900/5" : "bg-gray-100 opacity-30 grayscale",
+                                                        isSelected && "ring-2 ring-olive-900 ring-inset z-10",
+                                                        isToday && "bg-olive-900/[0.02]"
+                                                    )}
+                                                    onClick={() => onDateClick(cloneDay)}
+                                                    onPointerDown={(e) => canInteract && handlePointerDown(e, cloneDay)}
+                                                    onPointerEnter={() => canInteract && handlePointerEnter(cloneDay)}
+                                                    onContextMenu={(e) => e.preventDefault()}
+                                                >
+                                                    <div className="relative z-10 flex flex-col h-full">
+                                                        <div className="flex justify-between items-start">
+                                                            <span className={cn(
+                                                                "text-lg font-black mb-1 transition-colors",
+                                                                isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
+                                                                isSelected ? "text-olive-900" : (isVivid ? "text-olive-900" : "text-olive-900/10"),
+                                                                !isCurrentMonth && "text-olive-900/0"
+                                                            )}>
+                                                                {format(cloneDay, "d")}
+                                                            </span>
+                                                            {!isNightAvailable && isStartBlock && isCurrentMonth && (
+                                                                <span className="text-[8px] font-black text-red-500/40 uppercase bg-red-500/5 px-1 rounded">Checkout</span>
+                                                            )}
+                                                        </div>
+                                                        {isCurrentMonth && isNightAvailable && (
+                                                            <div className="mt-auto">
+                                                                <span className="text-[10px] font-black text-olive-900/40">R${price}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             );
-                                        })()
-                                    ) : (isPast || !inWindow) ? (
-                                        <div className="flex flex-col opacity-30">
-                                            <span className="text-[10px] font-bold text-olive-900/40 uppercase">Fechado</span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col">
-                                            <span className={cn(
-                                                "text-lg font-black tracking-tight flex items-center gap-0.5",
-                                                isSelected ? "text-olive-900" : (inWindow ? "text-olive-900" : "text-olive-900/60")
-                                            )}>
-                                                R${price}
-                                                {hasRuleApplied && (
-                                                    <span
-                                                        className="text-emerald-600 text-xs ml-0.5 cursor-help"
-                                                        title="Preço inteligente aplicado (regras automáticas)"
-                                                    >
-                                                        *
-                                                    </span>
-                                                )}
-                                            </span>
-                                            {dayOverride?.minNights && (
-                                                <div className="flex items-center gap-1 mt-0.5 opacity-40">
-                                                    <Clock className="w-2.5 h-2.5" />
-                                                    <span className="text-[9px] font-bold">{dayOverride.minNights} nts mín.</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                        {!isSelected && (
-                            <div className="absolute inset-0 bg-transparent group-hover:bg-olive-900/[0.02] rounded-2xl transition-all z-0" />
-                        )}
-                    </div>
-                );
-                day = addDays(day, 1);
-            }
+                                            day = addDays(day, 1);
+                                        }
             rows.push(
-                <div className="grid grid-cols-7 gap-2 mb-2" key={day.toString()}>
-                    {days}
-                </div>
-            );
-            days = [];
+                                    <div className="grid grid-cols-7 gap-2 mb-2" key={day.toString()}>
+                                        {days}
+                                    </div>
+                                    );
+                                    days = [];
         }
-        return <div className="w-full">{rows}</div>;
+                                    return <div className="w-full">{rows}</div>;
     };
 
     const renderYearView = () => {
         const startOfCurMonth = startOfMonth(currentMonth);
-        const months = Array.from({ length: 12 }, (_, i) => addMonths(startOfCurMonth, i));
+                                    const months = Array.from({length: 12 }, (_, i) => addMonths(startOfCurMonth, i));
 
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
-                {months.map((month) => (
-                    <div key={month.toString()} className="space-y-4">
-                        <h3 className="text-lg font-bold text-olive-900 capitalize px-2">
-                            {format(month, "MMMM", { locale: ptBR })}
-                        </h3>
-                        <div className="grid grid-cols-7 gap-1">
-                            {["d", "s", "t", "q", "q", "s", "s"].map((d, i) => (
-                                <div key={i} className="text-[8px] font-bold uppercase text-olive-900/30 text-center">{d}</div>
-                            ))}
-                            {Array.from({ length: 42 }, (_, i) => {
-                                const day = addDays(startOfWeek(startOfMonth(month)), i);
-                                const isCurrentMonth = isSameMonth(day, month);
-                                const inWindow = isDateInWindow(day);
-                                const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), day));
-                                const isPast = isBefore(day, startOfDay(new Date()));
-                                const isAvailable = inWindow && !dayBlock && !isPast;
-                                const canInteract = inWindow && !isPast;
-                                const isInDragRange = getIsDateInDragRange(day);
+                                    return (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
+                                        {months.map((month) => (
+                                            <div key={month.toString()} className="space-y-4">
+                                                <h3 className="text-lg font-bold text-olive-900 capitalize px-2">
+                                                    {format(month, "MMMM", { locale: ptBR })}
+                                                </h3>
+                                                <div className="grid grid-cols-7 gap-1">
+                                                    {["d", "s", "t", "q", "q", "s", "s"].map((d, i) => (
+                                                        <div key={i} className="text-[8px] font-bold uppercase text-olive-900/30 text-center">{d}</div>
+                                                    ))}
+                                                    {Array.from({ length: 42 }, (_, i) => {
+                                                        const day = addDays(startOfWeek(startOfMonth(month)), i);
+                                                        const isCurrentMonth = isSameMonth(day, month);
+                                                        const inWindow = isDateInWindow(day);
+                                                        const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), day));
+                                                        const isPast = isBefore(day, startOfDay(new Date()));
+                                                        const isAvailable = inWindow && !dayBlock && !isPast;
+                                                        const canInteract = inWindow && !isPast;
+                                                        const isInDragRange = getIsDateInDragRange(day);
 
-                                const isSelected = (selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
+                                                        const isSelected = (selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
 
-                                return (
-                                    <div
-                                        key={i}
-                                        className={cn(
-                                            "h-8 rounded-lg flex items-center justify-center text-[10px] font-bold cursor-pointer transition-all",
-                                            !isCurrentMonth && "opacity-0 pointer-events-none",
-                                            isSelected ? "bg-olive-900 text-white" :
-                                                (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
-                                                    "hover:bg-sand-50 text-olive-900/60"
-                                        )}
-                                        onClick={() => canInteract && onDateClick(day)}
-                                        onPointerDown={(e) => canInteract && handlePointerDown(e, day)}
-                                        onPointerEnter={() => canInteract && handlePointerEnter(day)}
-                                        onContextMenu={(e) => e.preventDefault()}
-                                    >
-                                        {format(day, "d")}
+                                                        return (
+                                                            <div
+                                                                key={i}
+                                                                className={cn(
+                                                                    "h-8 rounded-lg flex items-center justify-center text-[10px] font-bold cursor-pointer transition-all",
+                                                                    !isCurrentMonth && "opacity-0 pointer-events-none",
+                                                                    isSelected ? "bg-olive-900 text-white" :
+                                                                        (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
+                                                                            "hover:bg-sand-50 text-olive-900/60"
+                                                                )}
+                                                                onClick={() => canInteract && onDateClick(day)}
+                                                                onPointerDown={(e) => canInteract && handlePointerDown(e, day)}
+                                                                onPointerEnter={() => canInteract && handlePointerEnter(day)}
+                                                                onContextMenu={(e) => e.preventDefault()}
+                                                            >
+                                                                {format(day, "d")}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
+                                    );
     }
 
-    return (
-        <div className="w-full max-w-[1600px] mx-auto px-4 pb-12 select-none" onContextMenu={(e) => e.button === 2 && e.preventDefault()}>
-            {renderHeader()}
+                                    return (
+                                    <div className="w-full max-w-[1600px] mx-auto px-4 pb-12 select-none" onContextMenu={(e) => e.button === 2 && e.preventDefault()}>
+                                        {renderHeader()}
 
-            {viewMode === 'month' && (
-                <div className="grid grid-cols-7 mb-4 px-2">
-                    {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((day, idx) => (
-                        <div key={idx} className="text-center text-[10px] font-bold uppercase tracking-widest text-olive-900/30">
-                            {day}
-                        </div>
-                    ))}
-                </div>
-            )}
+                                        {viewMode === 'month' && (
+                                            <div className="grid grid-cols-7 mb-4 px-2">
+                                                {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((day, idx) => (
+                                                    <div key={idx} className="text-center text-[10px] font-bold uppercase tracking-widest text-olive-900/30">
+                                                        {day}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
 
-            {loading ? (
-                <div className="h-[600px] flex items-center justify-center bg-white rounded-[2.5rem] border border-olive-900/5">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-900"></div>
-                </div>
-            ) : (
-                viewMode === 'month' ? renderMonthGrid(currentMonth) : renderYearView()
-            )}
+                                        {loading ? (
+                                            <div className="h-[600px] flex items-center justify-center bg-white rounded-[2.5rem] border border-olive-900/5">
+                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-900"></div>
+                                            </div>
+                                        ) : (
+                                            viewMode === 'month' ? renderMonthGrid(currentMonth) : renderYearView()
+                                        )}
 
-            <CalendarSidebar
-                isOpen={isSidebarOpen}
-                onClose={() => setIsSidebarOpen(false)}
-                selectedRange={selectedRange}
-                onSuccess={() => {
-                    window.location.reload();
-                }}
-                basePrice={data?.property?.basePrice}
-                propertyId={propertyId}
-            />
-        </div>
-    );
+                                        <CalendarSidebar
+                                            isOpen={isSidebarOpen}
+                                            onClose={() => setIsSidebarOpen(false)}
+                                            selectedRange={selectedRange}
+                                            onSuccess={() => {
+                                                window.location.reload();
+                                            }}
+                                            basePrice={data?.property?.basePrice}
+                                            propertyId={propertyId}
+                                        />
+                                    </div>
+                                    );
 }

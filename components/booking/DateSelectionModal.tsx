@@ -127,11 +127,11 @@ export function DateSelectionModal({
         const isBlocked = data.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), d));
         if (isBlocked) return false;
 
-        // Regra 4: Não pode ter reserva confirmada
+        // Regra 4: Não pode ter reserva confirmada (A noite deve estar livre)
         const hasReservation = data.reservations?.some((r: any) => {
             const start = startOfDay(parseLocal(r.checkIn));
             const end = startOfDay(parseLocal(r.checkOut));
-            // Checkout day is free for check-in (Standard Practice)
+            // Noite ocupada se d >= checkin e d < checkout
             return d >= start && d < end;
         });
         if (hasReservation) return false;
@@ -139,26 +139,52 @@ export function DateSelectionModal({
         return true;
     };
 
-    const onDateClick = (day: Date) => {
-        if (!isDateAvailable(day)) return;
+    const isStartOfReservation = (date: Date) => {
+        return data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), date)) ||
+            data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), date)); // Bloqueios também começam em algum lugar
+    };
 
+    const onDateClick = (day: Date) => {
+        const d = startOfDay(day);
+        const isAvailableForCheckIn = isDateAvailable(d);
+
+        // Se não tem início ou estamos resetando
         if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
-            setSelectedRange({ start: day, end: null });
+            if (!isAvailableForCheckIn) {
+                // Se clicou num dia ocupado, mas é checkout de alguém, talvez queira começar ali
+                // O isDateAvailable já retorna true para o dia de checkout alheio
+                return;
+            }
+            setSelectedRange({ start: d, end: null });
+            setHoveredDate(null);
         } else {
-            if (isBefore(day, selectedRange.start)) {
-                setSelectedRange({ start: day, end: selectedRange.start });
-            } else if (isSameDay(day, selectedRange.start)) {
+            // Tentando fechar o range
+            if (isBefore(d, selectedRange.start)) {
+                if (!isAvailableForCheckIn) return;
+                setSelectedRange({ start: d, end: selectedRange.start });
+            } else if (isSameDay(d, selectedRange.start)) {
                 setSelectedRange({ start: null, end: null });
             } else {
-                // Verificar se há bloqueios no meio do intervalo
-                const interval = eachDayOfInterval({ start: selectedRange.start, end: day });
-                const hasBlockInRange = interval.some(d => !isDateAvailable(d));
+                // Verificar se há bloqueios NO MEIO do intervalo (excluindo o dia de saída d)
+                const interval = eachDayOfInterval({ start: selectedRange.start, end: d });
+                const nights = interval.slice(0, -1);
+                const hasBlockInRange = nights.some(date => !isDateAvailable(date));
 
                 if (hasBlockInRange) {
-                    setSelectedRange({ start: day, end: null });
-                } else {
-                    setSelectedRange({ ...selectedRange, end: day });
+                    // Se o intervalo é inválido, recomeçamos a seleção se o dia for válido para check-in
+                    if (isAvailableForCheckIn) {
+                        setSelectedRange({ start: d, end: null });
+                    }
+                    return;
                 }
+
+                // O dia 'd' (checkout) pode ser o início de outra reserva, 
+                // mas não pode ser um bloqueio manual rígido (blockedDate que geralmente bloqueia o dia todo)
+                // No entanto, no Casa Oliveira, bloqueios manuais seguem a mesma lógica (noite).
+                // Então permitimos d ser qualquer dia, desde que as noites anteriores estejam livres.
+
+                setSelectedRange({ ...selectedRange, end: d });
+                setHoveredDate(null);
             }
         }
     };
@@ -239,15 +265,18 @@ export function DateSelectionModal({
                 <div className="grid grid-cols-7 gap-y-1">
                     {days.map((date, i) => {
                         const isCurrentMonth = isSameMonth(date, monthStart);
-                        const isAvailable = isDateAvailable(date);
                         const isSelectedStart = selectedRange.start && isSameDay(date, selectedRange.start);
                         const isSelectedEnd = selectedRange.end && isSameDay(date, selectedRange.end);
                         const isInRange = selectedRange.start && selectedRange.end &&
                             isWithinInterval(date, { start: selectedRange.start, end: selectedRange.end });
+                        const isNightAvailable = isDateAvailable(date);
+                        const isStartBlock = isStartOfReservation(date);
+                        const isVivid = isNightAvailable || isStartBlock; // Vivid se posso dormir OU se é checkout de outra
+
                         const isToday = isSameDay(date, new Date());
 
                         const isHovered = selectedRange.start && !selectedRange.end && hoveredDate &&
-                            isCurrentMonth && isAvailable &&
+                            isCurrentMonth && (isNightAvailable || isSameDay(date, hoveredDate)) &&
                             ((date >= selectedRange.start && date <= hoveredDate) || (date <= selectedRange.start && date >= hoveredDate));
 
                         // Cálculo de Preço igual ao Admin
@@ -262,19 +291,19 @@ export function DateSelectionModal({
                         const price = Math.round(finalPrice);
 
                         // Verificação se é dia de checkout de reserva alheia (poderia ter checkin no mesmo dia)
-                        const isCheckoutOnly = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkOut), date)) && isAvailable;
+                        const isCheckoutOnly = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkOut), date)) && isNightAvailable;
 
                         return (
                             <div
                                 key={i}
-                                onClick={() => isCurrentMonth && onDateClick(date)}
-                                onMouseEnter={() => isCurrentMonth && isAvailable && setHoveredDate(date)}
+                                onClick={() => isCurrentMonth && (isVivid || isInRange) && onDateClick(date)}
+                                onMouseEnter={() => isCurrentMonth && isVivid && setHoveredDate(date)}
                                 onMouseLeave={() => setHoveredDate(null)}
                                 className={cn(
                                     "h-14 md:h-20 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
                                     !isCurrentMonth && "opacity-0 pointer-events-none",
-                                    isCurrentMonth && !isAvailable && "opacity-30 cursor-not-allowed grayscale",
-                                    isAvailable && isCurrentMonth && "hover:bg-olive-900/5 rounded-2xl",
+                                    isCurrentMonth && !isVivid && "opacity-30 cursor-not-allowed grayscale",
+                                    isVivid && isCurrentMonth && "hover:bg-olive-900/5 rounded-2xl",
                                     (isInRange || isHovered) && "bg-olive-900/5 rounded-none",
                                     isSelectedStart && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
                                     isSelectedEnd && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
@@ -283,12 +312,12 @@ export function DateSelectionModal({
                             >
                                 <span className={cn(
                                     "relative z-10 font-black block text-lg transition-colors",
-                                    (isSelectedStart || isSelectedEnd) ? "text-white" : (isAvailable ? "text-olive-900" : "text-olive-900/20")
+                                    (isSelectedStart || isSelectedEnd) ? "text-white" : (isVivid ? "text-olive-900" : "text-olive-900/20")
                                 )}>
                                     {format(date, "d")}
                                 </span>
 
-                                {isAvailable && isCurrentMonth && (
+                                {isNightAvailable && isCurrentMonth && (
                                     <span className={cn(
                                         "text-[10px] font-bold mt-1 z-10 transition-colors",
                                         (isSelectedStart || isSelectedEnd) ? "text-white/60" : "text-olive-900/40"
@@ -297,13 +326,17 @@ export function DateSelectionModal({
                                     </span>
                                 )}
 
+                                {isStartBlock && !isNightAvailable && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
+                                    <span className="text-[9px] font-bold text-red-500/40 mt-1 z-10 uppercase">Checkout</span>
+                                )}
+
                                 {isCheckoutOnly && !isSelectedStart && !isSelectedEnd && (
                                     <div className="absolute top-1 right-1">
                                         <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" title="Disponível para check-in após o meio-dia" />
                                     </div>
                                 )}
 
-                                {!isAvailable && isCurrentMonth && (
+                                {!isVivid && isCurrentMonth && (
                                     <div className="w-6 h-[1px] bg-olive-900/10 mt-2" />
                                 )}
 
