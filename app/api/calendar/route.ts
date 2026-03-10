@@ -36,7 +36,14 @@ export async function GET(request: Request) {
         });
 
         if (!property) {
-            return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+            return NextResponse.json({
+                property: null,
+                reservations: [],
+                blockedDates: [],
+                overrides: [],
+                availabilityWindows: [],
+                pricingRules: []
+            });
         }
 
         return NextResponse.json({
@@ -47,8 +54,13 @@ export async function GET(request: Request) {
             availabilityWindows,
             pricingRules
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Calendar API Error:', error);
-        return NextResponse.json({ error: 'Erro ao buscar eventos do calendário' }, { status: 500 });
+        return NextResponse.json({
+            error: 'Erro ao buscar eventos do calendário',
+            detail: error.message,
+            property: null,
+            reservations: []
+        }, { status: 500 });
     }
 }

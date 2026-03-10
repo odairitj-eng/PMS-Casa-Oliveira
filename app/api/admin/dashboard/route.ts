@@ -104,12 +104,14 @@ export async function GET(req: NextRequest) {
             select: { id: true, holdExpiresAt: true, guest: { select: { name: true } } },
             orderBy: { holdExpiresAt: 'asc' },
             take: 5,
+        }).catch(err => {
+            console.error('[Dashboard API] Error fetching pending reservations:', err.message);
+            return [];
         });
 
-        const lastSyncs = await db.syncLog.findMany({
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-        });
+        // SyncLog model doesn't exist in local/neon schema right now
+        const lastSyncs: any[] = [];
+
 
         return NextResponse.json({
             stats: {

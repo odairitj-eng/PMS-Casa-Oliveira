@@ -70,7 +70,9 @@ export default function DashboardPage() {
             .finally(() => setLoading(false));
     }, []);
 
-    if (loading) {
+    const isLoadingData = loading && !data;
+
+    if (isLoadingData) {
         return (
             <div className="flex items-center justify-center h-64">
                 <Loader2 className="w-8 h-8 animate-spin text-olive-600" />
@@ -78,15 +80,22 @@ export default function DashboardPage() {
         );
     }
 
-    if (error || !data) {
-        return (
-            <div className="flex items-center justify-center h-64 text-red-500 font-medium">
-                {error}
-            </div>
-        );
-    }
+    // Default Fallback Data if API fails or returns null
+    const stats = data?.stats || {
+        revenueTotal: 0,
+        revenueGrowth: null,
+        occupancyRate: 0,
+        availableNights: 30,
+        adr: 0,
+        basePrice: 0,
+        newGuests: 0,
+        newVips: 0
+    };
 
-    const { stats, upcomingArrivals, pendingReservations, lastSyncs } = data;
+    const upcomingArrivals = data?.upcomingArrivals || [];
+    const pendingReservations = data?.pendingReservations || [];
+    const lastSyncs = data?.lastSyncs || [];
+
 
     return (
         <div className="space-y-8">
