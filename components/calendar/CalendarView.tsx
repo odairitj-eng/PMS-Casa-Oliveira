@@ -363,38 +363,29 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 const isToday = isSameDay(cloneDay, new Date());
 
                 const inWindow = isDateInWindow(cloneDay);
-
-                const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), cloneDay));
                 const dayReservation = data?.reservations?.find((r: any) => {
                     const checkIn = startOfDay(parseLocal(r.checkIn));
                     const checkOut = startOfDay(parseLocal(r.checkOut));
                     return cloneDay >= checkIn && cloneDay < checkOut;
                 });
                 const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), cloneDay));
-
                 const isPast = isBefore(cloneDay, startOfDay(new Date()));
 
-                const isAvailable = inWindow && !dayBlock && !dayReservation && !isPast;
-                const canInteract = inWindow && !isPast;
+                const isNightAvailable = inWindow && !dayBlock && !dayReservation && !isPast;
+                const isStartBlock = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), cloneDay)) ||
+                    data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay));
 
-                // Verificar se está no range de arraste atual
+                const isVivid = isNightAvailable || isStartBlock;
+                const canInteract = (inWindow && !isPast) || isStartBlock;
+
                 const isInDragRange = getIsDateInDragRange(cloneDay);
+                const isSelected = (selectedRange && isWithinInterval(cloneDay, {
+                    start: isBefore(selectedRange.start, selectedRange.end) ? selectedRange.start : selectedRange.end,
+                    end: isBefore(selectedRange.start, selectedRange.end) ? selectedRange.end : selectedRange.start
+                })) || isInDragRange;
 
-                const isSelected = (selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
-
-                // --- Cálculo de Preço Inteligente (Smart Pricing) ---
-                let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
-                const isManualOverride = !!dayOverride;
-                const activeRules = isManualOverride ? [] : getDayRules(cloneDay);
-
-                if (!isManualOverride) {
-                    activeRules.forEach((rule: any) => {
-                        finalPrice *= rule.value;
-                    });
-                }
-                const hasRuleApplied = activeRules.length > 0;
+                let finalPrice = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), cloneDay))?.price || data?.property?.basePrice || 0;
                 const price = Math.round(finalPrice);
-                // --------------------------------------------------
 
                 days.push(
                     <div
@@ -403,9 +394,9 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                             "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
                             isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
-                            (!inWindow && !isPast) && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-80 border-olive-900/5",
-                            dayBlock && isCurrentMonth && "bg-gray-50/30 border-olive-900/10", // No grayscale so colors pop
-                            isAvailable && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
+                            !isVivid && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-30 border-olive-900/5",
+                            dayBlock && isCurrentMonth && "bg-gray-50/30 border-olive-900/10",
+                            isVivid && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
                         )}
@@ -419,25 +410,17 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 <span className={cn(
                                     "text-lg font-black mb-1 transition-colors",
                                     isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
-                                    isSelected ? "text-olive-900" : (isAvailable ? "text-olive-900" : "text-olive-900/10"),
+                                    isSelected ? "text-olive-900" : (isVivid ? "text-olive-900" : "text-olive-900/10"),
                                     !isCurrentMonth && "text-olive-900/0"
                                 )}>
                                     {format(cloneDay, "d")}
                                 </span>
+                                {!isNightAvailable && isStartBlock && isCurrentMonth && (
+                                    <span className="text-[8px] font-black text-red-500/40 uppercase bg-red-500/5 px-1 rounded">Checkout</span>
+                                )}
                                 {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && (
                                     <Lock className="w-3 h-3 text-olive-900/20" />
                                 )}
-                            </div>
-
-                            <div className="flex flex-wrap gap-1 mb-1 mt-0.5 min-h-[4px]">
-                                {getDayRules(cloneDay).map((rule: any, idx: number) => (
-                                    <div
-                                        key={rule.id}
-                                        className="h-1 flex-1 rounded-full opacity-60"
-                                        style={{ backgroundColor: rule.color || '#10b981' }}
-                                        title={rule.description || rule.type}
-                                    />
-                                ))}
                             </div>
 
                             {isCurrentMonth && (
@@ -448,174 +431,49 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             isSelected ? "bg-olive-900/10 text-olive-900" : "bg-olive-900/5 text-olive-900/60"
                                         )}>
                                             <div className="w-3.5 h-3.5 rounded-full bg-olive-900/20 flex-shrink-0" />
-                                            <span className="truncate font-bold">Reserva confirmada</span>
+                                            <span className="truncate font-bold text-[9px]">Ocupado</span>
                                         </div>
                                     ) : dayBlock ? (
                                         (() => {
                                             const reason = dayBlock.reason || "Indisponível";
                                             const isAirbnb = reason.toUpperCase().includes('AIRBNB');
                                             const isBooking = reason.toUpperCase().includes('BOOKING');
-
                                             let bgClass = "bg-gray-100";
                                             let textClass = "text-gray-400";
-
-                                            if (isAirbnb) {
-                                                bgClass = "bg-rose-100";
-                                                textClass = "text-rose-700";
-                                            } else if (isBooking) {
-                                                bgClass = "bg-blue-100";
-                                                textClass = "text-blue-800";
-                                            } else if (isSelected) {
-                                                bgClass = "bg-olive-900/20";
-                                                textClass = "text-olive-900";
-                                            }
-
+                                            if (isAirbnb) { bgClass = "bg-rose-100"; textClass = "text-rose-700"; }
+                                            else if (isBooking) { bgClass = "bg-blue-100"; textClass = "text-blue-800"; }
                                             return (
-                                                <div className={cn(
-                                                    "flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-full",
-                const isNightAvailable= isDateInWindow(cloneDay) && !data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay)) && !data?.reservations?.some((r: any) => {
-                                                        const s = startOfDay(parseLocal(r.checkIn));
-                                                        const e = startOfDay(parseLocal(r.checkOut));
-                                                        return cloneDay >= s && cloneDay < e;
-                                                    });
-                                            const isStartBlock = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), cloneDay)) ||
-                                                data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay));
-                                            const isVivid = isNightAvailable || isStartBlock;
-
-                                            days.push(
-                                                <div
-                                                    key={day.toString()}
-                                                    className={cn(
-                                                        "calendar-day border-r border-b min-h-24 p-2 transition-all cursor-pointer relative",
-                                                        !isCurrentMonth && "bg-gray-50/50",
-                                                        isVivid ? "bg-white hover:bg-olive-900/5" : "bg-gray-100 opacity-30 grayscale",
-                                                        isSelected && "ring-2 ring-olive-900 ring-inset z-10",
-                                                        isToday && "bg-olive-900/[0.02]"
-                                                    )}
-                                                    onClick={() => onDateClick(cloneDay)}
-                                                    onPointerDown={(e) => canInteract && handlePointerDown(e, cloneDay)}
-                                                    onPointerEnter={() => canInteract && handlePointerEnter(cloneDay)}
-                                                    onContextMenu={(e) => e.preventDefault()}
-                                                >
-                                                    <div className="relative z-10 flex flex-col h-full">
-                                                        <div className="flex justify-between items-start">
-                                                            <span className={cn(
-                                                                "text-lg font-black mb-1 transition-colors",
-                                                                isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
-                                                                isSelected ? "text-olive-900" : (isVivid ? "text-olive-900" : "text-olive-900/10"),
-                                                                !isCurrentMonth && "text-olive-900/0"
-                                                            )}>
-                                                                {format(cloneDay, "d")}
-                                                            </span>
-                                                            {!isNightAvailable && isStartBlock && isCurrentMonth && (
-                                                                <span className="text-[8px] font-black text-red-500/40 uppercase bg-red-500/5 px-1 rounded">Checkout</span>
-                                                            )}
-                                                        </div>
-                                                        {isCurrentMonth && isNightAvailable && (
-                                                            <div className="mt-auto">
-                                                                <span className="text-[10px] font-black text-olive-900/40">R${price}</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                <div className={cn("flex items-center gap-1 text-[9px] font-bold py-1 px-2 rounded-full", bgClass, textClass)}>
+                                                    <Minus className="w-2.5 h-2.5" />
+                                                    <span className="truncate">{reason}</span>
                                                 </div>
                                             );
-                                            day = addDays(day, 1);
-                                        }
+                                        })()
+                                    ) : isNightAvailable ? (
+                                        <div className="flex flex-col">
+                                            <span className="text-lg font-black tracking-tight text-olive-900">R${price}</span>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+                day = addDays(day, 1);
+            }
             rows.push(
-                                    <div className="grid grid-cols-7 gap-2 mb-2" key={day.toString()}>
-                                        {days}
-                                    </div>
-                                    );
-                                    days = [];
+                <div className="grid grid-cols-7 gap-2 mb-2" key={day.toString()}>
+                    {days}
+                </div>
+            );
+            days = [];
         }
-                                    return <div className="w-full">{rows}</div>;
+        return <div className="w-full">{rows}</div>;
     };
 
     const renderYearView = () => {
         const startOfCurMonth = startOfMonth(currentMonth);
-                                    const months = Array.from({length: 12 }, (_, i) => addMonths(startOfCurMonth, i));
-
-                                    return (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
-                                        {months.map((month) => (
-                                            <div key={month.toString()} className="space-y-4">
-                                                <h3 className="text-lg font-bold text-olive-900 capitalize px-2">
-                                                    {format(month, "MMMM", { locale: ptBR })}
-                                                </h3>
-                                                <div className="grid grid-cols-7 gap-1">
-                                                    {["d", "s", "t", "q", "q", "s", "s"].map((d, i) => (
-                                                        <div key={i} className="text-[8px] font-bold uppercase text-olive-900/30 text-center">{d}</div>
-                                                    ))}
-                                                    {Array.from({ length: 42 }, (_, i) => {
-                                                        const day = addDays(startOfWeek(startOfMonth(month)), i);
-                                                        const isCurrentMonth = isSameMonth(day, month);
-                                                        const inWindow = isDateInWindow(day);
-                                                        const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), day));
-                                                        const isPast = isBefore(day, startOfDay(new Date()));
-                                                        const isAvailable = inWindow && !dayBlock && !isPast;
-                                                        const canInteract = inWindow && !isPast;
-                                                        const isInDragRange = getIsDateInDragRange(day);
-
-                                                        const isSelected = (selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
-
-                                                        return (
-                                                            <div
-                                                                key={i}
-                                                                className={cn(
-                                                                    "h-8 rounded-lg flex items-center justify-center text-[10px] font-bold cursor-pointer transition-all",
-                                                                    !isCurrentMonth && "opacity-0 pointer-events-none",
-                                                                    isSelected ? "bg-olive-900 text-white" :
-                                                                        (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
-                                                                            "hover:bg-sand-50 text-olive-900/60"
-                                                                )}
-                                                                onClick={() => canInteract && onDateClick(day)}
-                                                                onPointerDown={(e) => canInteract && handlePointerDown(e, day)}
-                                                                onPointerEnter={() => canInteract && handlePointerEnter(day)}
-                                                                onContextMenu={(e) => e.preventDefault()}
-                                                            >
-                                                                {format(day, "d")}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    );
-    }
-
-                                    return (
-                                    <div className="w-full max-w-[1600px] mx-auto px-4 pb-12 select-none" onContextMenu={(e) => e.button === 2 && e.preventDefault()}>
-                                        {renderHeader()}
-
-                                        {viewMode === 'month' && (
-                                            <div className="grid grid-cols-7 mb-4 px-2">
-                                                {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((day, idx) => (
-                                                    <div key={idx} className="text-center text-[10px] font-bold uppercase tracking-widest text-olive-900/30">
-                                                        {day}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {loading ? (
-                                            <div className="h-[600px] flex items-center justify-center bg-white rounded-[2.5rem] border border-olive-900/5">
-                                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-900"></div>
-                                            </div>
-                                        ) : (
-                                            viewMode === 'month' ? renderMonthGrid(currentMonth) : renderYearView()
-                                        )}
-
-                                        <CalendarSidebar
-                                            isOpen={isSidebarOpen}
-                                            onClose={() => setIsSidebarOpen(false)}
-                                            selectedRange={selectedRange}
-                                            onSuccess={() => {
-                                                window.location.reload();
-                                            }}
-                                            basePrice={data?.property?.basePrice}
-                                            propertyId={propertyId}
                                         />
-                                    </div>
+                                    </div >
                                     );
 }
