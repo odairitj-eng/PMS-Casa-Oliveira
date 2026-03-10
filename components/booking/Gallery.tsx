@@ -26,7 +26,7 @@ export function Gallery({ photos = [] }: { photos?: any[] }) {
                     className="col-span-1 md:col-span-2 row-span-2 relative group cursor-pointer overflow-hidden bg-olive-900/10"
                     onClick={() => setShowModal(true)}
                 >
-                    <div className="absolute inset-0 bg-olive-900/20 group-hover:bg-transparent transition-colors z-10" />
+                    <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors z-10" />
                     <Image
                         src={primaryPhoto.imageUrl}
                         alt="Foto Principal do Imóvel"
@@ -43,7 +43,7 @@ export function Gallery({ photos = [] }: { photos?: any[] }) {
                         className="hidden md:block col-span-1 row-span-1 relative group cursor-pointer overflow-hidden bg-olive-900/10"
                         onClick={() => setShowModal(true)}
                     >
-                        <div className="absolute inset-0 bg-olive-900/20 group-hover:bg-transparent transition-colors z-10" />
+                        <div className="absolute inset-0 bg-transparent group-hover:bg-black/10 transition-colors z-10" />
                         <Image
                             src={photo.imageUrl}
                             alt={`Foto lateral ${index + 1}`}
