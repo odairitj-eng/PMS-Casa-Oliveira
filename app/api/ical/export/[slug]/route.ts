@@ -13,11 +13,16 @@ export async function GET(
     context: { params: Promise<{ slug: string }> }
 ) {
     try {
-        const { slug } = await context.params;
+        let { slug } = await context.params;
+
+        // Se a url terminar com .ics, removemos para pegar o slug real
+        if (slug.endsWith('.ics')) {
+            slug = slug.replace('.ics', '');
+        }
 
         const property = await db.property.findFirst({
-            // @ts-ignore - Falso positivo por cache do TS Server local. O Prisma já foi recarregado.
-            where: { slug },
+            // @ts-ignore
+            where: { slug: slug },
             select: { id: true, name: true, isActive: true },
         });
 

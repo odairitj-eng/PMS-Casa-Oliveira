@@ -164,19 +164,19 @@ export default function PropertySettingsPage() {
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="p-4 bg-olive-900/5 rounded-xl font-mono text-sm break-all border border-olive-900/10 select-all">
-                                    {typeof window !== 'undefined' ? `${window.location.origin}/api/ical/export/${propertyData.slug}` : ''}
+                                    {typeof window !== 'undefined' ? `${window.location.origin}/api/ical/export/${propertyData.slug}.ics` : ''}
                                 </div>
                                 <div className="flex gap-3">
                                     <Button
                                         onClick={() => {
-                                            navigator.clipboard.writeText(`${window.location.origin}/api/ical/export/${propertyData.slug}`);
+                                            navigator.clipboard.writeText(`${window.location.origin}/api/ical/export/${propertyData.slug}.ics`);
                                             toast.success('URL copiada!');
                                         }}
                                         className="bg-olive-900 hover:bg-olive-800 text-white"
                                     >
                                         Copiar URL
                                     </Button>
-                                    <a href={`/api/ical/export/${propertyData.slug}`} target="_blank">
+                                    <a href={`/api/ical/export/${propertyData.slug}.ics`} target="_blank">
                                         <Button variant="outline">Testar Feed</Button>
                                     </a>
                                 </div>

@@ -150,7 +150,7 @@ function IntegrationsContent() {
         toast.success("Link copiado!");
     };
 
-    const exportUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/export/${selectedPropertyId || 'casa-oliveira-token'}`;
+    const exportUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/ical/export/${selectedPropertyId || 'casa-oliveira-token'}.ics`;
 
     if (isPropsLoading) {
         return <div className="p-12 text-center text-olive-900/40">Carregando imóveis...</div>;
