@@ -314,9 +314,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 const inWindow = isDateInWindow(cloneDay);
 
                 const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), cloneDay));
-                const dayReservation = data?.reservations?.find((r: any) =>
-                    isWithinInterval(cloneDay, { start: startOfDay(parseLocal(r.checkIn)), end: startOfDay(parseLocal(r.checkOut)) })
-                );
+                const dayReservation = data?.reservations?.find((r: any) => {
+                    const checkIn = startOfDay(parseLocal(r.checkIn));
+                    const checkOut = startOfDay(parseLocal(r.checkOut));
+                    return cloneDay >= checkIn && cloneDay < checkOut;
+                });
                 const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), cloneDay));
 
                 const isPast = isBefore(cloneDay, startOfDay(new Date()));

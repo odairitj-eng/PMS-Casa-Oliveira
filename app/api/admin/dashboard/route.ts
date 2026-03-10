@@ -41,7 +41,8 @@ export async function GET(req: NextRequest) {
             newGuestsCount,
             newVipsCount,
             upcomingArrivalsList,
-            pendingReservationsList
+            pendingReservationsList,
+            lastSyncLogs
         ] = await Promise.all([
             // 1. Receita total (últimos 30 dias)
             db.reservation.aggregate({
@@ -81,6 +82,11 @@ export async function GET(req: NextRequest) {
                 select: { id: true, holdExpiresAt: true, guest: { select: { name: true } } },
                 orderBy: { holdExpiresAt: 'asc' },
                 take: 5,
+            }),
+            // 10. Últimas sincornizações iCal
+            db.syncLog.findMany({
+                orderBy: { createdAt: 'desc' },
+                take: 5,
             })
         ]);
 
@@ -100,7 +106,7 @@ export async function GET(req: NextRequest) {
         const pendingReservations = pendingReservationsList;
         const newGuests = newGuestsCount;
         const newVips = newVipsCount;
-        const lastSyncs: any[] = [];
+        const lastSyncs = lastSyncLogs;
 
 
         return NextResponse.json({
