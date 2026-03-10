@@ -71,12 +71,47 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         // Não permitir selecionar datas passadas no admin para edição
         if (isBefore(clickedDay, today)) return;
 
-        if (!selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end))) {
+        // Se a data clicada estiver bloqueada, só permitimos se for para ser o FIM de uma seleção
+        const isBlocked = data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), clickedDay)) ||
+            data?.reservations?.some((r: any) => {
+                const start = startOfDay(parseLocal(r.checkIn));
+                const end = startOfDay(parseLocal(r.checkOut));
+                return clickedDay >= start && clickedDay < end;
+            });
+
+        const isStartingSelection = !selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end));
+
+        if (isStartingSelection) {
+            if (isBlocked) {
+                toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
+                return;
+            }
             setSelectedRange({ start: clickedDay, end: clickedDay });
         } else {
+            // Tentando fechar o range
             if (isBefore(clickedDay, selectedRange.start)) {
+                if (isBlocked) {
+                    toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
+                    return;
+                }
                 setSelectedRange({ start: clickedDay, end: selectedRange.start });
             } else {
+                // Verificar se há bloqueios NO MEIO do caminho (excluindo o dia de saída)
+                const hasBlockInRange = data?.blockedDates?.some((b: any) => {
+                    const d = startOfDay(parseLocal(b.date));
+                    return d > selectedRange.start && d < clickedDay;
+                }) || data?.reservations?.some((r: any) => {
+                    const rs = startOfDay(parseLocal(r.checkIn));
+                    const re = startOfDay(parseLocal(r.checkOut));
+                    // Se a reserva alheia começa antes do nosso checkout e termina depois do nosso checkin
+                    return rs < clickedDay && re > selectedRange.start;
+                });
+
+                if (hasBlockInRange) {
+                    toast.error("O intervalo selecionado contém datas ocupadas.");
+                    return;
+                }
+
                 setSelectedRange({ ...selectedRange, end: clickedDay });
             }
         }
@@ -324,11 +359,12 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 const isPast = isBefore(cloneDay, startOfDay(new Date()));
 
                 const isAvailable = inWindow && !dayBlock && !dayReservation && !isPast;
+                const canInteract = inWindow && !isPast;
 
                 // Verificar se está no range de arraste atual
                 const isInDragRange = getIsDateInDragRange(cloneDay);
 
-                const isSelected = isAvailable && ((selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange);
+                const isSelected = (selectedRange && isWithinInterval(cloneDay, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
 
                 // --- Cálculo de Preço Inteligente (Smart Pricing) ---
                 let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
@@ -357,9 +393,9 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
                         )}
-                        onClick={() => isAvailable && onDateClick(cloneDay)}
-                        onPointerDown={(e) => isAvailable && handlePointerDown(e, cloneDay)}
-                        onPointerEnter={() => isAvailable && handlePointerEnter(cloneDay)}
+                        onClick={() => canInteract && onDateClick(cloneDay)}
+                        onPointerDown={(e) => canInteract && handlePointerDown(e, cloneDay)}
+                        onPointerEnter={() => canInteract && handlePointerEnter(cloneDay)}
                         onContextMenu={(e) => e.preventDefault()}
                     >
                         <div className="relative z-10 flex flex-col h-full">
@@ -407,15 +443,15 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             let bgClass = "bg-gray-100";
                                             let textClass = "text-gray-400";
 
-                                            if (isSelected) {
-                                                bgClass = "bg-rose-100";
-                                                textClass = "text-rose-700";
-                                            } else if (isAirbnb) {
+                                            if (isAirbnb) {
                                                 bgClass = "bg-rose-100";
                                                 textClass = "text-rose-700";
                                             } else if (isBooking) {
                                                 bgClass = "bg-blue-100";
                                                 textClass = "text-blue-800";
+                                            } else if (isSelected) {
+                                                bgClass = "bg-olive-900/20";
+                                                textClass = "text-olive-900";
                                             }
 
                                             return (
@@ -498,9 +534,10 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), day));
                                 const isPast = isBefore(day, startOfDay(new Date()));
                                 const isAvailable = inWindow && !dayBlock && !isPast;
+                                const canInteract = inWindow && !isPast;
                                 const isInDragRange = getIsDateInDragRange(day);
 
-                                const isSelected = isAvailable && ((selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange);
+                                const isSelected = (selectedRange && isWithinInterval(day, { start: selectedRange.start, end: selectedRange.end })) || isInDragRange;
 
                                 return (
                                     <div
@@ -512,9 +549,9 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                                 (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
                                                     "hover:bg-sand-50 text-olive-900/60"
                                         )}
-                                        onClick={() => isAvailable && onDateClick(day)}
-                                        onPointerDown={(e) => isAvailable && handlePointerDown(e, day)}
-                                        onPointerEnter={() => isAvailable && handlePointerEnter(day)}
+                                        onClick={() => canInteract && onDateClick(day)}
+                                        onPointerDown={(e) => canInteract && handlePointerDown(e, day)}
+                                        onPointerEnter={() => canInteract && handlePointerEnter(day)}
                                         onContextMenu={(e) => e.preventDefault()}
                                     >
                                         {format(day, "d")}
