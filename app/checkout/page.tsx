@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -126,7 +127,10 @@ function CheckoutContent() {
         return (
             <div className="min-h-screen bg-sand-50 py-12 px-4">
                 <Card className="max-w-xl mx-auto shadow-2xl rounded-[2rem] overflow-hidden border-0">
-                    <div className="bg-olive-900 p-8 text-center text-white">
+                    <div className="bg-olive-900 p-8 text-center text-white relative">
+                        <div className="absolute top-6 left-8 bg-white rounded-xl p-1.5 shadow-lg">
+                            <Image src="/imagens/logo.png" alt="Logo" width={40} height={40} className="object-contain" />
+                        </div>
                         <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-400" />
                         <h1 className="text-3xl font-bold">Reserva Quase Pronta!</h1>
                         <p className="opacity-80 mt-2">Damos um &quot;hold&quot; nas datas por 30 minutos enquanto você paga.</p>
@@ -161,6 +165,11 @@ function CheckoutContent() {
 
     return (
         <div className="min-h-screen bg-sand-50 py-12 px-4 bg-[url('/imagens/pattern.png')] bg-repeat">
+            <div className="max-w-5xl mx-auto mb-8 flex justify-center lg:justify-start">
+                <Link href="/">
+                    <Image src="/imagens/logo.png" alt="Casa Oliveira" width={150} height={50} className="object-contain hover:opacity-80 transition-opacity" />
+                </Link>
+            </div>
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Coluna Esquerda: Dados Hóspede */}

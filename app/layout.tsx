@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
     title: 'Casa Oliveira - Reserva Direta',
     description: 'Sistema de reserva direta e gerenciamento para a Casa Oliveira.',
+    icons: {
+        icon: '/imagens/logo.png',
+        shortcut: '/imagens/logo.png',
+        apple: '/imagens/logo.png',
+    }
 };
 
 import { Providers } from "@/components/Providers";
