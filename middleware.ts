@@ -20,7 +20,7 @@ export default withAuth(
             default-src 'self';
             script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.mercadopago.com https://*.vercel-scripts.com;
             style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-            img-src 'self' blob: data: https://*.mercadopago.com https://*.githubusercontent.com https://*.googleusercontent.com https://*.airbnb.com https://*.fbsbx.com https://*.fbcdn.net;
+            img-src 'self' blob: data: https://*.mercadopago.com https://*.githubusercontent.com https://*.googleusercontent.com https://*.airbnb.com https://*.muscache.com https://*.fbsbx.com https://*.fbcdn.net;
             font-src 'self' https://fonts.gstatic.com;
             object-src 'none';
             base-uri 'self';
