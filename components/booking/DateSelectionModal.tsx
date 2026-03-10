@@ -44,13 +44,22 @@ export function DateSelectionModal({
     propertyId
 }: DateSelectionModalProps) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [selectedRange, setSelectedRange] = useState<{ start: Date | null; end: Date | null }>({
-        start: initialCheckIn ? new Date(initialCheckIn + 'T12:00:00') : null,
-        end: initialCheckOut ? new Date(initialCheckOut + 'T12:00:00') : null
-    });
-
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
+
+    const parseLocal = (dStr: string) => {
+        if (!dStr) return new Date();
+        // Garante que o formato seja YYYY-MM-DD ignorando T...
+        const datePart = dStr.includes('T') ? dStr.split('T')[0] : dStr;
+        const [y, m, d] = datePart.split('-');
+        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    };
+
+    const [selectedRange, setSelectedRange] = useState<{ start: Date | null; end: Date | null }>({
+        start: initialCheckIn ? parseLocal(initialCheckIn) : null,
+        end: initialCheckOut ? parseLocal(initialCheckOut) : null
+    });
 
     useEffect(() => {
         if (isOpen && propertyId) {
@@ -69,6 +78,31 @@ export function DateSelectionModal({
         }
     }, [isOpen]);
 
+    const getDayRules = (date: Date) => {
+        if (!data?.pricingRules) return [];
+        const dateOnly = startOfDay(date);
+        const now = startOfDay(new Date());
+
+        return data.pricingRules.filter((rule: any) => {
+            if (!rule.isActive) return false;
+            if (rule.type === 'WEEKEND_SURGE' && (dateOnly.getDay() === 0 || dateOnly.getDay() === 6)) return true;
+            if (rule.type === 'SEASONAL' && rule.startDate && rule.endDate) {
+                const s = startOfDay(parseLocal(rule.startDate));
+                const e = startOfDay(parseLocal(rule.endDate));
+                if (dateOnly >= s && dateOnly <= e) return true;
+            }
+            if (rule.type === 'LAST_MINUTE') {
+                const daysToDate = differenceInDays(dateOnly, now);
+                return daysToDate >= 0 && daysToDate <= (rule.minDays || 7);
+            }
+            if (rule.type === 'EARLY_BIRD') {
+                const daysToDate = differenceInDays(dateOnly, now);
+                return daysToDate >= (rule.minDays || 30);
+            }
+            return false;
+        });
+    };
+
     const isDateAvailable = (date: Date) => {
         if (!data) return false;
 
@@ -82,26 +116,22 @@ export function DateSelectionModal({
         const hasWindows = data.availabilityWindows && data.availabilityWindows.length > 0;
         if (hasWindows) {
             const inWindow = data.availabilityWindows.some((w: any) => {
-                const start = startOfDay(new Date(w.startDate));
-                const end = startOfDay(new Date(w.endDate));
+                const start = startOfDay(parseLocal(w.startDate));
+                const end = startOfDay(parseLocal(w.endDate));
                 return isWithinInterval(d, { start, end });
             });
             if (!inWindow) return false;
         }
 
-        // Regra 3: Não pode estar bloqueado manualmente
-        const isBlocked = data.blockedDates?.some((b: any) => isSameDay(new Date(b.date), d));
+        // Regra 3: Não pode estar bloqueado manualmente ou por iCal
+        const isBlocked = data.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), d));
         if (isBlocked) return false;
 
         // Regra 4: Não pode ter reserva confirmada
         const hasReservation = data.reservations?.some((r: any) => {
-            const start = startOfDay(new Date(r.checkIn));
-            const end = startOfDay(new Date(r.checkOut));
-            // Checkout pode ser no mesmo dia do Checkin de outra reserva, mas aqui tratamos como intervalo fechado
-            // Simplificação: se o dia está entre checkin e checkout, está ocupado.
-            return isWithinInterval(d, { start, end: subMonths(addMonths(end, 0), 0) }); // Checkout exclusive?
-            // Na maioria dos sistemas, checkout day é livre para checkin.
-            // Para simplificar agora:
+            const start = startOfDay(parseLocal(r.checkIn));
+            const end = startOfDay(parseLocal(r.checkOut));
+            // Checkout day is free for check-in (Standard Practice)
             return d >= start && d < end;
         });
         if (hasReservation) return false;
@@ -151,6 +181,31 @@ export function DateSelectionModal({
         }
     };
 
+    const calculateTotal = () => {
+        if (!selectedRange.start || !selectedRange.end || !data) return 0;
+
+        let total = 0;
+        const interval = eachDayOfInterval({
+            start: selectedRange.start,
+            end: addDays(selectedRange.end, -1) // Checkout exclusive
+        });
+
+        const propertyBasePrice = data.property?.basePrice || 0;
+
+        for (const date of interval) {
+            const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), date));
+            let dayPrice = dayOverride?.price || propertyBasePrice;
+
+            if (!dayOverride) {
+                const rules = getDayRules(date);
+                rules.forEach((r: any) => { dayPrice *= r.value; });
+            }
+            total += Math.round(dayPrice);
+        }
+
+        return total + (data.property?.cleaningFee || 0);
+    };
+
     const clearDates = () => {
         setSelectedRange({ start: null, end: null });
     };
@@ -191,24 +246,69 @@ export function DateSelectionModal({
                             isWithinInterval(date, { start: selectedRange.start, end: selectedRange.end });
                         const isToday = isSameDay(date, new Date());
 
+                        const isHovered = selectedRange.start && !selectedRange.end && hoveredDate &&
+                            isCurrentMonth && isAvailable &&
+                            ((date >= selectedRange.start && date <= hoveredDate) || (date <= selectedRange.start && date >= hoveredDate));
+
+                        // Cálculo de Preço igual ao Admin
+                        const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), date));
+                        let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
+                        if (!dayOverride) {
+                            const activeRules = getDayRules(date);
+                            activeRules.forEach((rule: any) => {
+                                finalPrice *= rule.value;
+                            });
+                        }
+                        const price = Math.round(finalPrice);
+
+                        // Verificação se é dia de checkout de reserva alheia (poderia ter checkin no mesmo dia)
+                        const isCheckoutOnly = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkOut), date)) && isAvailable;
+
                         return (
                             <div
                                 key={i}
                                 onClick={() => isCurrentMonth && onDateClick(date)}
+                                onMouseEnter={() => isCurrentMonth && isAvailable && setHoveredDate(date)}
+                                onMouseLeave={() => setHoveredDate(null)}
                                 className={cn(
-                                    "h-10 md:h-12 flex items-center justify-center relative cursor-pointer text-sm transition-all",
+                                    "h-14 md:h-20 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
                                     !isCurrentMonth && "opacity-0 pointer-events-none",
-                                    isCurrentMonth && !isAvailable && "text-olive-900/10 cursor-not-allowed line-through",
-                                    isAvailable && isCurrentMonth && "hover:bg-olive-900/5 rounded-full",
-                                    isInRange && "bg-olive-900/5 rounded-none",
-                                    isSelectedStart && "bg-olive-900 text-white rounded-full z-10",
-                                    isSelectedEnd && "bg-olive-900 text-white rounded-full z-10",
+                                    isCurrentMonth && !isAvailable && "text-olive-900/10 cursor-not-allowed",
+                                    isAvailable && isCurrentMonth && "hover:bg-olive-900/5 rounded-2xl",
+                                    (isInRange || isHovered) && "bg-olive-900/5 rounded-none",
+                                    isSelectedStart && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20",
+                                    isSelectedEnd && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20",
                                     isToday && !isSelectedStart && !isSelectedEnd && "underline underline-offset-4 decoration-2 decoration-olive-900/30"
                                 )}
                             >
-                                <span className="relative z-10 font-bold">{format(date, "d")}</span>
-                                {isInRange && !isSelectedStart && !isSelectedEnd && (
-                                    <div className="absolute inset-0 bg-olive-900/5 -mx-[1px]" />
+                                <span className={cn(
+                                    "relative z-10 font-black block text-lg",
+                                    (isSelectedStart || isSelectedEnd) ? "text-white" : "text-olive-900"
+                                )}>
+                                    {format(date, "d")}
+                                </span>
+
+                                {isAvailable && isCurrentMonth && (
+                                    <span className={cn(
+                                        "text-[10px] font-bold mt-1 z-10 transition-colors",
+                                        (isSelectedStart || isSelectedEnd) ? "text-white/60" : "text-olive-900/40"
+                                    )}>
+                                        R${price}
+                                    </span>
+                                )}
+
+                                {isCheckoutOnly && !isSelectedStart && !isSelectedEnd && (
+                                    <div className="absolute top-1 right-1">
+                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" title="Disponível para check-in após o meio-dia" />
+                                    </div>
+                                )}
+
+                                {!isAvailable && isCurrentMonth && (
+                                    <div className="w-6 h-[1px] bg-olive-900/10 mt-2" />
+                                )}
+
+                                {(isInRange || isHovered) && !isSelectedStart && !isSelectedEnd && (
+                                    <div className="absolute inset-0 bg-olive-900/[0.03] -mx-[1px] rounded-none" />
                                 )}
                             </div>
                         );
@@ -280,12 +380,22 @@ export function DateSelectionModal({
                     </div>
 
                     <div className="mt-8 pt-6 border-t border-olive-900/10 flex items-center justify-between">
-                        <button
-                            onClick={clearDates}
-                            className="text-sm font-bold text-olive-900 underline hover:text-black transition-colors"
-                        >
-                            Limpar datas
-                        </button>
+                        <div className="flex flex-col">
+                            <button
+                                onClick={clearDates}
+                                className="text-sm font-bold text-olive-900 underline hover:text-black transition-colors text-left"
+                            >
+                                Limpar datas
+                            </button>
+                            {selectedRange.start && selectedRange.end && (
+                                <div className="mt-1 flex items-center gap-2">
+                                    <span className="text-xl font-black text-olive-900">Total: R${calculateTotal()}</span>
+                                    <span className="text-[10px] font-bold text-olive-900/40 uppercase bg-olive-900/5 px-2 py-0.5 rounded-full">
+                                        {differenceInDays(selectedRange.end, selectedRange.start)} noites
+                                    </span>
+                                </div>
+                            )}
+                        </div>
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={onClose}
