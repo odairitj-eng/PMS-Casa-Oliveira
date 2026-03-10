@@ -393,13 +393,35 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             <span className="truncate font-bold">Reserva confirmada</span>
                                         </div>
                                     ) : dayBlock ? (
-                                        <div className={cn(
-                                            "flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-full",
-                                            isSelected ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-400"
-                                        )}>
-                                            <Minus className="w-2.5 h-2.5" />
-                                            <span className="truncate">{dayBlock.reason || "Indisponível"}</span>
-                                        </div>
+                                        (() => {
+                                            const reason = dayBlock.reason || "Indisponível";
+                                            const isAirbnb = reason.toUpperCase().includes('AIRBNB');
+                                            const isBooking = reason.toUpperCase().includes('BOOKING');
+
+                                            let bgClass = "bg-gray-100";
+                                            let textClass = "text-gray-400";
+
+                                            if (isSelected) {
+                                                bgClass = "bg-red-50";
+                                                textClass = "text-red-600";
+                                            } else if (isAirbnb) {
+                                                bgClass = "bg-pink-50";
+                                                textClass = "text-red-600";
+                                            } else if (isBooking) {
+                                                bgClass = "bg-sky-50";
+                                                textClass = "text-sky-700";
+                                            }
+
+                                            return (
+                                                <div className={cn(
+                                                    "flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-full",
+                                                    bgClass, textClass
+                                                )}>
+                                                    <Minus className="w-2.5 h-2.5" />
+                                                    <span className="truncate">{reason}</span>
+                                                </div>
+                                            );
+                                        })()
                                     ) : (isPast || !inWindow) ? (
                                         <div className="flex flex-col opacity-30">
                                             <span className="text-[10px] font-bold text-olive-900/40 uppercase">Fechado</span>
