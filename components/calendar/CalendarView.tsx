@@ -39,6 +39,12 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
+    const parseLocal = (dStr: string) => {
+        if (!dStr) return new Date();
+        const [y, m, d] = new Date(dStr).toISOString().split('T')[0].split('-');
+        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+    };
+
     useEffect(() => {
         const loadData = async () => {
             if (!propertyId) {
@@ -154,8 +160,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
     const isDateInWindow = (date: Date) => {
         if (!data?.availabilityWindows) return false;
         return data.availabilityWindows.some((w: any) => {
-            const start = startOfDay(new Date(w.startDate));
-            const end = startOfDay(new Date(w.endDate));
+            const start = startOfDay(parseLocal(w.startDate));
+            const end = startOfDay(parseLocal(w.endDate));
             return isWithinInterval(startOfDay(date), { start, end });
         });
     };
@@ -307,11 +313,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
                 const inWindow = isDateInWindow(cloneDay);
 
-                const dayOverride = data?.overrides?.find((o: any) => isSameDay(new Date(o.date), cloneDay));
+                const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), cloneDay));
                 const dayReservation = data?.reservations?.find((r: any) =>
-                    isWithinInterval(cloneDay, { start: startOfDay(new Date(r.checkIn)), end: startOfDay(new Date(r.checkOut)) })
+                    isWithinInterval(cloneDay, { start: startOfDay(parseLocal(r.checkIn)), end: startOfDay(parseLocal(r.checkOut)) })
                 );
-                const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(new Date(b.date), cloneDay));
+                const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), cloneDay));
 
                 const isPast = isBefore(cloneDay, startOfDay(new Date()));
 

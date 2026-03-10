@@ -34,11 +34,20 @@ export async function POST(req: NextRequest) {
                     const dateEntries: { propertyId: string; date: Date; source: any; reason: string }[] = [];
 
                     for (const ev of events) {
+                        const startYMD = ev.start.toISOString().split('T')[0];
+                        const endYMD = ev.end.toISOString().split('T')[0];
+
+                        const [sy, sm, sd] = startYMD.split('-');
+                        const [ey, em, ed] = endYMD.split('-');
+
+                        const startDate = new Date(Date.UTC(parseInt(sy), parseInt(sm) - 1, parseInt(sd), 12, 0, 0));
+                        const endDate = new Date(Date.UTC(parseInt(ey), parseInt(em) - 1, parseInt(ed), 12, 0, 0));
+
                         // O iCal costuma marcar o end como o dia seguinte ao checkout
                         // Precisamos bloquear todos os dias entre start e end-1day
                         const days = eachDayOfInterval({
-                            start: startOfDay(ev.start),
-                            end: startOfDay(new Date(ev.end.getTime() - 1))
+                            start: startDate,
+                            end: new Date(endDate.getTime() - (24 * 60 * 60 * 1000))
                         });
 
                         for (const day of days) {
