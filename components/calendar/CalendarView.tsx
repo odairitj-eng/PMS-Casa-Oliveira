@@ -350,7 +350,9 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         className={cn(
                             "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
-                            (!isAvailable) && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
+                            isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
+                            (!inWindow && !isPast) && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-80 border-olive-900/5",
+                            dayBlock && isCurrentMonth && "bg-gray-50/30 border-olive-900/10", // No grayscale so colors pop
                             isAvailable && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
@@ -406,14 +408,14 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             let textClass = "text-gray-400";
 
                                             if (isSelected) {
-                                                bgClass = "bg-red-50";
-                                                textClass = "text-red-600";
+                                                bgClass = "bg-rose-100";
+                                                textClass = "text-rose-700";
                                             } else if (isAirbnb) {
-                                                bgClass = "bg-pink-50";
-                                                textClass = "text-red-600";
+                                                bgClass = "bg-rose-100";
+                                                textClass = "text-rose-700";
                                             } else if (isBooking) {
-                                                bgClass = "bg-sky-50";
-                                                textClass = "text-sky-700";
+                                                bgClass = "bg-blue-100";
+                                                textClass = "text-blue-800";
                                             }
 
                                             return (
