@@ -473,7 +473,92 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
     const renderYearView = () => {
         const startOfCurMonth = startOfMonth(currentMonth);
-                                        />
-                                    </div >
-                                    );
+        const months = Array.from({ length: 12 }, (_, i) => addMonths(startOfCurMonth, i));
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-12">
+                {months.map((month) => (
+                    <div key={month.toString()} className="space-y-4">
+                        <h3 className="text-lg font-bold text-olive-900 capitalize px-2">
+                            {format(month, "MMMM", { locale: ptBR })}
+                        </h3>
+                        <div className="grid grid-cols-7 gap-1">
+                            {["d", "s", "t", "q", "q", "s", "s"].map((d, i) => (
+                                <div key={i} className="text-[8px] font-bold uppercase text-olive-900/30 text-center">{d}</div>
+                            ))}
+                            {Array.from({ length: 42 }, (_, i) => {
+                                const day = addDays(startOfWeek(startOfMonth(month)), i);
+                                const isCurrentMonth = isSameMonth(day, month);
+                                const inWindow = isDateInWindow(day);
+                                const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), day));
+                                const isPast = isBefore(day, startOfDay(new Date()));
+                                const isAvailable = inWindow && !dayBlock && !isPast;
+                                const canInteract = inWindow && !isPast;
+                                const isInDragRange = getIsDateInDragRange(day);
+
+                                const isSelected = (selectedRange && isWithinInterval(day, {
+                                    start: isBefore(selectedRange.start, selectedRange.end) ? selectedRange.start : selectedRange.end,
+                                    end: isBefore(selectedRange.start, selectedRange.end) ? selectedRange.end : selectedRange.start
+                                })) || isInDragRange;
+
+                                return (
+                                    <div
+                                        key={i}
+                                        className={cn(
+                                            "h-8 rounded-lg flex items-center justify-center text-[10px] font-bold cursor-pointer transition-all",
+                                            !isCurrentMonth && "opacity-0 pointer-events-none",
+                                            isSelected ? "bg-olive-900 text-white" :
+                                                (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
+                                                    "hover:bg-sand-50 text-olive-900/60"
+                                        )}
+                                        onClick={() => canInteract && onDateClick(day)}
+                                        onPointerDown={(e) => canInteract && handlePointerDown(e, day)}
+                                        onPointerEnter={() => canInteract && handlePointerEnter(day)}
+                                        onContextMenu={(e) => e.preventDefault()}
+                                    >
+                                        {format(day, "d")}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
+    return (
+        <div className="w-full max-w-[1600px] mx-auto px-4 pb-12 select-none" onContextMenu={(e) => e.button === 2 && e.preventDefault()}>
+            {renderHeader()}
+
+            {viewMode === 'month' && (
+                <div className="grid grid-cols-7 mb-4 px-2">
+                    {["dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."].map((dayName, idx) => (
+                        <div key={idx} className="text-center text-[10px] font-bold uppercase tracking-widest text-olive-900/30">
+                            {dayName}
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {loading ? (
+                <div className="h-[600px] flex items-center justify-center bg-white rounded-[2.5rem] border border-olive-900/5">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-900"></div>
+                </div>
+            ) : (
+                viewMode === 'month' ? renderMonthGrid(currentMonth) : renderYearView()
+            )}
+
+            <CalendarSidebar
+                isOpen={isSidebarOpen}
+                onClose={() => setIsSidebarOpen(false)}
+                selectedRange={selectedRange}
+                onSuccess={() => {
+                    window.location.reload();
+                }}
+                basePrice={data?.property?.basePrice}
+                propertyId={propertyId}
+            />
+        </div>
+    );
 }
