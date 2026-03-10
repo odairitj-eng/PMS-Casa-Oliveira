@@ -25,91 +25,81 @@ export async function GET(req: NextRequest) {
     todayEnd.setHours(23, 59, 59, 999);
 
     try {
-        // ─── Receita total (últimos 30 dias, reservas confirmadas) ───────────
-        const revenueAgg = await db.reservation.aggregate({
-            _sum: { totalAmount: true },
-            where: {
-                status: 'CONFIRMED',
-                createdAt: { gte: thirtyDaysAgo },
-            },
-        });
-        const revenueTotal = revenueAgg._sum.totalAmount ?? 0;
-
-        // ─── Receita mês anterior (comparativo) ─────────────────────────────
+        // ─── Executando TODAS as consultas em paralelo para máxima performance ────
         const sixtyDaysAgo = new Date(now);
         sixtyDaysAgo.setDate(now.getDate() - 60);
-        const revenuePrevAgg = await db.reservation.aggregate({
-            _sum: { totalAmount: true },
-            where: {
-                status: 'CONFIRMED',
-                createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
-            },
-        });
+
+        const nextWeek = new Date(now);
+        nextWeek.setDate(now.getDate() + 7);
+
+        const [
+            revenueAgg,
+            revenuePrevAgg,
+            propertyBase,
+            blockedDatesCount,
+            adrAgg,
+            newGuestsCount,
+            newVipsCount,
+            upcomingArrivalsList,
+            pendingReservationsList
+        ] = await Promise.all([
+            // 1. Receita total (últimos 30 dias)
+            db.reservation.aggregate({
+                _sum: { totalAmount: true },
+                where: { status: 'CONFIRMED', createdAt: { gte: thirtyDaysAgo } },
+            }),
+            // 2. Receita mês anterior (comparativo 60-30 dias)
+            db.reservation.aggregate({
+                _sum: { totalAmount: true },
+                where: { status: 'CONFIRMED', createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+            }),
+            // 3. Informações base da propriedade
+            db.property.findFirst({ select: { minimumNights: true, basePrice: true } }),
+            // 4. Datas bloqueadas
+            db.blockedDate.count({
+                where: { date: { gte: now, lte: thirtyDaysFromNow } },
+            }),
+            // 5. ADR (Diária média)
+            db.reservation.aggregate({
+                _avg: { nightlyRate: true },
+                where: { status: 'CONFIRMED', createdAt: { gte: thirtyDaysAgo } },
+            }),
+            // 6. Novos Hóspedes
+            db.guest.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+            // 7. Novos VIPs
+            db.guest.count({ where: { createdAt: { gte: thirtyDaysAgo }, isVip: true } }),
+            // 8. Chegadas
+            db.reservation.findMany({
+                where: { status: 'CONFIRMED', checkIn: { gte: todayStart, lte: nextWeek } },
+                include: { guest: { select: { name: true, email: true, isVip: true } } },
+                orderBy: { checkIn: 'asc' },
+                take: 10,
+            }),
+            // 9. Avisos (Pagamentos pendentes)
+            db.reservation.findMany({
+                where: { status: 'PENDING_PAYMENT', holdExpiresAt: { gte: now } },
+                select: { id: true, holdExpiresAt: true, guest: { select: { name: true } } },
+                orderBy: { holdExpiresAt: 'asc' },
+                take: 5,
+            })
+        ]);
+
+        const revenueTotal = revenueAgg._sum.totalAmount ?? 0;
         const revenuePrev = revenuePrevAgg._sum.totalAmount ?? 0;
         const revenueGrowth = revenuePrev > 0
             ? Math.round(((revenueTotal - revenuePrev) / revenuePrev) * 100)
             : null;
 
-        // ─── Taxa de ocupação (próximos 30 dias) ────────────────────────────
-        const property = await db.property.findFirst({ select: { minimumNights: true } });
-        const blockedDates = await db.blockedDate.count({
-            where: {
-                date: { gte: now, lte: thirtyDaysFromNow },
-            },
-        });
-        const occupancyRate = Math.round((blockedDates / 30) * 100);
-        const availableNights = 30 - blockedDates;
+        const occupancyRate = Math.round((blockedDatesCount / 30) * 100);
+        const availableNights = 30 - blockedDatesCount;
 
-        // ─── Diária Média ADR (últimos 30 dias) ─────────────────────────────
-        const adrAgg = await db.reservation.aggregate({
-            _avg: { nightlyRate: true },
-            where: {
-                status: 'CONFIRMED',
-                createdAt: { gte: thirtyDaysAgo },
-            },
-        });
         const adr = adrAgg._avg.nightlyRate ?? 0;
-        const basePrice = await db.property.findFirst({ select: { basePrice: true } });
+        const basePriceValue = propertyBase?.basePrice ?? 0;
 
-        // ─── Novos hóspedes (últimos 30 dias) ───────────────────────────────
-        const newGuests = await db.guest.count({
-            where: { createdAt: { gte: thirtyDaysAgo } },
-        });
-        const newVips = await db.guest.count({
-            where: { createdAt: { gte: thirtyDaysAgo }, isVip: true },
-        });
-
-        // ─── Próximas chegadas (hoje e próximos 7 dias) ──────────────────────
-        const nextWeek = new Date(now);
-        nextWeek.setDate(now.getDate() + 7);
-
-        const upcomingArrivals = await db.reservation.findMany({
-            where: {
-                status: 'CONFIRMED',
-                checkIn: { gte: todayStart, lte: nextWeek },
-            },
-            include: {
-                guest: { select: { name: true, email: true, isVip: true } },
-            },
-            orderBy: { checkIn: 'asc' },
-            take: 10,
-        });
-
-        // ─── Avisos do sistema ───────────────────────────────────────────────
-        const pendingReservations = await db.reservation.findMany({
-            where: {
-                status: 'PENDING_PAYMENT',
-                holdExpiresAt: { gte: now },
-            },
-            select: { id: true, holdExpiresAt: true, guest: { select: { name: true } } },
-            orderBy: { holdExpiresAt: 'asc' },
-            take: 5,
-        }).catch(err => {
-            console.error('[Dashboard API] Error fetching pending reservations:', err.message);
-            return [];
-        });
-
-        // SyncLog model doesn't exist in local/neon schema right now
+        const upcomingArrivals = upcomingArrivalsList;
+        const pendingReservations = pendingReservationsList;
+        const newGuests = newGuestsCount;
+        const newVips = newVipsCount;
         const lastSyncs: any[] = [];
 
 
@@ -120,7 +110,7 @@ export async function GET(req: NextRequest) {
                 occupancyRate,
                 availableNights,
                 adr: Math.round(adr),
-                basePrice: basePrice?.basePrice ?? 0,
+                basePrice: basePriceValue,
                 newGuests,
                 newVips,
             },
