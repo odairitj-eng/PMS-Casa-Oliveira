@@ -194,7 +194,7 @@ export function BookingCard({
                                             <button onClick={() => setInfants(infants + 1)} disabled={infants >= 5} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Plus className="w-4 h-4" /></button>
                                         </div>
                                     </div>
-                                    {allowsPets && (
+                                    {allowsPets ? (
                                         <div className="flex justify-between items-center">
                                             <div>
                                                 <div className="font-bold text-olive-900 text-sm">Pets</div>
@@ -206,7 +206,19 @@ export function BookingCard({
                                                 <button onClick={() => setPets(pets + 1)} disabled={pets >= maxPets} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Plus className="w-4 h-4" /></button>
                                             </div>
                                         </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-1 border-t border-olive-900/5 pt-4">
+                                            <div className="font-bold text-olive-900 text-sm">Animais de estimação</div>
+                                            <div className="text-xs text-olive-900/50 underline cursor-pointer hover:text-black transition-colors">Vai levar um animal de serviço?</div>
+                                        </div>
                                     )}
+
+                                    <div className="pt-4 border-t border-olive-900/5 space-y-3">
+                                        <p className="text-xs text-olive-900/70 leading-relaxed font-medium">
+                                            Este espaço acomoda no máximo {maxGuests} hóspedes, não incluindo bebês. {allowsPets ? "" : "Animais de estimação não são permitidos."}
+                                        </p>
+                                    </div>
+
                                     <div className="flex justify-end pt-2">
                                         <button onClick={() => setIsGuestOpen(false)} className="text-xs font-bold underline text-olive-900">Fechar</button>
                                     </div>
