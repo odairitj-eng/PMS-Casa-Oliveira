@@ -15,12 +15,15 @@ export default function ProfilePage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // Safety Timeout: Forçar fim do loading após 10s para evitar spinner infinito
+        const timer = setTimeout(() => setIsLoading(false), 10000);
+
         if (status === "authenticated") {
             const fetchData = async () => {
                 try {
                     const [guestRes, reservationsRes] = await Promise.all([
                         axios.get("/api/guests/me"),
-                        axios.get("/api/reservations/me") // Vou precisar criar esta API ou filtrar
+                        axios.get("/api/reservations/me")
                     ]);
                     setGuestData(guestRes.data);
                     setReservations(reservationsRes.data);
@@ -28,12 +31,16 @@ export default function ProfilePage() {
                     console.error("Erro ao buscar dados do perfil", error);
                 } finally {
                     setIsLoading(false);
+                    clearTimeout(timer);
                 }
             };
             fetchData();
         } else if (status === "unauthenticated") {
-            window.location.href = "/auth/login?callbackUrl=/profile";
+            setIsLoading(false);
+            clearTimeout(timer);
         }
+
+        return () => clearTimeout(timer);
     }, [status]);
 
     if (isLoading || status === "loading") {

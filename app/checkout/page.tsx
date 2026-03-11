@@ -42,35 +42,47 @@ function CheckoutContent() {
     }, [guestsCount]);
 
     useEffect(() => {
-        if (status === "authenticated" && checkIn && checkOut) {
-            const fetchData = async () => {
+        // Safety Timeout: 15s para checkout pois envolve mais APIs
+        const timer = setTimeout(() => setIsLoading(false), 15000);
+
+        if (status === "authenticated") {
+            const fetchPricing = async () => {
+                const pId = searchParams.get("propertyId") || propertyId;
+                const cIn = searchParams.get("checkIn") || checkIn;
+                const cOut = searchParams.get("checkOut") || checkOut;
+
+                if (!pId || !cIn || !cOut) {
+                    setIsLoading(false);
+                    clearTimeout(timer);
+                    return;
+                }
+
                 try {
                     const [guestRes, pricingRes, propertyRes] = await Promise.all([
                         axios.get("/api/guests/me"),
-                        axios.get(`/api/pricing?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}`),
-                        axios.get(`/api/property/${propertyId}/public`)
+                        axios.get(`/api/pricing?propertyId=${pId}&checkIn=${cIn}&checkOut=${cOut}`),
+                        axios.get(`/api/property/${pId}/public`)
                     ]);
                     setGuestData(guestRes.data);
                     setPhone(guestRes.data.phone || "");
                     setPricing(pricingRes.data);
                     setPropertyData(propertyRes.data);
                 } catch (error) {
-                    console.error("Erro ao carregar dados", error);
+                    console.error("Erro ao buscar dados", error);
                     toast.error("Erro ao carregar informações da reserva.");
                 } finally {
                     setIsLoading(false);
+                    clearTimeout(timer);
                 }
             };
-            fetchData();
+            fetchPricing();
+        } else if (status === "unauthenticated") {
+            setIsLoading(false);
+            clearTimeout(timer);
         }
-    }, [status, checkIn, checkOut, propertyId, router, searchParams]);
 
-    // Proteção extra via cliente
-    if (status === "unauthenticated") {
-        const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
-        router.replace(`/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`);
-        return null;
-    }
+        return () => clearTimeout(timer);
+    }, [status, searchParams, propertyId, checkIn, checkOut]);
 
     const handleSubmit = async () => {
         if (!phone) {
@@ -83,9 +95,9 @@ function CheckoutContent() {
 
         try {
             const response = await axios.post("/api/reservations", {
-                propertyId,
-                checkIn,
-                checkOut,
+                propertyId: searchParams.get("propertyId") || propertyId,
+                checkIn: searchParams.get("checkIn") || checkIn,
+                checkOut: searchParams.get("checkOut") || checkOut,
                 guestName: session?.user?.name,
                 guestEmail: session?.user?.email,
                 guestPhone: phone,

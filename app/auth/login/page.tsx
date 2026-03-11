@@ -6,6 +6,7 @@ import { LoginButtons } from "@/components/auth/LoginButtons";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 function LoginContent() {
     const { data: session, status } = useSession();
@@ -16,17 +17,26 @@ function LoginContent() {
 
     useEffect(() => {
         if (status === "authenticated") {
+            const userRole = (session?.user as any)?.role;
+            const isAdmin = userRole === "ADMIN" || userRole === "CO_ADMIN";
+
+            // Proteção Anti-Loop: Se um não-admin tentar ir para o admin, manda para a home
+            if (callbackUrl.startsWith("/admin") && !isAdmin) {
+                router.replace("/");
+                return;
+            }
+
             router.replace(callbackUrl);
         }
-    }, [status, router, callbackUrl]);
+    }, [status, callbackUrl, router, session]);
 
     if (status === "loading" || status === "authenticated") {
         return (
-            <div className="min-h-screen bg-sand-50 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-4 border-olive-900 border-t-transparent rounded-full animate-spin" />
-                    <p className="text-olive-900 font-bold animate-pulse">Verificando acesso...</p>
-                </div>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-sand-50 gap-4">
+                <Loader2 className="w-10 h-10 animate-spin text-olive-900" />
+                <p className="text-olive-900/60 font-bold text-sm uppercase tracking-widest animate-pulse">
+                    Autenticando...
+                </p>
             </div>
         );
     }
