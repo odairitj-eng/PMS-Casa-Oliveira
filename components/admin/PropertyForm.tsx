@@ -443,8 +443,9 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                                         </SelectTrigger>
                                         <SelectContent className="max-h-[350px] rounded-2xl border-olive-900/10 shadow-2xl">
                                             <SelectItem value="Flexível" className="font-bold">Flexível</SelectItem>
-                                            {Array.from({ length: 24 }).map((_, i) => {
-                                                const time = `${i.toString().padStart(2, '0')}:00`;
+                                            {Array.from({ length: 16 }).map((_, i) => {
+                                                const hour = (i + 8).toString().padStart(2, '0');
+                                                const time = `${hour}:00`;
                                                 return <SelectItem key={time} value={time}>{time}</SelectItem>;
                                             })}
                                         </SelectContent>
@@ -461,16 +462,16 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                                         </SelectTrigger>
                                         <SelectContent className="max-h-[400px] rounded-2xl border-olive-900/10 shadow-2xl">
                                             <SelectItem value="Flexível" className="font-bold">Flexível</SelectItem>
-                                            {/* Manhã/Tarde */}
-                                            {Array.from({ length: 24 }).map((_, i) => {
-                                                const time = `${i.toString().padStart(2, '0')}:00`;
+                                            {/* Das 17:00 às 23:00 */}
+                                            {Array.from({ length: 7 }).map((_, i) => {
+                                                const hour = (i + 17).toString().padStart(2, '0');
+                                                const time = `${hour}:00`;
                                                 return <SelectItem key={time} value={time}>{time}</SelectItem>;
                                             })}
-                                            {/* Noite Adentro / Madrugada do dia seguinte */}
+                                            {/* Meia-noite e Dia Seguinte */}
                                             <SelectItem value="00:00" className="bg-olive-900/5">00:00</SelectItem>
                                             <SelectItem value="01:00" className="bg-olive-900/5">01:00 (dia seguinte)</SelectItem>
                                             <SelectItem value="02:00" className="bg-olive-900/5">02:00 (dia seguinte)</SelectItem>
-                                            <SelectItem value="03:00" className="bg-olive-900/5">03:00 (dia seguinte)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
