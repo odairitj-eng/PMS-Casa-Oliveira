@@ -42,7 +42,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
     const parseLocal = (dStr: string) => {
         if (!dStr) return new Date();
-        const [y, m, d] = new Date(dStr).toISOString().split('T')[0].split('-');
+        const datePart = dStr.includes('T') ? dStr.split('T')[0] : dStr;
+        const [y, m, d] = datePart.split('-');
         return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
     };
 
@@ -225,6 +226,19 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         });
     };
 
+    const isDateNightAvailable = (date: Date) => {
+        const dateOnly = startOfDay(date);
+        const inWindow = isDateInWindow(dateOnly);
+        const dayReservation = data?.reservations?.find((r: any) => {
+            const s = startOfDay(parseLocal(r.checkIn));
+            const e = startOfDay(parseLocal(r.checkOut));
+            return dateOnly >= s && dateOnly < e;
+        });
+        const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), dateOnly));
+        const isPast = isBefore(dateOnly, startOfDay(new Date()));
+        return inWindow && !dayBlock && !dayReservation && !isPast;
+    };
+
     const getDayRules = (date: Date) => {
         if (!data?.pricingRules) return [];
         const dateOnly = startOfDay(date);
@@ -379,11 +393,13 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), cloneDay));
                 const isPast = isBefore(cloneDay, startOfDay(new Date()));
 
-                const isNightAvailable = inWindow && !dayBlock && !dayReservation && !isPast;
+                const isNightAvailable = isDateNightAvailable(cloneDay);
                 const isStartBlock = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), cloneDay)) ||
                     data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay));
 
-                const isVivid = isNightAvailable; // Somente noites livres são vividas
+                const isCheckoutDay = isStartBlock && isDateNightAvailable(addDays(cloneDay, -1));
+
+                const isVivid = isNightAvailable || isCheckoutDay;
                 const canInteract = (inWindow && !isPast) || isStartBlock;
 
                 const isInDragRange = getIsDateInDragRange(cloneDay);
@@ -402,8 +418,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                             "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
                             isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
-                            !isVivid && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-30 border-olive-900/5",
-                            dayBlock && isCurrentMonth && "bg-gray-50/30 border-olive-900/10",
+                            !isVivid && !dayBlock && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-30 border-olive-900/5",
+                            dayBlock && isCurrentMonth && "bg-white border-olive-900/10 shadow-sm transition-opacity",
                             isVivid && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
@@ -423,10 +439,10 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 )}>
                                     {format(cloneDay, "d")}
                                 </span>
-                                {!isNightAvailable && isStartBlock && isCurrentMonth && (
-                                    <span className="text-[8px] font-black text-red-500/40 uppercase bg-red-500/5 px-1 rounded">Checkout</span>
+                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && (
+                                    <span className="text-[8px] font-black text-red-500 uppercase bg-red-500/5 px-1 rounded">Checkout</span>
                                 )}
-                                {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && (
+                                {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && !isCheckoutDay && (
                                     <Lock className="w-3 h-3 text-olive-900/20" />
                                 )}
                             </div>

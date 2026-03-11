@@ -280,7 +280,9 @@ export function DateSelectionModal({
                             isWithinInterval(date, { start: selectedRange.start, end: selectedRange.end });
                         const isNightAvailable = isDateAvailable(date);
                         const isStartBlock = isStartOfReservation(date);
-                        const isVivid = isNightAvailable; // Somente noites livres são vividas (cores vivas)
+                        const isCheckoutDay = isStartBlock && isDateAvailable(addDays(date, -1));
+
+                        const isVivid = isNightAvailable || isCheckoutDay; // Vívido se noite livre OU checkout após noite livre
 
                         const isToday = isSameDay(date, new Date());
 
@@ -301,18 +303,20 @@ export function DateSelectionModal({
 
                         // Verificação se é dia de checkout de reserva alheia (poderia ter checkin no mesmo dia)
                         const isCheckoutOnly = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkOut), date)) && isNightAvailable;
+                        const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), date));
 
                         return (
                             <div
                                 key={i}
-                                onClick={() => isCurrentMonth && (isVivid || isStartBlock || isInRange) && onDateClick(date)}
-                                onMouseEnter={() => isCurrentMonth && (isVivid || isStartBlock) && setHoveredDate(date)}
+                                onClick={() => isCurrentMonth && (isVivid || isInRange) && onDateClick(date)}
+                                onMouseEnter={() => isCurrentMonth && isVivid && setHoveredDate(date)}
                                 onMouseLeave={() => setHoveredDate(null)}
                                 className={cn(
                                     "h-14 md:h-20 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
                                     !isCurrentMonth && "opacity-0 pointer-events-none",
-                                    isCurrentMonth && !isVivid && "opacity-30 cursor-not-allowed grayscale",
+                                    isCurrentMonth && !isVivid && !isStartBlock && !dayBlock && "opacity-30 cursor-not-allowed grayscale",
                                     isVivid && isCurrentMonth && "hover:bg-olive-900/5 rounded-2xl",
+                                    dayBlock && isCurrentMonth && "bg-white border-olive-900/5 shadow-sm opacity-100",
                                     (isInRange || isHovered) && "bg-olive-900/5 rounded-none",
                                     isSelectedStart && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
                                     isSelectedEnd && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
@@ -335,8 +339,8 @@ export function DateSelectionModal({
                                     </span>
                                 )}
 
-                                {isStartBlock && !isNightAvailable && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
-                                    <span className="text-[9px] font-bold text-red-500/40 mt-1 z-10 uppercase">Checkout</span>
+                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
+                                    <span className="text-[9px] font-bold text-red-500 mt-1 z-10 uppercase">Checkout</span>
                                 )}
 
                                 {isCheckoutOnly && !isSelectedStart && !isSelectedEnd && (
@@ -356,7 +360,7 @@ export function DateSelectionModal({
                         );
                     })}
                 </div>
-            </div>
+            </div >
         );
     };
 
