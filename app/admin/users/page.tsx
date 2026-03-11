@@ -27,10 +27,16 @@ export default function UserManagementPage() {
         }
     };
 
-    const updateRole = async (userId: string, newRole: string) => {
+    const updateRole = async (userId: string, newRole: string, isPending?: boolean, email?: string, name?: string) => {
         setUpdatingId(userId);
         try {
-            await axios.patch("/api/admin/users", { userId, role: newRole });
+            await axios.patch("/api/admin/users", {
+                userId,
+                role: newRole,
+                guestId: isPending ? userId.replace('pending-', '') : undefined,
+                email: isPending ? email : undefined,
+                name: isPending ? name : undefined
+            });
             toast.success("Cargo atualizado com sucesso");
             fetchUsers();
         } catch (error) {
@@ -100,21 +106,26 @@ export default function UserManagementPage() {
                                         </div>
                                     </td>
                                     <td className="bg-gray-50/50 py-4">
-                                        <div className={cn(
-                                            "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter",
-                                            user.role === 'ADMIN' ? "bg-olive-900 text-white shadow-md shadow-olive-900/20" :
-                                                user.role === 'CO_ADMIN' ? "bg-olive-900/10 text-olive-900 border border-olive-900/10" :
-                                                    "bg-gray-100 text-gray-400"
-                                        )}>
-                                            {user.role === 'ADMIN' ? <ShieldCheck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
-                                            {user.role}
+                                        <div className="flex flex-col gap-1 items-start">
+                                            <div className={cn(
+                                                "inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter",
+                                                user.role === 'ADMIN' ? "bg-olive-900 text-white shadow-md shadow-olive-900/20" :
+                                                    user.role === 'CO_ADMIN' ? "bg-olive-900/10 text-olive-900 border border-olive-900/10" :
+                                                        "bg-gray-100 text-gray-400"
+                                            )}>
+                                                {user.role === 'ADMIN' ? <ShieldCheck className="w-3 h-3" /> : <UserCog className="w-3 h-3" />}
+                                                {user.role}
+                                            </div>
+                                            {user.isPending && (
+                                                <span className="text-[8px] font-bold text-olive-900/40 uppercase ml-1">Acesso Pendente</span>
+                                            )}
                                         </div>
                                     </td>
                                     <td className="bg-gray-50/50 rounded-r-[1.5rem] py-4">
                                         <div className="flex items-center gap-2">
                                             {user.role !== 'ADMIN' && (
                                                 <button
-                                                    onClick={() => updateRole(user.id, 'ADMIN')}
+                                                    onClick={() => updateRole(user.id, 'ADMIN', user.isPending, user.email, user.name)}
                                                     disabled={updatingId === user.id}
                                                     className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-olive-900 hover:text-white transition-all disabled:opacity-50 text-olive-900/40 bg-white shadow-sm"
                                                 >
@@ -123,14 +134,14 @@ export default function UserManagementPage() {
                                             )}
                                             {user.role !== 'CO_ADMIN' && (
                                                 <button
-                                                    onClick={() => updateRole(user.id, 'CO_ADMIN')}
+                                                    onClick={() => updateRole(user.id, 'CO_ADMIN', user.isPending, user.email, user.name)}
                                                     disabled={updatingId === user.id}
                                                     className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-olive-900/10 hover:text-olive-900 transition-all disabled:opacity-50 text-olive-900/40 bg-white shadow-sm border border-olive-900/5"
                                                 >
                                                     Tornar Co-Admin
                                                 </button>
                                             )}
-                                            {user.role !== 'USER' && (
+                                            {!user.isPending && user.role !== 'USER' && (
                                                 <button
                                                     onClick={() => updateRole(user.id, 'USER')}
                                                     disabled={updatingId === user.id}
