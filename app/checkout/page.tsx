@@ -24,6 +24,7 @@ function CheckoutContent() {
     const guestsCount = searchParams.get("guests") || "1";
 
     const [guestData, setGuestData] = useState<any>(null);
+    const [propertyData, setPropertyData] = useState<any>(null);
     const [phone, setPhone] = useState("");
     const [pricing, setPricing] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -44,13 +45,15 @@ function CheckoutContent() {
         if (status === "authenticated" && checkIn && checkOut) {
             const fetchData = async () => {
                 try {
-                    const [guestRes, pricingRes] = await Promise.all([
+                    const [guestRes, pricingRes, propertyRes] = await Promise.all([
                         axios.get("/api/guests/me"),
-                        axios.get(`/api/pricing?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}`)
+                        axios.get(`/api/pricing?propertyId=${propertyId}&checkIn=${checkIn}&checkOut=${checkOut}`),
+                        axios.get(`/api/property/${propertyId}/public`)
                     ]);
                     setGuestData(guestRes.data);
                     setPhone(guestRes.data.phone || "");
                     setPricing(pricingRes.data);
+                    setPropertyData(propertyRes.data);
                 } catch (error) {
                     console.error("Erro ao carregar dados", error);
                     toast.error("Erro ao carregar informações da reserva.");
@@ -64,7 +67,7 @@ function CheckoutContent() {
 
     // Proteção extra via cliente
     if (status === "unauthenticated") {
-        const currentPath = window.location.pathname + window.location.search;
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
         window.location.href = `/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`;
         return null;
     }
@@ -305,12 +308,23 @@ function CheckoutContent() {
                 {/* Coluna Direita: Resumo Financeiro */}
                 <div className="lg:col-span-1">
                     <Card className="rounded-[2rem] shadow-lg border-0 sticky top-8 overflow-hidden">
-                        <div className="aspect-video relative overflow-hidden">
-                            <Image src="/imagens/gallery-1.jpg" alt="Casa Oliveira" fill className="object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-olive-900/60 to-transparent" />
+                        <div className="aspect-video relative overflow-hidden bg-olive-900/5">
+                            {propertyData?.photos?.[0]?.imageUrl ? (
+                                <Image
+                                    src={propertyData.photos[0].imageUrl}
+                                    alt={propertyData.publicTitle || propertyData.name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                    <Image src="/imagens/logo.png" alt="Logo" width={80} height={80} className="opacity-20 object-contain" />
+                                </div>
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-olive-900/60 via-transparent to-transparent" />
                             <div className="absolute bottom-4 left-4 text-white">
-                                <p className="font-bold text-lg leading-tight">Casa Oliveira</p>
-                                <p className="text-xs opacity-80">Campos do Jordão, SP</p>
+                                <p className="font-bold text-lg leading-tight">{propertyData?.publicTitle || propertyData?.name || "Casa Oliveira"}</p>
+                                <p className="text-xs opacity-80">{propertyData?.city || "Campos do Jordão"}, {propertyData?.state || "SP"}</p>
                             </div>
                         </div>
                         <CardContent className="p-6 space-y-6">
