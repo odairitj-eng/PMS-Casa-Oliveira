@@ -85,18 +85,22 @@ export function InstallPrompt() {
                 </div>
 
                 {isIOS ? (
-                    <div className="bg-olive-900/[0.03] p-5 rounded-2xl border border-olive-900/5 space-y-3">
+                    <div className="bg-olive-900/[0.03] p-5 rounded-2xl border border-olive-900/5 space-y-4">
                         <p className="text-[11px] text-olive-900/80 font-medium leading-relaxed">
-                            Para transformar em App e remover a barra do navegador:
+                            Siga estes passos no seu **Safari** para transformar em App e remover as barras do navegador:
                         </p>
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-3">
-                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm text-[10px] font-black text-olive-900">1</span>
-                                <p className="text-[11px] text-olive-900 font-bold">Toque no ícone de Compartilhar (quadrado com seta)</p>
+                        <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm text-[10px] font-black text-olive-900 shrink-0 mt-0.5">1</span>
+                                <p className="text-[11px] text-olive-900 font-bold leading-tight">Toque no ícone de <span className="bg-white px-1.5 py-0.5 rounded border border-olive-900/10 inline-flex items-center mx-1">Compartilhar</span> (o quadrado com seta na barra inferior do Safari)</p>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm text-[10px] font-black text-olive-900">2</span>
-                                <p className="text-[11px] text-olive-900 font-bold">Role e toque em &quot;Adicionar à Tela de Início&quot;</p>
+                            <div className="flex items-start gap-3">
+                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm text-[10px] font-black text-olive-900 shrink-0 mt-0.5">2</span>
+                                <p className="text-[11px] text-olive-900 font-bold leading-tight">Role as opções e toque em <span className="text-olive-900 underline decoration-olive-900/20 underline-offset-2">&quot;Adicionar à Tela de Início&quot;</span></p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <span className="w-6 h-6 bg-white rounded-lg flex items-center justify-center shadow-sm text-[10px] font-black text-olive-900 shrink-0 mt-0.5">3</span>
+                                <p className="text-[11px] text-olive-900 font-bold leading-tight">Toque em <span className="text-olive-900 underline decoration-olive-900/20 underline-offset-2">&quot;Adicionar&quot;</span> no canto superior direito.</p>
                             </div>
                         </div>
                     </div>
