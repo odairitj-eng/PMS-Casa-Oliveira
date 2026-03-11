@@ -100,17 +100,28 @@ export function Header() {
 
             {/* Mobile Menu Drawer */}
             <div className={cn(
-                "fixed inset-0 z-[100] bg-sand-50 transition-all duration-500 md:hidden flex flex-col pt-32 px-8 shadow-2xl",
+                "fixed inset-0 z-[150] bg-sand-50 transition-all duration-500 md:hidden flex flex-col",
                 isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
             )}>
-                <button
-                    onClick={() => setIsMenuOpen(false)}
-                    className="absolute top-6 right-6 p-3 bg-olive-900/5 rounded-2xl text-olive-900"
-                >
-                    <X className="w-6 h-6" />
-                </button>
+                <div className="p-6 flex justify-between items-center border-b border-olive-900/5 bg-white/50">
+                    <div className="rounded-xl overflow-hidden shadow-sm border border-olive-900/5">
+                        <Image
+                            src="/imagens/logo.png"
+                            alt="Casa Oliveira"
+                            width={50}
+                            height={50}
+                            className="object-contain w-10 h-10"
+                        />
+                    </div>
+                    <button
+                        onClick={() => setIsMenuOpen(false)}
+                        className="p-3 bg-olive-900/5 rounded-2xl text-olive-900"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
 
-                <div className="flex flex-col gap-8">
+                <div className="flex-1 overflow-y-auto py-12 px-8 flex flex-col gap-10">
                     <Link
                         href="#a-casa"
                         onClick={(e) => handleScroll(e, 'a-casa')}
@@ -140,7 +151,7 @@ export function Header() {
                         Regras da Casa
                     </Link>
 
-                    <div className="mt-8 pt-8 border-t border-olive-900/5 flex flex-col gap-4">
+                    <div className="mt-4 pt-8 border-t border-olive-900/5 flex flex-col gap-4">
                         <p className="text-sm font-bold text-olive-900/40 uppercase tracking-widest">Contato</p>
                         <a href="tel:+5547999820528" className="text-xl font-bold text-olive-900">+55 47 99982-0528</a>
                     </div>
