@@ -143,10 +143,18 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
     };
 
     // Handlers para Arraste com Botão Direito
-    const handlePointerDown = (e: React.PointerEvent, day: Date) => {
+    const handleMonthChange = (offset: number) => {
+        if (viewMode === 'month') {
+            setCurrentMonth(addMonths(currentMonth, offset));
+        } else {
+            setCurrentMonth(addMonths(currentMonth, offset * 12));
+        }
+    };
+
+    const handlePointerDown = (e: React.PointerEvent, date: Date) => {
         if (e.button === 2) { // Botão direito
             (e.target as HTMLElement).setPointerCapture(e.pointerId);
-            const startDay = startOfDay(day);
+            const startDay = startOfDay(date);
             const today = startOfDay(new Date());
             if (isBefore(startDay, today)) return;
 
@@ -295,18 +303,18 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                     </button>
 
                     <div className="flex items-center gap-1 ml-4">
-                        <div className="flex">
+                        <div className="flex items-center gap-1">
                             <button
-                                onClick={() => setCurrentMonth(viewMode === 'month' ? subMonths(currentMonth, 1) : addMonths(currentMonth, -12))}
-                                className="p-2 hover:bg-olive-900/5 rounded-full transition-all text-olive-900"
+                                onClick={() => handleMonthChange(-1)}
+                                className="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-olive-900/10 text-olive-900 transition-all active:scale-90"
                             >
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-6 h-6" />
                             </button>
                             <button
-                                onClick={() => setCurrentMonth(viewMode === 'month' ? addMonths(currentMonth, 1) : addMonths(currentMonth, 12))}
-                                className="p-2 hover:bg-olive-900/5 rounded-full transition-all text-olive-900"
+                                onClick={() => handleMonthChange(1)}
+                                className="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-olive-900/10 text-olive-900 transition-all active:scale-90"
                             >
-                                <ChevronRight className="w-5 h-5" />
+                                <ChevronRight className="w-6 h-6" />
                             </button>
                         </div>
 
@@ -527,13 +535,12 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
                                 return (
                                     <div
-                                        key={i}
+                                        key={day.toString()}
                                         className={cn(
-                                            "h-8 rounded-lg flex items-center justify-center text-[10px] font-bold cursor-pointer transition-all",
-                                            !isCurrentMonth && "opacity-0 pointer-events-none",
-                                            isSelected ? "bg-olive-900 text-white" :
-                                                (!isAvailable) ? "bg-gray-100/50 text-olive-900/20" :
-                                                    "hover:bg-sand-50 text-olive-900/60"
+                                            "relative min-h-[50px] md:min-h-[140px] px-1 py-1 md:p-3 border-t border-olive-900/5 flex flex-col group transition-all",
+                                            !isCurrentMonth && "bg-sand-50/30 opacity-30",
+                                            isCurrentMonth && "hover:bg-olive-900/5",
+                                            isSelected && "bg-olive-900/10 ring-2 ring-inset ring-olive-900/20 z-10"
                                         )}
                                         onClick={() => canInteract && onDateClick(day)}
                                         onPointerDown={(e) => canInteract && handlePointerDown(e, day)}

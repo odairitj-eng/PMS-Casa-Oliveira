@@ -16,9 +16,7 @@ const nextConfig = {
             },
         ],
     },
-    experimental: {
-        serverComponentsExternalPackages: ['node-ical'],
-    },
+    serverExternalPackages: ['node-ical'],
 };
 
 export default nextConfig;

@@ -166,44 +166,44 @@ export function BookingCard({
                                             <div className="font-bold text-olive-900 text-sm">Adultos</div>
                                             <div className="text-xs text-olive-900/50">13 anos ou mais</div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <button onClick={() => setAdults(Math.max(1, adults - 1))} disabled={adults <= 1} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Minus className="w-4 h-4" /></button>
-                                            <span className="w-4 text-center text-sm font-bold">{adults}</span>
-                                            <button onClick={() => setAdults(adults + 1)} disabled={!canAddOccupant} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Plus className="w-4 h-4" /></button>
+                                        <div className="flex items-center gap-4">
+                                            <button onClick={() => setAdults(Math.max(1, adults - 1))} disabled={adults <= 1} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Minus className="w-5 h-5" /></button>
+                                            <span className="w-8 text-center font-bold text-olive-900">{adults}</span>
+                                            <button onClick={() => setAdults(adults + 1)} disabled={!canAddOccupant} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Plus className="w-5 h-5" /></button>
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <div className="font-bold text-olive-900 text-sm">Crianças</div>
-                                            <div className="text-xs text-olive-900/50">2 a 12 anos</div>
+                                            <p className="font-bold text-olive-900">Crianças</p>
+                                            <p className="text-xs text-olive-900/50 uppercase font-black tracking-widest">2 a 12 anos</p>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <button onClick={() => setChildren(Math.max(0, children - 1))} disabled={children <= 0} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Minus className="w-4 h-4" /></button>
-                                            <span className="w-4 text-center text-sm font-bold">{children}</span>
-                                            <button onClick={() => setChildren(children + 1)} disabled={!canAddOccupant} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Plus className="w-4 h-4" /></button>
+                                        <div className="flex items-center gap-4">
+                                            <button onClick={() => setChildren(Math.max(0, children - 1))} disabled={children <= 0} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Minus className="w-5 h-5" /></button>
+                                            <span className="w-8 text-center font-bold text-olive-900">{children}</span>
+                                            <button onClick={() => setChildren(children + 1)} disabled={!canAddOccupant} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Plus className="w-5 h-5" /></button>
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex items-center justify-between">
                                         <div>
-                                            <div className="font-bold text-olive-900 text-sm">Bebês</div>
-                                            <div className="text-xs text-olive-900/50">Menor de 2 anos</div>
+                                            <p className="font-bold text-olive-900">Bebês</p>
+                                            <p className="text-xs text-olive-900/50 uppercase font-black tracking-widest">Menos de 2 anos</p>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <button onClick={() => setInfants(Math.max(0, infants - 1))} disabled={infants <= 0} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Minus className="w-4 h-4" /></button>
-                                            <span className="w-4 text-center text-sm font-bold">{infants}</span>
-                                            <button onClick={() => setInfants(infants + 1)} disabled={infants >= 5} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Plus className="w-4 h-4" /></button>
+                                        <div className="flex items-center gap-4">
+                                            <button onClick={() => setInfants(Math.max(0, infants - 1))} disabled={infants <= 0} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Minus className="w-5 h-5" /></button>
+                                            <span className="w-8 text-center font-bold text-olive-900">{infants}</span>
+                                            <button onClick={() => setInfants(infants + 1)} disabled={infants >= 5} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Plus className="w-5 h-5" /></button>
                                         </div>
                                     </div>
-                                    {allowsPets ? (
-                                        <div className="flex justify-between items-center">
+                                    {maxPets > 0 ? (
+                                        <div className="flex items-center justify-between">
                                             <div>
-                                                <div className="font-bold text-olive-900 text-sm">Pets</div>
-                                                <div className="text-xs text-olive-900/50">Animais de estimação</div>
+                                                <p className="font-bold text-olive-900">Animais</p>
+                                                <p className="text-xs text-olive-900/50 uppercase font-black tracking-widest">Máximo {maxPets}</p>
                                             </div>
-                                            <div className="flex items-center gap-3">
-                                                <button onClick={() => setPets(Math.max(0, pets - 1))} disabled={pets <= 0} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Minus className="w-4 h-4" /></button>
-                                                <span className="w-4 text-center text-sm font-bold">{pets}</span>
-                                                <button onClick={() => setPets(pets + 1)} disabled={pets >= maxPets} className="w-8 h-8 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20"><Plus className="w-4 h-4" /></button>
+                                            <div className="flex items-center gap-4">
+                                                <button onClick={() => setPets(Math.max(0, pets - 1))} disabled={pets <= 0} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Minus className="w-5 h-5" /></button>
+                                                <span className="w-8 text-center font-bold text-olive-900">{pets}</span>
+                                                <button onClick={() => setPets(pets + 1)} disabled={pets >= maxPets} className="w-11 h-11 rounded-full border border-olive-900/20 flex items-center justify-center disabled:opacity-20 active:bg-olive-900/5 transition-colors"><Plus className="w-5 h-5" /></button>
                                             </div>
                                         </div>
                                     ) : (

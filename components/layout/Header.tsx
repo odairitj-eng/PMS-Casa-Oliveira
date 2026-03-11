@@ -1,19 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function Header() {
     const pathname = usePathname();
     const isAdminPage = pathname?.startsWith("/admin");
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // No painel admin, usaremos a barra lateral existente para o menu de usuário por enquanto
-    // ou podemos adicionar um topo limpo se desejar. Mantendo para páginas públicas.
     if (isAdminPage) return null;
 
     const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, id: string) => {
+        setIsMenuOpen(false);
         const element = document.getElementById(id);
         if (element) {
             e.preventDefault();
@@ -33,18 +37,18 @@ export function Header() {
 
     return (
         <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-olive-900/5 shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-32 flex justify-between items-center">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-32 flex justify-between items-center">
                 <Link href="/" className="hover:opacity-80 transition-opacity">
                     <Image
                         src="/imagens/logo.png"
                         alt="Casa Oliveira"
-                        width={120}
-                        height={120}
-                        className="object-contain"
+                        width={100}
+                        height={100}
+                        className="object-contain w-20 md:w-24"
                     />
                 </Link>
 
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4 md:gap-6">
                     <nav className="hidden md:flex items-center gap-8">
                         <Link
                             href="#a-casa"
@@ -78,7 +82,65 @@ export function Header() {
 
                     <div className="h-8 w-[1px] bg-olive-900/10 hidden md:block" />
 
-                    <UserMenu />
+                    <div className="flex items-center gap-2">
+                        <UserMenu />
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="p-2 text-olive-900 md:hidden hover:bg-olive-900/5 rounded-xl transition-colors"
+                            aria-label="Menu"
+                        >
+                            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Mobile Menu Drawer */}
+            <div className={cn(
+                "fixed inset-0 z-[60] bg-white transition-all duration-300 md:hidden flex flex-col pt-32 px-8",
+                isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
+            )}>
+                <button
+                    onClick={() => setIsMenuOpen(false)}
+                    className="absolute top-6 right-6 p-3 bg-olive-900/5 rounded-2xl text-olive-900"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+
+                <div className="flex flex-col gap-8">
+                    <Link
+                        href="#a-casa"
+                        onClick={(e) => handleScroll(e, 'a-casa')}
+                        className="text-3xl font-black text-olive-900 tracking-tight"
+                    >
+                        A Casa
+                    </Link>
+                    <Link
+                        href="#comodidades"
+                        onClick={(e) => handleScroll(e, 'comodidades')}
+                        className="text-3xl font-black text-olive-900 tracking-tight"
+                    >
+                        Comodidades
+                    </Link>
+                    <Link
+                        href="#localizacao"
+                        onClick={(e) => handleScroll(e, 'localizacao')}
+                        className="text-3xl font-black text-olive-900 tracking-tight"
+                    >
+                        Localização
+                    </Link>
+                    <Link
+                        href="#regras"
+                        onClick={(e) => handleScroll(e, 'regras')}
+                        className="text-3xl font-black text-olive-900 tracking-tight"
+                    >
+                        Regras da Casa
+                    </Link>
+
+                    <div className="mt-8 pt-8 border-t border-olive-900/5 flex flex-col gap-4">
+                        <p className="text-sm font-bold text-olive-900/40 uppercase tracking-widest">Contato</p>
+                        <a href="tel:+5547999820528" className="text-xl font-bold text-olive-900">+55 47 99982-0528</a>
+                    </div>
                 </div>
             </div>
         </header>

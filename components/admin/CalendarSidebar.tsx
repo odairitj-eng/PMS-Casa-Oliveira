@@ -183,6 +183,7 @@ export function CalendarSidebar({ isOpen, onClose, selectedRange, onSuccess, bas
                                         <span style={{ fontSize: "14px", color: FG, fontWeight: 700, opacity: 0.8 }}>R$</span>
                                         <input
                                             type="number"
+                                            inputMode="decimal"
                                             value={price}
                                             onChange={e => setPrice(e.target.value)}
                                             placeholder={basePrice ? String(basePrice) : "180"}

@@ -157,6 +157,9 @@ export function GuestModal({ isOpen, onClose, onSuccess, guest }: GuestModalProp
                                 <Phone className="w-4 h-4" /> WhatsApp
                             </Label>
                             <Input
+                                type="tel"
+                                inputMode="tel"
+                                autoComplete="tel"
                                 value={formData.phone}
                                 onChange={e => set("phone", e.target.value)}
                                 placeholder="+55 11 9...."

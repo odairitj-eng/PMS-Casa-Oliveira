@@ -16,12 +16,13 @@ const RuleIconComponent = ({ name, className }: { name: string; className?: stri
 };
 
 interface Props {
-    params: { slug: string };
+    params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { slug } = await params;
     const property = await db.property.findUnique({
-        where: { slug: params.slug },
+        where: { slug },
         select: { publicTitle: true, name: true, shortDescription: true },
     });
     return {
@@ -31,8 +32,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function PropertyPage({ params }: Props) {
+    const { slug } = await params;
     const property = await db.property.findUnique({
-        where: { slug: params.slug },
+        where: { slug },
         include: {
             photos: { orderBy: { sortOrder: 'asc' } },
             amenities: { orderBy: { sortOrder: 'asc' } },

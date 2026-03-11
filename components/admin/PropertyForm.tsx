@@ -352,19 +352,39 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                         <Label>Máximo Hóspedes</Label>
-                        <Input type="number" value={data.maxGuests || 0} onChange={(e) => setData({ ...data, maxGuests: parseInt(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="numeric"
+                            value={data.maxGuests || 0}
+                            onChange={(e) => setData({ ...data, maxGuests: parseInt(e.target.value) })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Quartos</Label>
-                        <Input type="number" value={data.bedrooms || 0} onChange={(e) => setData({ ...data, bedrooms: parseInt(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="numeric"
+                            value={data.bedrooms || 0}
+                            onChange={(e) => setData({ ...data, bedrooms: parseInt(e.target.value) })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Camas</Label>
-                        <Input type="number" value={data.beds || 0} onChange={(e) => setData({ ...data, beds: parseInt(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="numeric"
+                            value={data.beds || 0}
+                            onChange={(e) => setData({ ...data, beds: parseInt(e.target.value) })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Banheiros</Label>
-                        <Input type="number" value={data.bathrooms || 0} onChange={(e) => setData({ ...data, bathrooms: parseInt(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="numeric"
+                            value={data.bathrooms || 0}
+                            onChange={(e) => setData({ ...data, bathrooms: parseInt(e.target.value) })}
+                        />
                     </div>
                 </div>
 
@@ -392,6 +412,7 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                             <Label>Máximo de Animais</Label>
                             <Input
                                 type="number"
+                                inputMode="numeric"
                                 min={1}
                                 className="max-w-[150px]"
                                 value={data.maxPets || 1}
@@ -409,7 +430,7 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     </div>
                     <div className="space-y-2">
                         <Label>Número</Label>
-                        <Input value={data.streetNumber || ""} onChange={(e) => setData({ ...data, streetNumber: e.target.value })} />
+                        <Input type="text" inputMode="numeric" value={data.streetNumber || ""} onChange={(e) => setData({ ...data, streetNumber: e.target.value })} />
                     </div>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -419,7 +440,7 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     </div>
                     <div className="space-y-2">
                         <Label>CEP</Label>
-                        <Input value={data.postalCode || ""} onChange={(e) => setData({ ...data, postalCode: e.target.value })} />
+                        <Input type="text" inputMode="numeric" value={data.postalCode || ""} onChange={(e) => setData({ ...data, postalCode: e.target.value })} />
                     </div>
                     <div className="space-y-2">
                         <Label>Cidade</Label>
@@ -441,11 +462,23 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Label className="text-[10px] uppercase font-bold text-olive-900/40">Latitude</Label>
-                                <Input type="number" step="any" value={data.latitude ?? ""} onChange={(e) => setData({ ...data, latitude: e.target.value === "" ? null : parseFloat(e.target.value) })} />
+                                <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={data.latitude ?? ""}
+                                    onChange={(e) => setData({ ...data, latitude: e.target.value === "" ? null : parseFloat(e.target.value) })}
+                                />
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-[10px] uppercase font-bold text-olive-900/40">Longitude</Label>
-                                <Input type="number" step="any" value={data.longitude ?? ""} onChange={(e) => setData({ ...data, longitude: e.target.value === "" ? null : parseFloat(e.target.value) })} />
+                                <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={data.longitude ?? ""}
+                                    onChange={(e) => setData({ ...data, longitude: e.target.value === "" ? null : parseFloat(e.target.value) })}
+                                />
                             </div>
                         </div>
                         <p className="text-[10px] text-olive-900/40 italic">Usadas para o mapa exato após reserva confirmada.</p>
@@ -456,11 +489,23 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                                 <Label className="text-[10px] uppercase font-bold text-olive-900/40">Latitude Pública</Label>
-                                <Input type="number" step="any" value={data.publicLatitude ?? ""} onChange={(e) => setData({ ...data, publicLatitude: e.target.value === "" ? null : parseFloat(e.target.value) })} />
+                                <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={data.publicLatitude ?? ""}
+                                    onChange={(e) => setData({ ...data, publicLatitude: e.target.value === "" ? null : parseFloat(e.target.value) })}
+                                />
                             </div>
                             <div className="space-y-1">
                                 <Label className="text-[10px] uppercase font-bold text-olive-900/40">Longitude Pública</Label>
-                                <Input type="number" step="any" value={data.publicLongitude ?? ""} onChange={(e) => setData({ ...data, publicLongitude: e.target.value === "" ? null : parseFloat(e.target.value) })} />
+                                <Input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={data.publicLongitude ?? ""}
+                                    onChange={(e) => setData({ ...data, publicLongitude: e.target.value === "" ? null : parseFloat(e.target.value) })}
+                                />
                             </div>
                         </div>
                         <p className="text-[10px] text-olive-900/40 italic">Usadas para o mapa público no anúncio (Preserva privacidade).</p>
@@ -476,15 +521,30 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                         <Label>Preço por Noite Padrão (R$)</Label>
-                        <Input type="number" value={data.basePrice || 0} onChange={(e) => setData({ ...data, basePrice: parseFloat(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="decimal"
+                            value={data.basePrice || 0}
+                            onChange={(e) => setData({ ...data, basePrice: parseFloat(e.target.value) })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Taxa de Limpeza Base (R$)</Label>
-                        <Input type="number" value={data.cleaningFee || 0} onChange={(e) => setData({ ...data, cleaningFee: parseFloat(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="decimal"
+                            value={data.cleaningFee || 0}
+                            onChange={(e) => setData({ ...data, cleaningFee: parseFloat(e.target.value) })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Mínimo de Noites Base</Label>
-                        <Input type="number" value={data.minimumNights || 2} onChange={(e) => setData({ ...data, minimumNights: parseInt(e.target.value) })} />
+                        <Input
+                            type="number"
+                            inputMode="numeric"
+                            value={data.minimumNights || 2}
+                            onChange={(e) => setData({ ...data, minimumNights: parseInt(e.target.value) })}
+                        />
                     </div>
                 </div>
 

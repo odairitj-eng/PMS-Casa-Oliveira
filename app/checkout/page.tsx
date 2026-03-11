@@ -198,10 +198,13 @@ function CheckoutContent() {
                             <div>
                                 <Label className="font-bold text-olive-900 mb-2 block">Telefone / WhatsApp (Obrigatório)</Label>
                                 <Input
+                                    type="tel"
+                                    inputMode="tel"
+                                    autoComplete="tel"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                     placeholder="(11) 99999-9999"
-                                    className="h-12 rounded-xl border-olive-900/20 focus:border-olive-900 text-lg"
+                                    className="h-14 rounded-2xl border-olive-900/20 focus:border-olive-900 text-lg md:text-base"
                                 />
                                 <p className="text-xs text-olive-900/40 font-medium mt-2">Usaremos este número apenas para comunicações sobre sua reserva.</p>
                             </div>
@@ -286,13 +289,15 @@ function CheckoutContent() {
                                 </div>
                             </div>
 
-                            <Button
-                                onClick={handleSubmit}
-                                disabled={isSubmitting}
-                                className="w-full h-16 mt-8 bg-olive-900 text-sand-50 rounded-2xl font-bold text-xl hover:bg-olive-800 transition-all shadow-xl active:scale-[0.98]"
-                            >
-                                {isSubmitting ? "Processando..." : "Confirmar e Ir para Pagamento"}
-                            </Button>
+                            <div className="hidden md:block">
+                                <Button
+                                    onClick={handleSubmit}
+                                    disabled={isSubmitting}
+                                    className="w-full h-16 mt-8 bg-olive-900 text-sand-50 rounded-2xl font-bold text-xl hover:bg-olive-800 transition-all shadow-xl active:scale-[0.98]"
+                                >
+                                    {isSubmitting ? "Processando..." : "Confirmar e Ir para Pagamento"}
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -344,6 +349,20 @@ function CheckoutContent() {
 
             </div>
 
+            {/* Mobile Sticky CTA */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-olive-900/5 p-4 z-50 flex items-center justify-between gap-4">
+                <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase text-olive-900/40 tracking-widest">Total</span>
+                    <span className="text-xl font-black text-olive-900">R$ {pricing?.total.toFixed(2)}</span>
+                </div>
+                <Button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="flex-1 h-14 bg-olive-900 text-sand-50 rounded-2xl font-bold text-base hover:bg-olive-800 transition-all shadow-xl active:scale-95"
+                >
+                    {isSubmitting ? "Reservar" : "Pagar Agora"}
+                </Button>
+            </div>
         </div>
     );
 }

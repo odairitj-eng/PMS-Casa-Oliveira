@@ -339,14 +339,14 @@ export function DateSelectionModal({
                                     </span>
                                 )}
 
-                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
-                                    <span className="text-[9px] font-bold text-red-500 mt-1 z-10 uppercase">Checkout</span>
-                                )}
-
                                 {isCheckoutOnly && !isSelectedStart && !isSelectedEnd && (
                                     <div className="absolute top-1 right-1">
-                                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" title="Disponível para check-in após o meio-dia" />
+                                        <div className="w-1.5 h-1.5 bg-olive-500 rounded-full animate-pulse" title="Disponível para check-in após o meio-dia" />
                                     </div>
+                                )}
+
+                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
+                                    <span className="text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-1 z-10 uppercase">Checkout</span>
                                 )}
 
                                 {!isVivid && isCurrentMonth && (
@@ -412,13 +412,13 @@ export function DateSelectionModal({
                         <div className="absolute top-0 left-0 right-0 flex justify-between pointer-events-none px-2">
                             <button
                                 onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                                className="p-2 hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto"
+                                className="w-12 h-12 flex items-center justify-center hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto active:scale-90"
                             >
                                 <ChevronLeft className="w-6 h-6" />
                             </button>
                             <button
                                 onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                                className="p-2 hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto"
+                                className="w-12 h-12 flex items-center justify-center hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto active:scale-90"
                             >
                                 <ChevronRight className="w-6 h-6" />
                             </button>
@@ -442,17 +442,17 @@ export function DateSelectionModal({
                                 </div>
                             )}
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
                             <button
                                 onClick={onClose}
-                                className="px-6 py-2.5 text-sm font-bold text-olive-900 hover:bg-olive-900/5 rounded-xl transition-all"
+                                className="flex-1 md:flex-none px-6 py-3 text-sm font-bold text-olive-900 hover:bg-olive-900/5 rounded-xl transition-all"
                             >
                                 Fechar
                             </button>
                             <Button
                                 onClick={handleConfirm}
                                 disabled={!selectedRange.start || !selectedRange.end}
-                                className="bg-olive-900 text-sand-50 px-8 py-2.5 rounded-xl font-bold hover:bg-olive-800 transition-all shadow-lg shadow-olive-900/20 disabled:opacity-50"
+                                className="flex-[2] md:flex-none bg-olive-900 text-sand-50 px-8 py-3 rounded-xl font-bold hover:bg-olive-800 transition-all shadow-lg shadow-olive-900/20 disabled:opacity-50"
                             >
                                 Confirmar
                             </Button>
