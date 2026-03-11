@@ -1,4 +1,4 @@
-const CACHE_NAME = 'casa-oliveira-pwa-v1';
+const CACHE_NAME = 'casa-oliveira-pwa-v2';
 const STATIC_ASSETS = [
     '/',
     '/offline',
@@ -36,8 +36,13 @@ self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Áreas dinâmicas (Admin, API, Auth): Network-Only ou Network-First sem cache agressivo
-    if (url.pathname.startsWith('/api') || url.pathname.startsWith('/admin') || url.pathname.startsWith('/auth')) {
+    // 🚨 EXCLUSÃO CRÍTICA: Não interceptar AUTH ou API do NextAuth
+    if (url.pathname.includes('/api/auth') || url.pathname.includes('/auth/login') || url.pathname.includes('/auth/error')) {
+        return; // Deixa o navegador lidar (Sempre Rede)
+    }
+
+    // Áreas dinâmicas (Admin, API restante): Network-Only ou Network-First
+    if (url.pathname.startsWith('/api') || url.pathname.startsWith('/admin')) {
         event.respondWith(fetch(request).catch(() => caches.match(request)));
         return;
     }

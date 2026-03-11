@@ -36,7 +36,8 @@ export function UserMenu() {
     }
 
     const user = session?.user;
-    const isAdmin = (user as any)?.role === "ADMIN";
+    const userRole = (user as any)?.role;
+    const isLevelAdmin = ["ADMIN", "CO_ADMIN"].includes(userRole);
 
     return (
         <div className="relative" ref={menuRef}>
@@ -64,15 +65,15 @@ export function UserMenu() {
                     <div className="px-6 py-4 border-b border-olive-900/5 mb-2">
                         <p className="font-bold text-olive-900 text-lg truncate">{user?.name}</p>
                         <p className="text-xs text-olive-900/50 font-medium truncate">{user?.email}</p>
-                        {isAdmin && (
+                        {isLevelAdmin && (
                             <span className="inline-block mt-2 px-2 py-0.5 bg-olive-900 text-[10px] text-sand-50 font-bold rounded-lg uppercase tracking-wider">
-                                Administrador
+                                {userRole === "ADMIN" ? "Administrador" : "Co-Administrador"}
                             </span>
                         )}
                     </div>
 
                     <div className="px-2 space-y-1">
-                        {isAdmin ? (
+                        {isLevelAdmin ? (
                             <Link
                                 href="/admin/dashboard"
                                 className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-olive-900/70 hover:text-olive-900 hover:bg-olive-900/5 rounded-2xl transition-all"
@@ -92,7 +93,7 @@ export function UserMenu() {
                             </Link>
                         )}
 
-                        {isAdmin && (
+                        {(userRole === "ADMIN") && (
                             <Link
                                 href="/admin/settings"
                                 className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-olive-900/70 hover:text-olive-900 hover:bg-olive-900/5 rounded-2xl transition-all"

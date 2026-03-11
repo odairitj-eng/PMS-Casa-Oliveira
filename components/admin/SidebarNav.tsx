@@ -1,11 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Copy, CalendarDays, Users, LayoutDashboard, Settings, TrendingUp, Building2, Globe } from "lucide-react";
 
 export function SidebarNav() {
+    const { data: session } = useSession();
     const pathname = usePathname();
+    const userRole = (session?.user as any)?.role;
 
     const menuItems = [
         { href: "/admin/dashboard", label: "Visão Geral", icon: LayoutDashboard },
@@ -13,8 +16,11 @@ export function SidebarNav() {
         { href: "/admin/pricing", label: "Smart Pricing", icon: TrendingUp },
         { href: "/admin/properties", label: "Imóveis", icon: Building2 },
         { href: "/admin/guests", label: "Hóspedes & CRM", icon: Users },
-        { href: "/admin/users", label: "Gestão de Equipe", icon: Users },
-        { href: "/admin/integrations", label: "Integrações & API", icon: Globe },
+        // Apenas ADMIN vê gestão de equipe e integração técnica
+        ...(userRole === "ADMIN" ? [
+            { href: "/admin/users", label: "Gestão de Equipe", icon: Users },
+            { href: "/admin/integrations", label: "Integrações & API", icon: Globe },
+        ] : []),
     ];
 
     return (
