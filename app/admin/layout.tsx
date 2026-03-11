@@ -28,7 +28,7 @@ export default function AdminLayout({
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex w-64 bg-olive-900 border-r border-olive-800 text-sand-50 flex-col flex-shrink-0 sticky top-0 h-screen">
                 <div className="p-6 border-b border-olive-800/50 flex flex-col items-center pt-8 text-center">
-                    <div className="bg-sand-50 rounded-2xl p-2 inline-flex w-fit mb-4 mx-auto">
+                    <div className="rounded-2xl overflow-hidden inline-flex w-fit mb-4 mx-auto shadow-lg shadow-black/20">
                         <Image
                             src="/imagens/logo.png"
                             alt="Casa Oliveira PMS"

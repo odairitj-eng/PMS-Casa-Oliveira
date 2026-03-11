@@ -16,7 +16,7 @@ function LoginContent() {
             <div className="w-full max-w-md space-y-8 p-10 bg-white rounded-[2.5rem] shadow-2xl shadow-olive-900/5 transition-all animate-in fade-in slide-in-from-bottom-8 duration-700">
 
                 <div className="text-center space-y-6">
-                    <div className="inline-block p-4 bg-olive-900/5 rounded-3xl mb-2">
+                    <div className="inline-block rounded-[2.5rem] overflow-hidden mb-2 shadow-xl shadow-olive-900/10">
                         <Image
                             src="/imagens/logo.png"
                             alt="Casa Oliveira"
