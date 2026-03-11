@@ -7,7 +7,7 @@ import { Chrome, Facebook } from "lucide-react";
 
 export function LoginButtons() {
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "/checkout";
+    const callbackUrl = searchParams.get("callbackUrl") || "/";
 
     return (
         <div className="grid grid-cols-1 gap-4 w-full">

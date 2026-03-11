@@ -42,6 +42,12 @@ function CheckoutContent() {
     }, [guestsCount]);
 
     useEffect(() => {
+        // Validação de Parâmetros: Se não tem os dados básicos, volta pra home
+        if (!searchParams.get("propertyId") || !searchParams.get("checkIn") || !searchParams.get("checkOut")) {
+            router.replace("/");
+            return;
+        }
+
         // Safety Timeout: 15s para checkout pois envolve mais APIs
         const timer = setTimeout(() => setIsLoading(false), 15000);
 
@@ -50,12 +56,6 @@ function CheckoutContent() {
                 const pId = searchParams.get("propertyId") || propertyId;
                 const cIn = searchParams.get("checkIn") || checkIn;
                 const cOut = searchParams.get("checkOut") || checkOut;
-
-                if (!pId || !cIn || !cOut) {
-                    setIsLoading(false);
-                    clearTimeout(timer);
-                    return;
-                }
 
                 try {
                     const [guestRes, pricingRes, propertyRes] = await Promise.all([
@@ -82,7 +82,7 @@ function CheckoutContent() {
         }
 
         return () => clearTimeout(timer);
-    }, [status, searchParams, propertyId, checkIn, checkOut]);
+    }, [status, searchParams, propertyId, checkIn, checkOut, router]);
 
     const handleSubmit = async () => {
         if (!phone) {
@@ -107,7 +107,7 @@ function CheckoutContent() {
                 totalNights: pricing.breakdown.length,
                 guests: parseInt(guestsCount),
                 occupants: occupants.filter(o => o.name),
-                paymentMethod // Novo campo
+                paymentMethod
             });
 
             if (paymentMethod === "PIX") {
@@ -115,7 +115,6 @@ function CheckoutContent() {
                 setPixData(response.data.pix);
             } else {
                 toast.success("Redirecionando para pagamento seguro...", { id: idToast });
-                // Supondo que o backend retornará a URL de checkout se for Card
                 if (response.data.checkoutUrl) {
                     window.location.href = response.data.checkoutUrl;
                 } else {
@@ -138,6 +137,9 @@ function CheckoutContent() {
         );
     }
 
+    // Se ainda assim não tivermos dados essenciais após o loading, não renderizamos nada
+    if (!checkIn || !checkOut || !pricing) return null;
+
     if (pixData) {
         return (
             <div className="min-h-screen bg-sand-50 py-12 px-4">
@@ -154,7 +156,6 @@ function CheckoutContent() {
                         <div className="text-center">
                             <p className="text-olive-900/60 font-medium mb-4 uppercase tracking-widest text-xs">Escaneie o QR Code PIX</p>
                             <div className="bg-white p-6 inline-block rounded-3xl border-2 border-olive-900/5 shadow-inner">
-                                {/* Aqui viria o QR Code dinâmico do Mercado Pago */}
                                 <div className="w-48 h-48 bg-gray-100 flex items-center justify-center rounded-2xl">
                                     <span className="text-gray-400 text-xs font-mono break-all p-4">{pixData.qr_code.substring(0, 100)}...</span>
                                 </div>
@@ -187,7 +188,6 @@ function CheckoutContent() {
             </div>
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-                {/* Coluna Esquerda: Dados Hóspede */}
                 <div className="lg:col-span-2 space-y-6">
                     <Button variant="ghost" onClick={() => router.back()} className="text-olive-900 font-bold hover:bg-olive-900/5 -ml-4">
                         <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
@@ -317,9 +317,8 @@ function CheckoutContent() {
                     </Card>
                 </div>
 
-                {/* Coluna Direita: Resumo Financeiro */}
                 <div className="lg:col-span-1">
-                    <Card className="rounded-[2rem] shadow-lg border-0 sticky top-8 overflow-hidden">
+                    <Card className="rounded-[2.5rem] shadow-lg border-0 sticky top-8 overflow-hidden">
                         <div className="aspect-video relative overflow-hidden bg-olive-900/5">
                             {propertyData?.photos?.[0]?.imageUrl ? (
                                 <Image
@@ -329,14 +328,14 @@ function CheckoutContent() {
                                     className="object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center">
+                                <div className="w-full h-full flex items-center justify-center bg-olive-900/10">
                                     <Image src="/imagens/logo.png" alt="Logo" width={80} height={80} className="opacity-20 object-contain" />
                                 </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-olive-900/60 via-transparent to-transparent" />
                             <div className="absolute bottom-4 left-4 text-white">
                                 <p className="font-bold text-lg leading-tight">{propertyData?.publicTitle || propertyData?.name || "Casa Oliveira"}</p>
-                                <p className="text-xs opacity-80">{propertyData?.city || "Campos do Jordão"}, {propertyData?.state || "SP"}</p>
+                                <p className="text-xs opacity-80">{propertyData?.city && propertyData?.state ? `${propertyData.city}, ${propertyData.state}` : "Carregando localização..."}</p>
                             </div>
                         </div>
                         <CardContent className="p-6 space-y-6">
@@ -344,11 +343,15 @@ function CheckoutContent() {
                                 <div className="flex justify-between items-center bg-olive-900/5 p-4 rounded-xl">
                                     <div>
                                         <p className="text-[10px] font-bold text-olive-900/40 uppercase mb-1">Check-in</p>
-                                        <p className="font-bold text-sm">{new Date(checkIn!).toLocaleDateString('pt-BR')}</p>
+                                        <p className="font-bold text-sm tracking-tight">
+                                            {checkIn ? new Date(checkIn).toLocaleDateString('pt-BR') : "--/--/----"}
+                                        </p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] font-bold text-olive-900/40 uppercase mb-1">Checkout</p>
-                                        <p className="font-bold text-sm">{new Date(checkOut!).toLocaleDateString('pt-BR')}</p>
+                                        <p className="font-bold text-sm tracking-tight">
+                                            {checkOut ? new Date(checkOut).toLocaleDateString('pt-BR') : "--/--/----"}
+                                        </p>
                                     </div>
                                 </div>
 
@@ -375,7 +378,6 @@ function CheckoutContent() {
 
             </div>
 
-            {/* Mobile Sticky CTA */}
             <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-olive-900/5 p-4 z-50 flex items-center justify-between gap-4">
                 <div className="flex flex-col">
                     <span className="text-[10px] font-black uppercase text-olive-900/40 tracking-widest">Total</span>
