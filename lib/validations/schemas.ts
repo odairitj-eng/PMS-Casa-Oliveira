@@ -42,6 +42,11 @@ export const propertySchema = z.object({
     postalCode: z.string().nullable().optional(),
     street: z.string().nullable().optional(),
     streetNumber: z.string().nullable().optional(),
+
+    // Horários de Check-in/Out
+    checkInStart: z.string().nullable().optional(),
+    checkInEnd: z.string().nullable().optional(),
+    checkOutEnd: z.string().nullable().optional(),
 });
 
 // Schema para Ocupante

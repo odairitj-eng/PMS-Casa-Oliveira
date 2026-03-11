@@ -133,6 +133,24 @@ export default async function PropertyPage({ params }: Props) {
 
                     <div id="regras" className="py-8 border-t border-olive-900/10 scroll-mt-24">
                         <h2 className="text-2xl font-bold mb-4">Regras da casa</h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 p-6 bg-olive-900/5 rounded-2xl border border-olive-900/10">
+                            <div className="flex items-start gap-3">
+                                <LucideIcons.Clock className="w-5 h-5 text-olive-900 mt-1 opacity-70" />
+                                <div>
+                                    <p className="font-bold text-olive-900">Check-in</p>
+                                    <p className="text-olive-900/80">Entre {property.checkInStart || "14:00"} e {property.checkInEnd || "22:00"}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <LucideIcons.LogOut className="w-5 h-5 text-olive-900 mt-1 opacity-70" />
+                                <div>
+                                    <p className="font-bold text-olive-900">Check-out</p>
+                                    <p className="text-olive-900/80">Até às {property.checkOutEnd || "11:00"}</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {property.rules.length > 0 ? (
                                 property.rules.map((rule: any) => (
@@ -164,6 +182,9 @@ export default async function PropertyPage({ params }: Props) {
                         maxGuests={property.maxGuests}
                         allowsPets={property.allowsPets}
                         maxPets={property.maxPets}
+                        checkInStart={(property as any).checkInStart}
+                        checkInEnd={(property as any).checkInEnd}
+                        checkOutEnd={(property as any).checkOutEnd}
                     />
                 </div>
             </div>

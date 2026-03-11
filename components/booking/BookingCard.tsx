@@ -14,13 +14,19 @@ interface BookingCardProps {
     maxGuests?: number;
     allowsPets?: boolean;
     maxPets?: number;
+    checkInStart?: string;
+    checkInEnd?: string;
+    checkOutEnd?: string;
 }
 
 export function BookingCard({
     propertyId = "casa-oliveira-id",
     maxGuests = 4,
     allowsPets = false,
-    maxPets = 0
+    maxPets = 0,
+    checkInStart = "14:00",
+    checkInEnd = "22:00",
+    checkOutEnd = "11:00"
 }: BookingCardProps) {
     const [dates, setDates] = useState({ checkIn: "", checkOut: "" });
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -128,6 +134,11 @@ export function BookingCard({
                             <span className="text-sm font-bold text-olive-900">
                                 {formatDateDisplay(dates.checkIn)}
                             </span>
+                            {dates.checkIn && (
+                                <span className="text-[10px] text-olive-900/60 block mt-0.5 font-medium">
+                                    A partir das {checkInStart}
+                                </span>
+                            )}
                         </div>
                         <div
                             onClick={() => setIsDatePickerOpen(true)}
@@ -139,6 +150,11 @@ export function BookingCard({
                             <span className="text-sm font-bold text-olive-900">
                                 {formatDateDisplay(dates.checkOut)}
                             </span>
+                            {dates.checkOut && (
+                                <span className="text-[10px] text-olive-900/60 block mt-0.5 font-medium">
+                                    Até às {checkOutEnd}
+                                </span>
+                            )}
                         </div>
                     </div>
 

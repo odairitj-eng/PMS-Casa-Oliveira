@@ -422,6 +422,64 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     )}
                 </div>
 
+                <h3 className="text-lg font-semibold pt-4 border-t">Horários de Check-in e Check-out</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl border border-olive-900/10 bg-olive-900/5">
+                    <div className="space-y-2">
+                        <Label>Início do Check-in</Label>
+                        <Select
+                            value={data.checkInStart || "14:00"}
+                            onValueChange={(v: string) => setData({ ...data, checkInStart: v })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="14:00" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[200px]">
+                                {Array.from({ length: 24 }).map((_, i) => (
+                                    <SelectItem key={`${i.toString().padStart(2, '0')}:00`} value={`${i.toString().padStart(2, '0')}:00`}>
+                                        {i.toString().padStart(2, '0')}:00
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Término do Check-in</Label>
+                        <Select
+                            value={data.checkInEnd || "22:00"}
+                            onValueChange={(v: string) => setData({ ...data, checkInEnd: v })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="22:00" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[200px]">
+                                {Array.from({ length: 24 }).map((_, i) => (
+                                    <SelectItem key={`${i.toString().padStart(2, '0')}:00`} value={`${i.toString().padStart(2, '0')}:00`}>
+                                        {i.toString().padStart(2, '0')}:00
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Limite do Check-out</Label>
+                        <Select
+                            value={data.checkOutEnd || "11:00"}
+                            onValueChange={(v: string) => setData({ ...data, checkOutEnd: v })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="11:00" />
+                            </SelectTrigger>
+                            <SelectContent className="max-h-[200px]">
+                                {Array.from({ length: 24 }).map((_, i) => (
+                                    <SelectItem key={`${i.toString().padStart(2, '0')}:00`} value={`${i.toString().padStart(2, '0')}:00`}>
+                                        {i.toString().padStart(2, '0')}:00
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
                 <h3 className="text-lg font-semibold pt-4 border-t">Localização Detalhada</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="md:col-span-2 space-y-2">

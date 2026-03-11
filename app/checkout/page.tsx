@@ -343,15 +343,17 @@ function CheckoutContent() {
                                 <div className="flex justify-between items-center bg-olive-900/5 p-4 rounded-xl">
                                     <div>
                                         <p className="text-[10px] font-bold text-olive-900/40 uppercase mb-1">Check-in</p>
-                                        <p className="font-bold text-sm tracking-tight">
-                                            {checkIn ? new Date(checkIn).toLocaleDateString('pt-BR') : "--/--/----"}
+                                        <p className="font-bold text-sm tracking-tight text-olive-900">
+                                            {checkIn ? new Date(checkIn + "T00:00:00").toLocaleDateString('pt-BR') : "--/--/----"}
                                         </p>
+                                        <p className="text-[10px] text-olive-900/60 font-medium">Após as {propertyData?.checkInStart || "14:00"}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] font-bold text-olive-900/40 uppercase mb-1">Checkout</p>
-                                        <p className="font-bold text-sm tracking-tight">
-                                            {checkOut ? new Date(checkOut).toLocaleDateString('pt-BR') : "--/--/----"}
+                                        <p className="font-bold text-sm tracking-tight text-olive-900">
+                                            {checkOut ? new Date(checkOut + "T00:00:00").toLocaleDateString('pt-BR') : "--/--/----"}
                                         </p>
+                                        <p className="text-[10px] text-olive-900/60 font-medium">Até as {propertyData?.checkOutEnd || "11:00"}</p>
                                     </div>
                                 </div>
 
