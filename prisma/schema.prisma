@@ -145,6 +145,7 @@ model User {
 
 enum UserRole {
   ADMIN
+  CO_ADMIN
   USER
 }
 

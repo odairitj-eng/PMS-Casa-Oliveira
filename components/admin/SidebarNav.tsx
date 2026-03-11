@@ -13,6 +13,7 @@ export function SidebarNav() {
         { href: "/admin/pricing", label: "Smart Pricing", icon: TrendingUp },
         { href: "/admin/properties", label: "Imóveis", icon: Building2 },
         { href: "/admin/guests", label: "Hóspedes & CRM", icon: Users },
+        { href: "/admin/users", label: "Gestão de Equipe", icon: Users },
         { href: "/admin/integrations", label: "Integrações & API", icon: Globe },
     ];
 
