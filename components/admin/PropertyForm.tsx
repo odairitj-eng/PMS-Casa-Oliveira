@@ -422,76 +422,81 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                     )}
                 </div>
 
-                <h3 className="text-lg font-semibold pt-4 border-t">Horários de Check-in e Check-out</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl border border-olive-900/10 bg-olive-900/5">
-                    <div className="space-y-2">
-                        <Label>Início do Check-in</Label>
-                        <Select
-                            value={data.checkInStart || "14:00"}
-                            onValueChange={(v: string) => setData({ ...data, checkInStart: v })}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="14:00" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                                {Array.from({ length: 48 }).map((_, i) => {
-                                    const hour = Math.floor(i / 2).toString().padStart(2, '0');
-                                    const minute = i % 2 === 0 ? "00" : "30";
-                                    const time = `${hour}:${minute}`;
-                                    return (
-                                        <SelectItem key={time} value={time}>
-                                            {time}
-                                        </SelectItem>
-                                    );
-                                })}
-                            </SelectContent>
-                        </Select>
+                <div className="space-y-6 pt-4 border-t">
+                    <div className="flex flex-col gap-1">
+                        <h3 className="text-lg font-bold text-olive-900">Horários de check-in e checkout</h3>
+                        <p className="text-sm text-olive-900/60 font-medium">Configure as janelas de horário para os seus hóspedes.</p>
                     </div>
-                    <div className="space-y-2">
-                        <Label>Término do Check-in</Label>
-                        <Select
-                            value={data.checkInEnd || "22:00"}
-                            onValueChange={(v: string) => setData({ ...data, checkInEnd: v })}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="22:00" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                                {Array.from({ length: 48 }).map((_, i) => {
-                                    const hour = Math.floor(i / 2).toString().padStart(2, '0');
-                                    const minute = i % 2 === 0 ? "00" : "30";
-                                    const time = `${hour}:${minute}`;
-                                    return (
-                                        <SelectItem key={time} value={time}>
-                                            {time}
-                                        </SelectItem>
-                                    );
-                                })}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Limite do Check-out</Label>
-                        <Select
-                            value={data.checkOutEnd || "11:00"}
-                            onValueChange={(v: string) => setData({ ...data, checkOutEnd: v })}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="11:00" />
-                            </SelectTrigger>
-                            <SelectContent className="max-h-[300px]">
-                                {Array.from({ length: 48 }).map((_, i) => {
-                                    const hour = Math.floor(i / 2).toString().padStart(2, '0');
-                                    const minute = i % 2 === 0 ? "00" : "30";
-                                    const time = `${hour}:${minute}`;
-                                    return (
-                                        <SelectItem key={time} value={time}>
-                                            {time}
-                                        </SelectItem>
-                                    );
-                                })}
-                            </SelectContent>
-                        </Select>
+
+                    <div className="space-y-4 p-6 rounded-[2rem] border border-olive-900/10 bg-white shadow-sm">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] uppercase font-black tracking-widest text-olive-900/40">Intervalo de check-in</Label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="space-y-1.5 p-3 rounded-2xl border border-olive-900/10 bg-sand-50/30 focus-within:border-olive-900 group transition-all">
+                                    <Label className="text-[10px] font-bold text-olive-900/40 group-focus-within:text-olive-900">Horário de início</Label>
+                                    <Select
+                                        value={data.checkInStart || "14:00"}
+                                        onValueChange={(v: string) => setData({ ...data, checkInStart: v })}
+                                    >
+                                        <SelectTrigger className="border-0 bg-transparent p-0 h-auto focus:ring-0 text-base font-bold text-olive-900">
+                                            <SelectValue placeholder="Flexível" />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-[350px] rounded-2xl border-olive-900/10 shadow-2xl">
+                                            <SelectItem value="Flexível" className="font-bold">Flexível</SelectItem>
+                                            {Array.from({ length: 24 }).map((_, i) => {
+                                                const time = `${i.toString().padStart(2, '0')}:00`;
+                                                return <SelectItem key={time} value={time}>{time}</SelectItem>;
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-1.5 p-3 rounded-2xl border border-olive-900/10 bg-sand-50/30 focus-within:border-olive-900 group transition-all">
+                                    <Label className="text-[10px] font-bold text-olive-900/40 group-focus-within:text-olive-900">Horário de término</Label>
+                                    <Select
+                                        value={data.checkInEnd || "22:00"}
+                                        onValueChange={(v: string) => setData({ ...data, checkInEnd: v })}
+                                    >
+                                        <SelectTrigger className="border-0 bg-transparent p-0 h-auto focus:ring-0 text-base font-bold text-olive-900">
+                                            <SelectValue placeholder="Escolha um horário" />
+                                        </SelectTrigger>
+                                        <SelectContent className="max-h-[400px] rounded-2xl border-olive-900/10 shadow-2xl">
+                                            <SelectItem value="Flexível" className="font-bold">Flexível</SelectItem>
+                                            {/* Manhã/Tarde */}
+                                            {Array.from({ length: 24 }).map((_, i) => {
+                                                const time = `${i.toString().padStart(2, '0')}:00`;
+                                                return <SelectItem key={time} value={time}>{time}</SelectItem>;
+                                            })}
+                                            {/* Noite Adentro / Madrugada do dia seguinte */}
+                                            <SelectItem value="00:00" className="bg-olive-900/5">00:00</SelectItem>
+                                            <SelectItem value="01:00" className="bg-olive-900/5">01:00 (dia seguinte)</SelectItem>
+                                            <SelectItem value="02:00" className="bg-olive-900/5">02:00 (dia seguinte)</SelectItem>
+                                            <SelectItem value="03:00" className="bg-olive-900/5">03:00 (dia seguinte)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-olive-900/5">
+                            <div className="space-y-1.5 p-3 rounded-2xl border border-olive-900/10 bg-sand-50/30 focus-within:border-olive-900 group transition-all max-w-sm">
+                                <Label className="text-[10px] font-bold text-olive-900/40 group-focus-within:text-olive-900 uppercase tracking-widest">Limite de checkout</Label>
+                                <Select
+                                    value={data.checkOutEnd || "11:00"}
+                                    onValueChange={(v: string) => setData({ ...data, checkOutEnd: v })}
+                                >
+                                    <SelectTrigger className="border-0 bg-transparent p-0 h-auto focus:ring-0 text-base font-bold text-olive-900">
+                                        <SelectValue placeholder="11:00" />
+                                    </SelectTrigger>
+                                    <SelectContent className="max-h-[350px] rounded-2xl border-olive-900/10 shadow-2xl">
+                                        <SelectItem value="Flexível" className="font-bold">Flexível</SelectItem>
+                                        {Array.from({ length: 24 }).map((_, i) => {
+                                            const time = `${i.toString().padStart(2, '0')}:00`;
+                                            return <SelectItem key={time} value={time}>{time}</SelectItem>;
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

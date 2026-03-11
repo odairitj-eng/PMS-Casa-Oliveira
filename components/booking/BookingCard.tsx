@@ -136,7 +136,7 @@ export function BookingCard({
                             </span>
                             {dates.checkIn && (
                                 <span className="text-[10px] text-olive-900/60 block mt-0.5 font-medium">
-                                    A partir das {checkInStart}
+                                    {checkInStart === "Flexível" ? "Horário flexível" : `A partir das ${checkInStart}`}
                                 </span>
                             )}
                         </div>
@@ -152,7 +152,7 @@ export function BookingCard({
                             </span>
                             {dates.checkOut && (
                                 <span className="text-[10px] text-olive-900/60 block mt-0.5 font-medium">
-                                    Até às {checkOutEnd}
+                                    {checkOutEnd === "Flexível" ? "Horário flexível" : `Até às ${checkOutEnd}`}
                                 </span>
                             )}
                         </div>

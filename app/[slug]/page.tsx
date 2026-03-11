@@ -139,14 +139,21 @@ export default async function PropertyPage({ params }: Props) {
                                 <LucideIcons.Clock className="w-5 h-5 text-olive-900 mt-1 opacity-70" />
                                 <div>
                                     <p className="font-bold text-olive-900">Check-in</p>
-                                    <p className="text-olive-900/80">Entre {property.checkInStart || "14:00"} e {property.checkInEnd || "22:00"}</p>
+                                    <p className="text-olive-900/80">
+                                        {property.checkInStart === "Flexível"
+                                            ? "Horário flexível"
+                                            : `Entre ${property.checkInStart || "14:00"} e ${property.checkInEnd === "Flexível" ? "a combinar" : (property.checkInEnd || "22:00")}${property.checkInEnd?.includes("01") || property.checkInEnd?.includes("02") || property.checkInEnd?.includes("03") ? " (dia seguinte)" : ""}`
+                                        }
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
                                 <LucideIcons.LogOut className="w-5 h-5 text-olive-900 mt-1 opacity-70" />
                                 <div>
                                     <p className="font-bold text-olive-900">Check-out</p>
-                                    <p className="text-olive-900/80">Até às {property.checkOutEnd || "11:00"}</p>
+                                    <p className="text-olive-900/80">
+                                        {property.checkOutEnd === "Flexível" ? "Horário flexível" : `Até às ${property.checkOutEnd || "11:00"}`}
+                                    </p>
                                 </div>
                             </div>
                         </div>
