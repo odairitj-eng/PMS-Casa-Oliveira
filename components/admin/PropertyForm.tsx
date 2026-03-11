@@ -433,12 +433,17 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                             <SelectTrigger>
                                 <SelectValue placeholder="14:00" />
                             </SelectTrigger>
-                            <SelectContent className="max-h-[200px]">
-                                {Array.from({ length: 24 }).map((_, i) => (
-                                    <SelectItem key={`${i.toString().padStart(2, '0')}:00`} value={`${i.toString().padStart(2, '0')}:00`}>
-                                        {i.toString().padStart(2, '0')}:00
-                                    </SelectItem>
-                                ))}
+                            <SelectContent className="max-h-[300px]">
+                                {Array.from({ length: 48 }).map((_, i) => {
+                                    const hour = Math.floor(i / 2).toString().padStart(2, '0');
+                                    const minute = i % 2 === 0 ? "00" : "30";
+                                    const time = `${hour}:${minute}`;
+                                    return (
+                                        <SelectItem key={time} value={time}>
+                                            {time}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
@@ -451,12 +456,17 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                             <SelectTrigger>
                                 <SelectValue placeholder="22:00" />
                             </SelectTrigger>
-                            <SelectContent className="max-h-[200px]">
-                                {Array.from({ length: 24 }).map((_, i) => (
-                                    <SelectItem key={`${i.toString().padStart(2, '0')}:00`} value={`${i.toString().padStart(2, '0')}:00`}>
-                                        {i.toString().padStart(2, '0')}:00
-                                    </SelectItem>
-                                ))}
+                            <SelectContent className="max-h-[300px]">
+                                {Array.from({ length: 48 }).map((_, i) => {
+                                    const hour = Math.floor(i / 2).toString().padStart(2, '0');
+                                    const minute = i % 2 === 0 ? "00" : "30";
+                                    const time = `${hour}:${minute}`;
+                                    return (
+                                        <SelectItem key={time} value={time}>
+                                            {time}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
@@ -469,12 +479,17 @@ export function PropertyForm({ property, onSave }: { property: any, onSave: (p: 
                             <SelectTrigger>
                                 <SelectValue placeholder="11:00" />
                             </SelectTrigger>
-                            <SelectContent className="max-h-[200px]">
-                                {Array.from({ length: 24 }).map((_, i) => (
-                                    <SelectItem key={`${i.toString().padStart(2, '0')}:00`} value={`${i.toString().padStart(2, '0')}:00`}>
-                                        {i.toString().padStart(2, '0')}:00
-                                    </SelectItem>
-                                ))}
+                            <SelectContent className="max-h-[300px]">
+                                {Array.from({ length: 48 }).map((_, i) => {
+                                    const hour = Math.floor(i / 2).toString().padStart(2, '0');
+                                    const minute = i % 2 === 0 ? "00" : "30";
+                                    const time = `${hour}:${minute}`;
+                                    return (
+                                        <SelectItem key={time} value={time}>
+                                            {time}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
