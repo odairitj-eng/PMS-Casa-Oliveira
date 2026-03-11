@@ -425,8 +425,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         className={cn(
                             "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
-                            isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-60 border-olive-900/5",
-                            !isVivid && !dayBlock && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-30 border-olive-900/5",
+                            isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-80 border-olive-900/5",
+                            !isVivid && !dayBlock && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-70 border-olive-900/5",
                             dayBlock && isCurrentMonth && "bg-white border-olive-900/10 shadow-sm transition-opacity",
                             isVivid && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
                             isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
@@ -442,7 +442,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 <span className={cn(
                                     "text-lg font-black mb-1 transition-colors",
                                     isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
-                                    isSelected ? "text-olive-900" : (isVivid ? "text-olive-900" : "text-olive-900/10"),
+                                    isSelected ? "text-olive-900" : (isVivid ? "text-olive-900" : "text-olive-900/40"),
                                     !isCurrentMonth && "text-olive-900/0"
                                 )}>
                                     {format(cloneDay, "d")}
@@ -451,7 +451,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                     <span className="text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-1 z-10 uppercase">Checkout</span>
                                 )}
                                 {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && !isCheckoutDay && (
-                                    <Lock className="w-3 h-3 text-olive-900/20" />
+                                    <Lock className="w-3 h-3 text-olive-900/50" />
                                 )}
                             </div>
 
