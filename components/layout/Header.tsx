@@ -38,14 +38,17 @@ export function Header() {
     return (
         <header className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-olive-900/5 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-32 flex justify-between items-center">
-                <Link href="/" className="hover:opacity-80 transition-opacity">
-                    <Image
-                        src="/imagens/logo.png"
-                        alt="Casa Oliveira"
-                        width={100}
-                        height={100}
-                        className="object-contain w-20 md:w-24"
-                    />
+                <Link href="/" className="hover:opacity-80 transition-all active:scale-95">
+                    <div className="rounded-2xl overflow-hidden shadow-sm border border-olive-900/5">
+                        <Image
+                            src="/imagens/logo.png"
+                            alt="Casa Oliveira"
+                            width={100}
+                            height={100}
+                            className="object-contain w-16 h-16 md:w-20 md:h-20"
+                            priority
+                        />
+                    </div>
                 </Link>
 
                 <div className="flex items-center gap-4 md:gap-6">
