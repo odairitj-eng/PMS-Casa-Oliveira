@@ -18,7 +18,10 @@ export async function GET(
                 city: true,
                 state: true,
                 photos: {
-                    orderBy: { sortOrder: 'asc' },
+                    orderBy: [
+                        { isPrimary: 'desc' },
+                        { sortOrder: 'asc' }
+                    ],
                     take: 1,
                     select: { imageUrl: true }
                 }

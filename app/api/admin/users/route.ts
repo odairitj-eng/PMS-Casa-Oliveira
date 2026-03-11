@@ -7,7 +7,7 @@ export async function GET() {
         await requireAdmin();
 
         // 1. Busca usuários que já logaram
-        const users = await db.user.findMany({
+        const users = await (db.user as any).findMany({
             select: {
                 id: true,
                 name: true,
@@ -87,5 +87,33 @@ export async function PATCH(req: Request) {
     } catch (error) {
         console.error("Error updating user", error);
         return NextResponse.json({ error: "Error updating user" }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await requireAdmin();
+        const { searchParams } = new URL(req.url);
+        const userId = searchParams.get("userId");
+
+        if (!userId) {
+            return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+        }
+
+        const currentUserId = (session?.user as any)?.id;
+
+        // Impedir que o admin se exclua
+        if (userId === currentUserId) {
+            return NextResponse.json({ error: "Você não pode excluir a si mesmo" }, { status: 400 });
+        }
+
+        await db.user.delete({
+            where: { id: userId }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error("Error deleting user", error);
+        return NextResponse.json({ error: "Error deleting user" }, { status: 500 });
     }
 }

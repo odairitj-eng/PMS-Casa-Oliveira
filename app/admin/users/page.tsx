@@ -46,6 +46,22 @@ export default function UserManagementPage() {
         }
     };
 
+    const handleDelete = async (userId: string) => {
+        if (!confirm("Tem certeza que deseja excluir este usuário? Esta ação é irreversível.")) return;
+
+        setUpdatingId(userId);
+        try {
+            await axios.delete(`/api/admin/users?userId=${userId}`);
+            toast.success("Usuário excluído com sucesso");
+            fetchUsers();
+        } catch (error: any) {
+            const msg = error.response?.data?.error || "Erro ao excluir usuário";
+            toast.error(msg);
+        } finally {
+            setUpdatingId(null);
+        }
+    };
+
     const filteredUsers = users.filter(user =>
         user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -145,9 +161,18 @@ export default function UserManagementPage() {
                                                 <button
                                                     onClick={() => updateRole(user.id, 'USER')}
                                                     disabled={updatingId === user.id}
-                                                    className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-500 transition-all disabled:opacity-50 text-olive-900/20"
+                                                    className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-50 hover:text-yellow-600 transition-all disabled:opacity-50 text-olive-900/20"
                                                 >
                                                     Remover Permissões
+                                                </button>
+                                            )}
+                                            {!user.isPending && (
+                                                <button
+                                                    onClick={() => handleDelete(user.id)}
+                                                    disabled={updatingId === user.id}
+                                                    className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-50 text-red-600/40 bg-white shadow-sm border border-red-100"
+                                                >
+                                                    Excluir
                                                 </button>
                                             )}
                                             {updatingId === user.id && <Loader2 className="w-4 h-4 animate-spin text-olive-900/40 ml-2" />}

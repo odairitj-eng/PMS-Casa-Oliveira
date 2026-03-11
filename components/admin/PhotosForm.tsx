@@ -48,7 +48,7 @@ export function PhotosForm({ propertyId }: Props) {
         try {
             await axios.post('/api/admin/property/photos', { ...photo, isPrimary: true, propertyId });
             fetchPhotos();
-            toast.success("Destaque alterado.");
+            toast.success("Foto principal atualizada!");
         } catch { toast.error("Erro ao atualizar."); }
     };
 
@@ -56,7 +56,7 @@ export function PhotosForm({ propertyId }: Props) {
         <Card className="shadow-sm border-olive-900/10">
             <CardHeader>
                 <CardTitle>Galeria de Fotos</CardTitle>
-                <CardDescription>Gerencie as imagens exibidas no site. A primeira foto ativa será a principal.</CardDescription>
+                <CardDescription>Gerencie as imagens exibidas no site. A foto marcada como principal será o destaque.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex gap-4 items-end bg-olive-900/5 p-4 rounded-xl border border-olive-900/10">
@@ -76,7 +76,7 @@ export function PhotosForm({ propertyId }: Props) {
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img src={photo.imageUrl} alt="Property" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                    <Button size="icon" variant="destructive" onClick={() => handleDelete(photo.id)}>
+                                    <Button size="icon" variant="destructive" onClick={() => handleDelete(photo.id)} title="Excluir">
                                         <Trash2 className="w-4 h-4" />
                                     </Button>
                                     {!photo.isPrimary && (

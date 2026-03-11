@@ -36,7 +36,12 @@ export default async function PropertyPage({ params }: Props) {
     const property = await db.property.findUnique({
         where: { slug },
         include: {
-            photos: { orderBy: { sortOrder: 'asc' } },
+            photos: {
+                orderBy: [
+                    { isPrimary: 'desc' },
+                    { sortOrder: 'asc' }
+                ]
+            },
             amenities: { orderBy: { sortOrder: 'asc' } },
             rules: { orderBy: { sortOrder: 'asc' } },
         },
