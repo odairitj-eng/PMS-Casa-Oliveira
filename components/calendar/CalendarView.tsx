@@ -439,8 +439,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 )}>
                                     {format(cloneDay, "d")}
                                 </span>
-                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && (
-                                    <span className="text-[8px] font-black text-red-500 uppercase bg-red-500/5 px-1 rounded">Checkout</span>
+                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelected && (
+                                    <span className="text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-1 z-10 uppercase">Checkout</span>
                                 )}
                                 {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && !isCheckoutDay && (
                                     <Lock className="w-3 h-3 text-olive-900/20" />
