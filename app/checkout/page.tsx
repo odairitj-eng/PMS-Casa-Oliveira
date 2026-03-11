@@ -347,7 +347,7 @@ function CheckoutContent() {
                                             {checkIn ? new Date(checkIn + "T00:00:00").toLocaleDateString('pt-BR') : "--/--/----"}
                                         </p>
                                         <p className="text-[10px] text-olive-900/60 font-medium">
-                                            {propertyData?.checkInStart === "Flexível" ? "Horário flexível" : `Após as ${propertyData?.checkInStart || "14:00"}`}
+                                            {propertyData?.checkInStart === "Flexível" ? "Horário flexível" : propertyData?.checkInStart ? `Após as ${propertyData.checkInStart}` : "..."}
                                         </p>
                                     </div>
                                     <div className="text-right">
@@ -356,7 +356,7 @@ function CheckoutContent() {
                                             {checkOut ? new Date(checkOut + "T00:00:00").toLocaleDateString('pt-BR') : "--/--/----"}
                                         </p>
                                         <p className="text-[10px] text-olive-900/60 font-medium">
-                                            {propertyData?.checkOutEnd === "Flexível" ? "Horário flexível" : `Até as ${propertyData?.checkOutEnd || "11:00"}`}
+                                            {propertyData?.checkOutEnd === "Flexível" ? "Horário flexível" : propertyData?.checkOutEnd ? `Até as ${propertyData.checkOutEnd}` : "..."}
                                         </p>
                                     </div>
                                 </div>

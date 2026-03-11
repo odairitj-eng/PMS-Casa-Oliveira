@@ -136,7 +136,7 @@ export function BookingCard({
                             </span>
                             {dates.checkIn && (
                                 <span className="text-[10px] text-olive-900/60 block mt-0.5 font-medium">
-                                    {checkInStart === "Flexível" ? "Horário flexível" : `A partir das ${checkInStart}`}
+                                    {checkInStart === "Flexível" ? "Horário flexível" : checkInStart ? `A partir das ${checkInStart}` : "Consulte os horários"}
                                 </span>
                             )}
                         </div>
@@ -152,7 +152,7 @@ export function BookingCard({
                             </span>
                             {dates.checkOut && (
                                 <span className="text-[10px] text-olive-900/60 block mt-0.5 font-medium">
-                                    {checkOutEnd === "Flexível" ? "Horário flexível" : `Até às ${checkOutEnd}`}
+                                    {checkOutEnd === "Flexível" ? "Horário flexível" : checkOutEnd ? `Até às ${checkOutEnd}` : "Consulte os horários"}
                                 </span>
                             )}
                         </div>
