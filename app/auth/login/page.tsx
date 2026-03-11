@@ -3,13 +3,33 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LoginButtons } from "@/components/auth/LoginButtons";
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect } from "react";
 
 function LoginContent() {
+    const { data: session, status } = useSession();
+    const router = useRouter();
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") || "";
+    const callbackUrl = searchParams.get("callbackUrl") || "/";
     const isAdminLogin = callbackUrl.includes("/admin");
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace(callbackUrl);
+        }
+    }, [status, router, callbackUrl]);
+
+    if (status === "loading" || status === "authenticated") {
+        return (
+            <div className="min-h-screen bg-sand-50 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-10 h-10 border-4 border-olive-900 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-olive-900 font-bold animate-pulse">Verificando acesso...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-sand-50 flex flex-col items-center justify-center p-6 bg-[url('/imagens/pattern.png')] bg-repeat">

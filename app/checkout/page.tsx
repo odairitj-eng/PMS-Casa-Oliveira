@@ -68,7 +68,7 @@ function CheckoutContent() {
     // Proteção extra via cliente
     if (status === "unauthenticated") {
         const currentPath = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
-        window.location.href = `/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`;
+        router.replace(`/auth/login?callbackUrl=${encodeURIComponent(currentPath)}`);
         return null;
     }
 
