@@ -147,12 +147,12 @@ export function DateSelectionModal({
     const onDateClick = (day: Date) => {
         const d = startOfDay(day);
         const isAvailableForCheckIn = isDateAvailable(d);
+        const minNights = data?.property?.minimumNights || 1;
 
         // Se não tem início ou estamos resetando
         if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
             if (!isAvailableForCheckIn) {
-                // Se clicou num dia ocupado, mas é checkout de alguém, talvez queira começar ali
-                // O isDateAvailable já retorna true para o dia de checkout alheio
+                toast.error("Esta data está ocupada para check-in.");
                 return;
             }
             setSelectedRange({ start: d, end: null });
@@ -160,32 +160,41 @@ export function DateSelectionModal({
         } else {
             // Tentando fechar o range
             if (isBefore(d, selectedRange.start)) {
-                if (!isAvailableForCheckIn) return;
-                setSelectedRange({ start: d, end: selectedRange.start });
-            } else if (isSameDay(d, selectedRange.start)) {
-                setSelectedRange({ start: null, end: null });
-            } else {
-                // Verificar se há bloqueios NO MEIO do intervalo (excluindo o dia de saída d)
-                const interval = eachDayOfInterval({ start: selectedRange.start, end: d });
-                const nights = interval.slice(0, -1);
-                const hasBlockInRange = nights.some(date => !isDateAvailable(date));
-
-                if (hasBlockInRange) {
-                    // Se o intervalo é inválido, recomeçamos a seleção se o dia for válido para check-in
-                    if (isAvailableForCheckIn) {
-                        setSelectedRange({ start: d, end: null });
-                    }
+                if (!isAvailableForCheckIn) {
+                    toast.error("Esta data está ocupada para check-in.");
                     return;
                 }
-
-                // O dia 'd' (checkout) pode ser o início de outra reserva, 
-                // mas não pode ser um bloqueio manual rígido (blockedDate que geralmente bloqueia o dia todo)
-                // No entanto, no Casa Oliveira, bloqueios manuais seguem a mesma lógica (noite).
-                // Então permitimos d ser qualquer dia, desde que as noites anteriores estejam livres.
-
-                setSelectedRange({ ...selectedRange, end: d });
-                setHoveredDate(null);
+                setSelectedRange({ start: d, end: null });
+                return;
             }
+
+            if (isSameDay(d, selectedRange.start)) {
+                setSelectedRange({ start: null, end: null });
+                return;
+            }
+
+            // Verificar se há bloqueios NO MEIO do intervalo (excluindo o dia de saída d)
+            const interval = eachDayOfInterval({ start: selectedRange.start, end: d });
+            const nightsInterval = interval.slice(0, -1);
+            const hasBlockInRange = nightsInterval.some(date => !isDateAvailable(date));
+
+            if (hasBlockInRange) {
+                toast.error("O intervalo contém datas ocupadas. Selecione um período livre.");
+                if (isAvailableForCheckIn) {
+                    setSelectedRange({ start: d, end: null });
+                }
+                return;
+            }
+
+            // Validar Noites Mínimas
+            const nightsCount = differenceInDays(d, selectedRange.start);
+            if (nightsCount < minNights) {
+                toast.error(`O período mínimo é de ${minNights} noite${minNights > 1 ? 's' : ''}.`);
+                return;
+            }
+
+            setSelectedRange({ ...selectedRange, end: d });
+            setHoveredDate(null);
         }
     };
 
@@ -271,7 +280,7 @@ export function DateSelectionModal({
                             isWithinInterval(date, { start: selectedRange.start, end: selectedRange.end });
                         const isNightAvailable = isDateAvailable(date);
                         const isStartBlock = isStartOfReservation(date);
-                        const isVivid = isNightAvailable || isStartBlock; // Vivid se posso dormir OU se é checkout de outra
+                        const isVivid = isNightAvailable; // Somente noites livres são vividas (cores vivas)
 
                         const isToday = isSameDay(date, new Date());
 
@@ -296,8 +305,8 @@ export function DateSelectionModal({
                         return (
                             <div
                                 key={i}
-                                onClick={() => isCurrentMonth && (isVivid || isInRange) && onDateClick(date)}
-                                onMouseEnter={() => isCurrentMonth && isVivid && setHoveredDate(date)}
+                                onClick={() => isCurrentMonth && (isVivid || isStartBlock || isInRange) && onDateClick(date)}
+                                onMouseEnter={() => isCurrentMonth && (isVivid || isStartBlock) && setHoveredDate(date)}
                                 onMouseLeave={() => setHoveredDate(null)}
                                 className={cn(
                                     "h-14 md:h-20 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",

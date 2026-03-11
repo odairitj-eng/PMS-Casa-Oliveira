@@ -65,17 +65,15 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         loadData();
     }, [refreshKey, propertyId]);
 
-    const onDateClick = (day: Date) => {
-        const clickedDay = startOfDay(day);
+    const onDateClick = (date: Date) => {
+        const clickedDay = startOfDay(date);
         const today = startOfDay(new Date());
 
         if (isBefore(clickedDay, today)) return;
 
-        const isStartingSelection = !selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end));
+        const propertyMinNights = data?.property?.minimumNights || 1;
 
-        if (isStartingSelection) {
-            // Para começar, o dia precisa estar livre (Smart logic: isDateInWindow && !block && !res)
-            // Usamos a mesma lógica de renderização para consistência
+        if (!selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end))) {
             const inWindow = isDateInWindow(clickedDay);
             const dayReservation = data?.reservations?.find((r: any) => {
                 const s = startOfDay(parseLocal(r.checkIn));
@@ -92,7 +90,6 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         } else {
             // Tentando fechar o range
             if (isBefore(clickedDay, selectedRange.start)) {
-                // Inverter se clicou antes e validar o novo início
                 const inWindow = isDateInWindow(clickedDay);
                 const dayReservation = data?.reservations?.find((r: any) => {
                     const s = startOfDay(parseLocal(r.checkIn));
@@ -104,32 +101,43 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                     toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
                     return;
                 }
-                setSelectedRange({ start: clickedDay, end: selectedRange.start });
-            } else if (isSameDay(clickedDay, selectedRange.start)) {
-                setSelectedRange(null);
-            } else {
-                // Verificar se há bloqueios NO MEIO do caminho (excluindo o dia de saída clickedDay)
-                const interval = eachDayOfInterval({ start: selectedRange.start, end: clickedDay });
-                const nights = interval.slice(0, -1);
-
-                const hasBlockInRange = nights.some((date: Date) => {
-                    const dayRes = data?.reservations?.some((r: any) => {
-                        const s = startOfDay(parseLocal(r.checkIn));
-                        const e = startOfDay(parseLocal(r.checkOut));
-                        return date >= s && date < e;
-                    });
-                    const dayBlk = data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), date));
-                    const win = isDateInWindow(date);
-                    return !win || dayRes || dayBlk;
-                });
-
-                if (hasBlockInRange) {
-                    toast.error("O intervalo selecionado contém datas ocupadas.");
-                    return;
-                }
-
-                setSelectedRange({ ...selectedRange, end: clickedDay });
+                setSelectedRange({ start: clickedDay, end: clickedDay });
+                return;
             }
+
+            if (isSameDay(clickedDay, selectedRange.start)) {
+                setSelectedRange(null);
+                return;
+            }
+
+            // Verificar se há bloqueios NO MEIO do caminho (excluindo o dia de saída clickedDay)
+            const interval = eachDayOfInterval({ start: selectedRange.start, end: clickedDay });
+            const nights = interval.slice(0, -1);
+
+            const hasBlockInRange = nights.some((d: Date) => {
+                const dayRes = data?.reservations?.some((r: any) => {
+                    const s = startOfDay(parseLocal(r.checkIn));
+                    const e = startOfDay(parseLocal(r.checkOut));
+                    return d >= s && d < e;
+                });
+                const dayBlk = data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), d));
+                const win = isDateInWindow(d);
+                return !win || dayRes || dayBlk;
+            });
+
+            if (hasBlockInRange) {
+                toast.error("O intervalo contém datas ocupadas. Selecione um período livre.");
+                return;
+            }
+
+            // Validar Noites Mínimas
+            const nightsCount = differenceInDays(clickedDay, selectedRange.start);
+            if (nightsCount < propertyMinNights) {
+                toast.error(`O período mínimo é de ${propertyMinNights} noite${propertyMinNights > 1 ? 's' : ''}.`);
+                return;
+            }
+
+            setSelectedRange({ ...selectedRange, end: clickedDay });
         }
     };
 
@@ -375,7 +383,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 const isStartBlock = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), cloneDay)) ||
                     data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay));
 
-                const isVivid = isNightAvailable || isStartBlock;
+                const isVivid = isNightAvailable; // Somente noites livres são vividas
                 const canInteract = (inWindow && !isPast) || isStartBlock;
 
                 const isInDragRange = getIsDateInDragRange(cloneDay);
