@@ -71,6 +71,8 @@ export const config = {
         "/checkout",
         "/checkout/:path*",
         "/payment/:path*",
+        "/profile",
+        "/profile/:path*",
         "/admin",
         "/admin/:path*"
     ],

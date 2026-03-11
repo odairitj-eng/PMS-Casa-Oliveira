@@ -36,18 +36,50 @@ self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // 🚨 EXCLUSÃO CRÍTICA: Não interceptar AUTH ou API do NextAuth
-    if (url.pathname.includes('/api/auth') || url.pathname.includes('/auth/login') || url.pathname.includes('/auth/error')) {
-        return; // Deixa o navegador lidar (Sempre Rede)
-    }
-
-    // Áreas dinâmicas (Admin, API restante): Network-Only ou Network-First
-    if (url.pathname.startsWith('/api') || url.pathname.startsWith('/admin')) {
-        event.respondWith(fetch(request).catch(() => caches.match(request)));
+    // 🚨 EXCLUSÃO ABSOLUTA: NextAuth, API de Auth e Login
+    // Nunca interceptar ou cachear nada relacionado a autenticação
+    if (
+        url.pathname.includes('/api/auth') ||
+        url.pathname.includes('/auth/login') ||
+        url.pathname.includes('/auth/error') ||
+        url.pathname.includes('/favicon.ico')
+    ) {
         return;
     }
 
-    // Assets Estáticos: Cache-First
+    // 1. Áreas Dinâmicas e API (Excluindo Auth acima): Network-Only
+    if (url.pathname.startsWith('/api') || url.pathname.startsWith('/admin')) {
+        event.respondWith(
+            fetch(request).catch(() => {
+                // Tenta cache apenas se a rede falhar (fallback básico)
+                return caches.match(request);
+            })
+        );
+        return;
+    }
+
+    // 2. Navegação (Páginas HTML): Network-First
+    // Crucial para garantir que o status de login seja atualizado
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    // Opcional: Atualizar o cache da página principal ou offline
+                    if (url.pathname === '/') {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then(cache => cache.put(request, responseClone));
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    // Fallback Offline
+                    return caches.match(request) || caches.match('/offline') || caches.match('/');
+                })
+        );
+        return;
+    }
+
+    // 3. Assets Estáticos: Cache-First (Performance)
     if (
         request.destination === 'style' ||
         request.destination === 'script' ||
@@ -58,10 +90,13 @@ self.addEventListener('fetch', (event) => {
             caches.match(request).then((cachedResponse) => {
                 if (cachedResponse) return cachedResponse;
                 return fetch(request).then((networkResponse) => {
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(request, responseToCache);
-                    });
+                    // Só guarda no cache se a resposta for válida
+                    if (networkResponse.ok) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseToCache);
+                        });
+                    }
                     return networkResponse;
                 });
             })
@@ -69,26 +104,8 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Navegação: Stale-While-Revalidate com Offline Fallback
-    if (request.mode === 'navigate') {
-        event.respondWith(
-            fetch(request).catch(() => {
-                return caches.match('/offline') || caches.match('/');
-            })
-        );
-        return;
-    }
-
+    // 4. Estratégia Padrão: Network-First
     event.respondWith(
-        caches.match(request).then((cachedResponse) => {
-            const fetchPromise = fetch(request).then((networkResponse) => {
-                const responseToCache = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(request, responseToCache);
-                });
-                return networkResponse;
-            });
-            return cachedResponse || fetchPromise;
-        })
+        fetch(request).catch(() => caches.match(request))
     );
 });
