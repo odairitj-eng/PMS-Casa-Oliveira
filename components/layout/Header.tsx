@@ -100,7 +100,7 @@ export function Header() {
 
             {/* Mobile Menu Drawer */}
             <div className={cn(
-                "fixed inset-0 z-[60] bg-white transition-all duration-500 md:hidden flex flex-col pt-32 px-8",
+                "fixed inset-0 z-[100] bg-sand-50 transition-all duration-500 md:hidden flex flex-col pt-32 px-8 shadow-2xl",
                 isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"
             )}>
                 <button
