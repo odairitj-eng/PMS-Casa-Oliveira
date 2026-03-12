@@ -17,6 +17,9 @@ export async function GET(
                 publicTitle: true,
                 city: true,
                 state: true,
+                checkInStart: true,
+                checkInEnd: true,
+                checkOutEnd: true,
                 photos: {
                     orderBy: [
                         { isPrimary: 'desc' },

@@ -347,7 +347,11 @@ function CheckoutContent() {
                                             {checkIn ? new Date(checkIn + "T00:00:00").toLocaleDateString('pt-BR') : "--/--/----"}
                                         </p>
                                         <p className="text-[10px] text-olive-900/60 font-medium">
-                                            {propertyData?.checkInStart === "Flexível" ? "Horário flexível" : propertyData?.checkInStart ? `Após as ${propertyData.checkInStart}` : "..."}
+                                            {propertyData?.checkInStart === "Flexível"
+                                                ? "Horário flexível"
+                                                : propertyData?.checkInStart
+                                                    ? `Entre ${propertyData.checkInStart} e ${propertyData.checkInEnd === "Flexível" ? "a combinar" : (propertyData.checkInEnd || "...")}${propertyData.checkInEnd?.includes("01") || propertyData.checkInEnd?.includes("02") || propertyData.checkInEnd?.includes("03") ? " (dia seguinte)" : ""}`
+                                                    : "..."}
                                         </p>
                                     </div>
                                     <div className="text-right">
