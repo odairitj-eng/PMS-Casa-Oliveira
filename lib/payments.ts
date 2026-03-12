@@ -105,3 +105,44 @@ export async function createCheckoutPreference({
 
     return response.data;
 }
+
+/**
+ * Realiza o reembolso de um pagamento no Mercado Pago.
+ * Suporta Pix e Cartão de Crédito.
+ */
+export async function refundPayment({
+    paymentId,
+    amount,
+}: {
+    paymentId: string;
+    amount?: number; // Se não enviado, reembolsa o total
+}) {
+    if (!MP_ACCESS_TOKEN) {
+        console.warn("[SECURITY] Running Refund in MOCK mode (missing MERCADOPAGO_ACCESS_TOKEN)");
+        return {
+            id: `mock_refund_${uuidv4().substring(0, 8)}`,
+            status: "approved",
+            amount: amount || 0
+        };
+    }
+
+    const payload = amount ? { amount: Number(amount.toFixed(2)) } : {};
+
+    try {
+        const response = await axios.post(
+            `https://api.mercadopago.com/v1/payments/${paymentId}/refunds`,
+            payload,
+            {
+                headers: {
+                    Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+                    "X-Idempotency-Key": uuidv4(),
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error: any) {
+        console.error("Error refunding payment:", error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || "Erro ao processar reembolso no Mercado Pago");
+    }
+}

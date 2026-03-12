@@ -4,15 +4,21 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Loader2, User as UserIcon, Mail, Phone, Calendar, ShieldCheck, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { CancellationModal } from "@/components/CancellationModal";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
     const [guestData, setGuestData] = useState<any>(null);
     const [reservations, setReservations] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+    const [selectedReservationId, setSelectedReservationId] = useState<string | null>(null);
 
     useEffect(() => {
         // Safety Timeout: Forçar fim do loading após 10s para evitar spinner infinito
@@ -137,7 +143,52 @@ export default function ProfilePage() {
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        {/* Listagem de reservas... */}
+                                        {reservations.map((res) => (
+                                            <div key={res.id} className="p-6 rounded-2xl border border-olive-900/10 hover:border-olive-900/20 transition-all bg-sand-50/10 group">
+                                                <div className="flex flex-col md:flex-row justify-between gap-4">
+                                                    <div className="space-y-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest text-olive-900/40 bg-white px-2 py-1 rounded-md border border-olive-900/5 shadow-sm">
+                                                                #{res.id.slice(-6)}
+                                                            </span>
+                                                            <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-md ${res.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' :
+                                                                res.status === 'PENDING_PAYMENT' ? 'bg-amber-100 text-amber-700' :
+                                                                    res.status.startsWith('CANCELLED') ? 'bg-red-100 text-red-700' :
+                                                                        'bg-olive-900/10 text-olive-900/60'
+                                                                }`}>
+                                                                {res.status}
+                                                            </span>
+                                                        </div>
+                                                        <h3 className="font-bold text-olive-900 text-lg">{res.property?.publicTitle || "Propriedade"}</h3>
+                                                        <div className="flex items-center gap-4 text-sm text-olive-900/60 font-medium">
+                                                            <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {format(new Date(res.checkIn), "dd MMM", { locale: ptBR })} - {format(new Date(res.checkOut), "dd MMM", { locale: ptBR })}</span>
+                                                            <span className="w-1 h-1 rounded-full bg-olive-900/20" />
+                                                            <span>R$ {res.totalAmount.toFixed(2)}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-end justify-between md:flex-col md:items-end">
+                                                        <Link href={`/${res.property?.id || ''}`} className="text-sm font-bold text-olive-900 underline opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            Ver imóvel
+                                                        </Link>
+
+                                                        {res.status === 'CONFIRMED' && (
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    setSelectedReservationId(res.id);
+                                                                    setIsCancelModalOpen(true);
+                                                                }}
+                                                                className="text-red-500 hover:text-red-600 hover:bg-red-50 font-bold rounded-xl"
+                                                            >
+                                                                Cancelar
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </CardContent>
@@ -145,6 +196,18 @@ export default function ProfilePage() {
                     </div>
                 </div>
             </div>
+
+            {selectedReservationId && (
+                <CancellationModal
+                    isOpen={isCancelModalOpen}
+                    onClose={() => setIsCancelModalOpen(false)}
+                    reservationId={selectedReservationId}
+                    onSuccess={() => {
+                        // Refresh reservations
+                        axios.get("/api/reservations/me").then(res => setReservations(res.data));
+                    }}
+                />
+            )}
         </div>
     );
 }

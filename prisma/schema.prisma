@@ -80,6 +80,9 @@ model Property {
   integrations        Integration[]
   syncLogs            SyncLog[]
   reservationLinks    ReservationLink[]
+  
+  cancellationPolicyId String?
+  cancellationPolicy   CancellationPolicy? @relation(fields: [cancellationPolicyId], references: [id])
 }
 
 model Guest {
@@ -183,6 +186,7 @@ model Reservation {
   guest        Guest         @relation(fields: [guestId], references: [id])
   payments     Payment[]
   blockedDates BlockedDate[]
+  events       ReservationEvent[]
   
   numGuests    Int?          @default(1)
   occupants    ReservationOccupant[]
@@ -192,10 +196,42 @@ model Reservation {
 }
 
 enum ReservationStatus {
+  DRAFT
   PENDING_PAYMENT
   CONFIRMED
-  CANCELLED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED_BY_GUEST
+  CANCELLED_BY_HOST
+  CANCELLED_SYSTEM
   EXPIRED
+}
+
+model CancellationPolicy {
+  id                         String   @id @default(uuid())
+  name                       String
+  description                String?  @db.Text
+  cancelFreeLimitHours       Int      @default(48)
+  partialRefundPercentage    Float    @default(50)
+  nonRefundableLimitHours    Int      @default(24)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+
+  properties Property[]
+}
+
+model ReservationEvent {
+  id            String   @id @default(uuid())
+  reservationId String
+  type          String   // CANCEL_REQUESTED, CANCELLED, REFUND_REQUESTED, REFUND_COMPLETED, etc
+  userId        String?  // Quem realizou a ação (admin ou null se sistema/hóspede s/ login)
+  reason        String?  @db.Text
+  metadata      Json?    // Detalhes extras (ex: valores calculados)
+  createdAt     DateTime @default(now())
+
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
 }
 
 model ReservationOccupant {
@@ -222,6 +258,12 @@ model Payment {
   expiresAt            DateTime?     // Para Pix ou boletos
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt @default(now())
+
+  // Campos de Reembolso
+  refundAmount         Float?
+  refundStatus         String?       // PENDING, COMPLETED, FAILED
+  refundProviderId     String?       // ID do refund no Mercado Pago
+  refundedAt           DateTime?
 
   reservation Reservation @relation(fields: [reservationId], references: [id])
 }

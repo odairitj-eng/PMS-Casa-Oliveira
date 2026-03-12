@@ -23,6 +23,7 @@ export async function GET(
             photos: { orderBy: { sortOrder: 'asc' } },
             amenities: { orderBy: { sortOrder: 'asc' } },
             rules: { orderBy: { sortOrder: 'asc' } },
+            cancellationPolicy: true,
             _count: { select: { reservations: true } },
         },
     });

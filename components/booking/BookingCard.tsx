@@ -17,6 +17,7 @@ interface BookingCardProps {
     checkInStart?: string;
     checkInEnd?: string;
     checkOutEnd?: string;
+    basePrice?: number;
 }
 
 export function BookingCard({
@@ -26,7 +27,8 @@ export function BookingCard({
     maxPets = 0,
     checkInStart = "14:00",
     checkInEnd = "22:00",
-    checkOutEnd = "11:00"
+    checkOutEnd = "11:00",
+    basePrice = 0
 }: BookingCardProps) {
     const [dates, setDates] = useState({ checkIn: "", checkOut: "" });
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -113,8 +115,8 @@ export function BookingCard({
                 <div className="flex items-baseline gap-1">
                     <CardTitle className="text-3xl md:text-4xl font-bold text-olive-900 tracking-tight">
                         {hasDates && pricing
-                            ? `R$ ${Math.round(pricing.total / pricing.breakdown.length)}`
-                            : "Consultar"
+                            ? `R$ ${Math.round(pricing.nightlyRate)}`
+                            : `R$ ${basePrice}`
                         }
                     </CardTitle>
                     <span className="text-olive-900/60 font-medium">/ noite</span>
@@ -260,9 +262,9 @@ export function BookingCard({
                     <div className="pt-6 border-t border-olive-900/5 space-y-3 animate-in fade-in duration-500">
                         <div className="flex justify-between text-sm text-olive-900/70">
                             <span className="underline decoration-1 underline-offset-2">
-                                R$ {Math.round(pricing.total / pricing.breakdown.length)} x {pricing.breakdown.length} noites
+                                R$ {Math.round(pricing.nightlyRate)} x {pricing.breakdown.length} noites
                             </span>
-                            <span>R$ {(pricing.total - pricing.cleaningFee).toFixed(2)}</span>
+                            <span>R$ {(pricing.nightlyRate * pricing.breakdown.length).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm text-olive-900/70">
                             <span className="underline decoration-1 underline-offset-2">Taxa de limpeza</span>
@@ -284,6 +286,24 @@ export function BookingCard({
                 initialCheckOut={dates.checkOut}
                 propertyId={propertyId}
             />
+
+            {/* Mobile Booking Bottom Bar (Sincronizado) */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-olive-900/10 flex justify-between items-center z-[100] shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+                <div>
+                    <div className="flex items-end gap-1">
+                        <span className="font-bold text-lg">
+                            R$ {hasDates && pricing ? Math.round(pricing.nightlyRate) : basePrice}
+                        </span>
+                        <span className="text-sm font-medium text-olive-900/60 pb-[2px]">noite</span>
+                    </div>
+                </div>
+                <button
+                    onClick={handleActionClick}
+                    className="bg-olive-900 text-sand-50 px-8 py-3 rounded-xl font-bold text-lg hover:bg-olive-800 transition-colors active:scale-95"
+                >
+                    {hasDates ? "Reservar" : "Disponibilidade"}
+                </button>
+            </div>
         </Card>
     );
 }

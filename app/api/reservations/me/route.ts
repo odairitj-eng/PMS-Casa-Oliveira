@@ -20,6 +20,17 @@ export async function GET() {
                     email: session.user.email
                 }
             },
+            include: {
+                property: {
+                    select: {
+                        id: true,
+                        publicTitle: true,
+                        name: true,
+                        cancellationPolicy: true
+                    }
+                },
+                payments: true
+            },
             orderBy: {
                 checkIn: 'desc'
             }

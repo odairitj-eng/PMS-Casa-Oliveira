@@ -102,7 +102,7 @@ function CheckoutContent() {
                 guestEmail: session?.user?.email,
                 guestPhone: phone,
                 totalAmount: pricing.total,
-                nightlyRate: pricing.total / pricing.breakdown.length,
+                nightlyRate: pricing.nightlyRate,
                 cleaningFee: pricing.cleaningFee,
                 totalNights: pricing.breakdown.length,
                 guests: parseInt(guestsCount),

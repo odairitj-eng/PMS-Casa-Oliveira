@@ -24,6 +24,7 @@ import { ChevronLeft, ChevronRight, Lock, Clock, Info, X, Calendar, Minus } from
 import axios from "axios";
 import { cn } from "@/lib/utils";
 import { CalendarSidebar } from "@/components/admin/CalendarSidebar";
+import { ReservationDetailsModal } from "@/components/admin/ReservationDetailsModal";
 import toast from "react-hot-toast";
 
 export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: number, propertyId: string }) {
@@ -31,6 +32,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
     const [selectedRange, setSelectedRange] = useState<{ start: Date; end: Date } | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [viewMode, setViewMode] = useState<'month' | 'year'>('month');
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedReservation, setSelectedReservation] = useState<any>(null);
 
     // Estados para seleção por arraste (botão direito)
     const [isDragging, setIsDragging] = useState(false);
@@ -84,6 +87,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
             const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), clickedDay));
 
             if (!inWindow || dayReservation || dayBlock) {
+                if (dayReservation) {
+                    setSelectedReservation(dayReservation);
+                    setIsDetailsModalOpen(true);
+                    return;
+                }
                 toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
                 return;
             }
@@ -590,6 +598,16 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 }}
                 basePrice={data?.property?.basePrice}
                 propertyId={propertyId}
+            />
+
+            <ReservationDetailsModal
+                isOpen={isDetailsModalOpen}
+                onClose={() => setIsDetailsModalOpen(false)}
+                reservation={selectedReservation}
+                onSuccess={() => {
+                    // Refresh data instead of full reload if possible, but reload is safer for now
+                    window.location.reload();
+                }}
             />
         </div>
     );

@@ -194,22 +194,12 @@ export default async function PropertyPage({ params }: Props) {
                         checkInStart={(property as any).checkInStart}
                         checkInEnd={(property as any).checkInEnd}
                         checkOutEnd={(property as any).checkOutEnd}
+                        basePrice={property.basePrice}
                     />
                 </div>
             </div>
 
-            {/* Mobile Booking Bottom Bar (Fixed) */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-olive-900/10 flex justify-between items-center z-[100]">
-                <div>
-                    <div className="flex items-end gap-1">
-                        <span className="font-bold text-lg">R$ {property.basePrice}</span>
-                        <span className="text-sm font-medium text-olive-900/60 pb-[2px]">noite</span>
-                    </div>
-                </div>
-                <a href="#reserva" className="bg-olive-900 text-sand-50 px-8 py-3 rounded-xl font-bold text-lg hover:bg-olive-800 transition-colors">
-                    Reservar
-                </a>
-            </div>
+
         </main>
     );
 }

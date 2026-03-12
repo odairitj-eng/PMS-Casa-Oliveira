@@ -20,8 +20,9 @@ import { AmenitiesForm } from "@/components/admin/AmenitiesForm";
 import { RulesForm } from "@/components/admin/RulesForm";
 import { ImportForm } from "@/components/admin/ImportForm";
 import { IntegrationsForm } from "@/components/admin/IntegrationsForm";
+import { CancellationPolicyForm } from "@/components/admin/CancellationPolicyForm";
 
-type Tab = 'geral' | 'fotos' | 'comodidades' | 'regras' | 'importar' | 'integracoes' | 'contato';
+type Tab = 'geral' | 'fotos' | 'comodidades' | 'regras' | 'importar' | 'integracoes' | 'financeiro' | 'contato';
 
 export default function PropertySettingsPage() {
     const params = useParams<{ id: string }>();
@@ -127,6 +128,7 @@ export default function PropertySettingsPage() {
                 {TAB_BTN('regras', 'Regras', FileCheck)}
                 <div className="w-[1px] h-6 bg-olive-900/20 my-auto mx-2 hidden md:block" />
                 {TAB_BTN('integracoes', 'Integrações', Plug)}
+                {TAB_BTN('financeiro', 'Financeiro', CreditCard)}
                 {TAB_BTN('contato', 'Contato', Mail)}
             </div>
 
@@ -183,6 +185,13 @@ export default function PropertySettingsPage() {
                             </CardContent>
                         </Card>
                     </div>
+                )}
+
+                {activeTab === 'financeiro' && (
+                    <CancellationPolicyForm
+                        propertyId={propertyId}
+                        initialPolicy={propertyData?.cancellationPolicy}
+                    />
                 )}
 
                 {/* System Settings */}
