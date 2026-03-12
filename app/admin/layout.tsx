@@ -30,7 +30,7 @@ export default function AdminLayout({
                 <div className="p-6 border-b border-olive-800/50 flex flex-col items-center pt-8 text-center">
                     <div className="rounded-2xl overflow-hidden inline-flex w-fit mb-4 mx-auto shadow-lg shadow-black/20">
                         <Image
-                            src="/imagens/logo.png"
+                            src="/imagens/logo.png?v=2"
                             alt="Casa Oliveira PMS"
                             width={100}
                             height={100}
