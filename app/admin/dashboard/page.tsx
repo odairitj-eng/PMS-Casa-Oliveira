@@ -21,6 +21,9 @@ interface DashboardData {
         basePrice: number;
         newGuests: number;
         newVips: number;
+        checkInStart: string;
+        checkInEnd: string;
+        checkOutEnd: string;
     };
     upcomingArrivals: Array<{
         id: string;
@@ -234,7 +237,14 @@ export default function DashboardPage() {
                                                 {res.totalNights} noite{res.totalNights > 1 ? 's' : ''} · {formatCurrency(res.totalAmount)}
                                             </p>
                                         </div>
-                                        <CheckInLabel dateStr={res.checkIn} />
+                                        <div className="flex flex-col items-end gap-1">
+                                            <CheckInLabel dateStr={res.checkIn} />
+                                            {data?.stats && (
+                                                <span className="text-[10px] font-bold text-olive-900/30 whitespace-nowrap">
+                                                    {data.stats.checkInStart} - {data.stats.checkInEnd}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>

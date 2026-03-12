@@ -366,6 +366,47 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        // Extrair horários do texto pesquisável
+        const searchableText = `${fullDescription} ${rulesArray.join(' ')}`;
+        const checkInPatterns = [
+            /check-in\s*(?:é|as|após|entre)?\s*(\d{1,2}(?::\d{2})?h?(?:\s*e\s*\d{1,2}(?::\d{2})?h?)?)/i,
+            /entrada\s*(?:liberada|das|após|entre)?\s*(\d{1,2}(?::\d{2})?h?(?:\s*e\s*\d{1,2}(?::\d{2})?h?)?)/i
+        ];
+        const checkOutPatterns = [
+            /check-out\s*(?:é|até|as)?\s*(\d{1,2}(?::\d{2})?h?)/i,
+            /saída\s*(?:até|as)?\s*(\d{1,2}(?::\d{2})?h?)/i
+        ];
+
+        let extractedCheckInStart = "14:00";
+        let extractedCheckInEnd = "22:00";
+        let extractedCheckOut = "11:00";
+
+        for (const pattern of checkInPatterns) {
+            const match = searchableText.match(pattern);
+            if (match) {
+                const time = match[1].toLowerCase();
+                const parts = time.split(/\s+e\s+/);
+                if (parts[0]) extractedCheckInStart = parts[0].includes(':') ? parts[0] : parts[0].replace('h', ':00');
+                if (parts[1]) extractedCheckInEnd = parts[1].includes(':') ? parts[1] : parts[1].replace('h', ':00');
+                break;
+            }
+        }
+
+        for (const pattern of checkOutPatterns) {
+            const match = searchableText.match(pattern);
+            if (match) {
+                const time = match[1].toLowerCase();
+                extractedCheckOut = time.includes(':') ? time : time.replace('h', ':00');
+                break;
+            }
+        }
+
+        const cleanTime = (t: string) => {
+            const hMatch = t.match(/(\d{1,2})/);
+            if (hMatch) return `${hMatch[1].padStart(2, '0')}:00`;
+            return t;
+        };
+
         return NextResponse.json({
             success: true,
             summary: {
@@ -373,7 +414,10 @@ export async function POST(req: NextRequest) {
                 amenities: amenitiesArray.length,
                 rules: rulesArray.length,
                 publicTitle,
-                hasSubtitle: !!publicSubtitle
+                hasSubtitle: !!publicSubtitle,
+                checkInStart: cleanTime(extractedCheckInStart),
+                checkInEnd: cleanTime(extractedCheckInEnd),
+                checkOutEnd: cleanTime(extractedCheckOut)
             }
         });
 

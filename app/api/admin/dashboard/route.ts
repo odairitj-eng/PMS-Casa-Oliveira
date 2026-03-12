@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
                 where: { status: 'CONFIRMED', createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
             }),
             // 3. Informações base da propriedade
-            db.property.findFirst({ select: { minimumNights: true, basePrice: true } }),
+            db.property.findFirst({ select: { minimumNights: true, basePrice: true, checkInStart: true, checkInEnd: true, checkOutEnd: true } }),
             // 4. Datas bloqueadas
             db.blockedDate.count({
                 where: { date: { gte: now, lte: thirtyDaysFromNow } },
@@ -117,6 +117,9 @@ export async function GET(req: NextRequest) {
                 availableNights,
                 adr: Math.round(adr),
                 basePrice: basePriceValue,
+                checkInStart: propertyBase?.checkInStart || "14:00",
+                checkInEnd: propertyBase?.checkInEnd || "22:00",
+                checkOutEnd: propertyBase?.checkOutEnd || "11:00",
                 newGuests,
                 newVips,
             },

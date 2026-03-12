@@ -429,7 +429,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                             !isVivid && !dayBlock && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-70 border-olive-900/5",
                             dayBlock && isCurrentMonth && "bg-white border-olive-900/10 shadow-sm transition-opacity",
                             isVivid && isCurrentMonth && "bg-white border-olive-900/20 hover:border-olive-900 shadow-sm",
-                            isSelected && "bg-olive-900/10 border-olive-900/60 z-20 grayscale-0 opacity-100",
+                            isSelected && "bg-olive-900/15 border-olive-900/60 z-20 grayscale-0 opacity-100",
+                            !isNightAvailable && dayReservation && isCurrentMonth && "bg-olive-900/5 border-olive-900/10 grayscale-0 opacity-100",
                             isToday && !isSelected && "border-olive-900/60 shadow-inner bg-sand-50/30"
                         )}
                         onClick={() => canInteract && onDateClick(cloneDay)}

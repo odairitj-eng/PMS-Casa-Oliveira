@@ -24,7 +24,7 @@ export async function GET(
             reservations: {
                 orderBy: { checkIn: 'desc' },
                 include: {
-                    property: { select: { name: true } }
+                    property: { select: { name: true, checkInStart: true, checkInEnd: true, checkOutEnd: true } }
                 }
             }
         }

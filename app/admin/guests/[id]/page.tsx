@@ -241,6 +241,9 @@ export default function GuestDetailPage() {
                                                     <div className="text-xs text-olive-900/40 font-medium">
                                                         {res.property.name} • {res.totalNights} noites
                                                     </div>
+                                                    <div className="text-[10px] font-bold text-olive-900/20 uppercase tracking-tighter mt-0.5">
+                                                        Entrada: {res.property.checkInStart} - {res.property.checkInEnd} • Saída até {res.property.checkOutEnd}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div className="text-right">
