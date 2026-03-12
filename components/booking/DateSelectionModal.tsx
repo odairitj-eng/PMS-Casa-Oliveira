@@ -52,14 +52,18 @@ export function DateSelectionModal({
         if (!dStr) return new Date();
         // Garante que o formato seja YYYY-MM-DD ignorando T...
         const datePart = dStr.includes('T') ? dStr.split('T')[0] : dStr;
-        const [y, m, d] = datePart.split('-');
-        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        const parts = datePart.split('-');
+        if (parts.length !== 3) return new Date();
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
     };
 
     const [selectedRange, setSelectedRange] = useState<{ start: Date | null; end: Date | null }>({
         start: initialCheckIn ? parseLocal(initialCheckIn) : null,
         end: initialCheckOut ? parseLocal(initialCheckOut) : null
     });
+
+    // Mapas para busca O(1) de datas ocupadas
+    const [occupiedMap, setOccupiedMap] = useState<{ [key: string]: 'reservation' | 'blocked' }>({});
 
     useEffect(() => {
         if (isOpen && propertyId) {
@@ -68,6 +72,24 @@ export function DateSelectionModal({
                 try {
                     const { data } = await axios.get(`/api/calendar?propertyId=${propertyId}`);
                     setData(data);
+
+                    // Pre-processar datas ocupadas para busca rápida
+                    const newMap: { [key: string]: 'reservation' | 'blocked' } = {};
+
+                    data.reservations?.forEach((r: any) => {
+                        const start = startOfDay(parseLocal(r.checkIn));
+                        const end = startOfDay(parseLocal(r.checkOut));
+                        const interval = eachDayOfInterval({ start, end: addDays(end, -1) });
+                        interval.forEach(d => {
+                            newMap[format(d, "yyyy-MM-dd")] = 'reservation';
+                        });
+                    });
+
+                    data.blockedDates?.forEach((b: any) => {
+                        newMap[format(parseLocal(b.date), "yyyy-MM-dd")] = 'blocked';
+                    });
+
+                    setOccupiedMap(newMap);
                 } catch (error) {
                     console.error("Erro ao carregar dados do calendário", error);
                 } finally {
@@ -76,7 +98,7 @@ export function DateSelectionModal({
             };
             loadData();
         }
-    }, [isOpen]);
+    }, [isOpen, propertyId]);
 
     const getDayRules = (date: Date) => {
         if (!data?.pricingRules) return [];
@@ -123,25 +145,17 @@ export function DateSelectionModal({
             if (!inWindow) return false;
         }
 
-        // Regra 3: Não pode estar bloqueado manualmente ou por iCal
-        const isBlocked = data.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), d));
-        if (isBlocked) return false;
-
-        // Regra 4: Não pode ter reserva confirmada (A noite deve estar livre)
-        const hasReservation = data.reservations?.some((r: any) => {
-            const start = startOfDay(parseLocal(r.checkIn));
-            const end = startOfDay(parseLocal(r.checkOut));
-            // Noite ocupada se d >= checkin e d < checkout
-            return d >= start && d < end;
-        });
-        if (hasReservation) return false;
+        // Regra 3 e 4: Mapas O(1)
+        const dateKey = format(d, "yyyy-MM-dd");
+        if (occupiedMap[dateKey]) return false;
 
         return true;
     };
 
     const isStartOfReservation = (date: Date) => {
-        return data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), date)) ||
-            data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), date)); // Bloqueios também começam em algum lugar
+        const dKey = format(date, "yyyy-MM-dd");
+        if (occupiedMap[dKey] === 'blocked') return true;
+        return data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), date));
     };
 
     const onDateClick = (day: Date) => {
@@ -228,7 +242,8 @@ export function DateSelectionModal({
         const propertyBasePrice = data.property?.basePrice || 0;
 
         for (const date of interval) {
-            const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), date));
+            const dateKey = format(date, "yyyy-MM-dd");
+            const dayOverride = data?.overrides?.find((o: any) => format(parseLocal(o.date), "yyyy-MM-dd") === dateKey);
             let dayPrice = dayOverride?.price || propertyBasePrice;
 
             if (!dayOverride) {
@@ -259,6 +274,8 @@ export function DateSelectionModal({
             day = addDays(day, 1);
         }
 
+        const today = startOfDay(new Date());
+
         return (
             <div className="flex-1 min-w-[300px]">
                 <h3 className="text-center font-bold text-olive-900 mb-4 capitalize">
@@ -271,8 +288,9 @@ export function DateSelectionModal({
                         </div>
                     ))}
                 </div>
-                <div className="grid grid-cols-7 gap-y-1">
+                <div className="grid grid-cols-7 gap-[2px]">
                     {days.map((date, i) => {
+                        const dateKey = format(date, "yyyy-MM-dd");
                         const isCurrentMonth = isSameMonth(date, monthStart);
                         const isSelectedStart = selectedRange.start && isSameDay(date, selectedRange.start);
                         const isSelectedEnd = selectedRange.end && isSameDay(date, selectedRange.end);
@@ -284,14 +302,14 @@ export function DateSelectionModal({
 
                         const isVivid = isNightAvailable || isCheckoutDay; // Vívido se noite livre OU checkout após noite livre
 
-                        const isToday = isSameDay(date, new Date());
+                        const isToday = isSameDay(date, today);
 
                         const isHovered = selectedRange.start && !selectedRange.end && hoveredDate &&
                             isCurrentMonth && (isNightAvailable || isSameDay(date, hoveredDate)) &&
                             ((date >= selectedRange.start && date <= hoveredDate) || (date <= selectedRange.start && date >= hoveredDate));
 
-                        // Cálculo de Preço igual ao Admin
-                        const dayOverride = data?.overrides?.find((o: any) => isSameDay(parseLocal(o.date), date));
+                        // Otimização de busca de preços
+                        const dayOverride = data?.overrides?.find((o: any) => format(parseLocal(o.date), "yyyy-MM-dd") === dateKey);
                         let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
                         if (!dayOverride) {
                             const activeRules = getDayRules(date);
@@ -301,9 +319,8 @@ export function DateSelectionModal({
                         }
                         const price = Math.round(finalPrice);
 
-                        // Verificação se é dia de checkout de reserva alheia (poderia ter checkin no mesmo dia)
-                        const isCheckoutOnly = data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkOut), date)) && isNightAvailable;
-                        const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), date));
+                        // Verificação se é dia de checkout de reserva alheia
+                        const isCheckoutOnly = data?.reservations?.some((r: any) => format(parseLocal(r.checkOut), "yyyy-MM-dd") === dateKey) && isNightAvailable;
 
                         return (
                             <div
@@ -312,19 +329,18 @@ export function DateSelectionModal({
                                 onMouseEnter={() => isCurrentMonth && isVivid && setHoveredDate(date)}
                                 onMouseLeave={() => setHoveredDate(null)}
                                 className={cn(
-                                    "h-14 md:h-20 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
+                                    "h-14 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
                                     !isCurrentMonth && "opacity-0 pointer-events-none",
-                                    isCurrentMonth && !isVivid && !isStartBlock && !dayBlock && "opacity-30 cursor-not-allowed grayscale",
-                                    isVivid && isCurrentMonth && "hover:bg-olive-900/5 rounded-2xl",
-                                    dayBlock && isCurrentMonth && "bg-white border-olive-900/5 shadow-sm opacity-100",
+                                    isCurrentMonth && !isVivid && !isStartBlock && "opacity-30 cursor-not-allowed grayscale",
+                                    isVivid && isCurrentMonth && "hover:bg-olive-900/5 rounded-xl",
                                     (isInRange || isHovered) && "bg-olive-900/5 rounded-none",
-                                    isSelectedStart && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
-                                    isSelectedEnd && "bg-olive-900 text-white rounded-2xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
+                                    isSelectedStart && "bg-olive-900 text-white rounded-xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
+                                    isSelectedEnd && "bg-olive-900 text-white rounded-xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
                                     isToday && !isSelectedStart && !isSelectedEnd && "underline underline-offset-4 decoration-2 decoration-olive-900/30"
                                 )}
                             >
                                 <span className={cn(
-                                    "relative z-10 font-black block text-lg transition-colors",
+                                    "relative z-10 font-black block text-base md:text-lg transition-colors",
                                     (isSelectedStart || isSelectedEnd) ? "text-white" : (isVivid ? "text-olive-900" : "text-olive-900/20")
                                 )}>
                                     {format(date, "d")}
@@ -332,7 +348,7 @@ export function DateSelectionModal({
 
                                 {isNightAvailable && isCurrentMonth && (
                                     <span className={cn(
-                                        "text-[10px] font-bold mt-1 z-10 transition-colors",
+                                        "text-[9px] font-bold mt-0.5 z-10 transition-colors",
                                         (isSelectedStart || isSelectedEnd) ? "text-white/60" : "text-olive-900/40"
                                     )}>
                                         R${price}
@@ -341,16 +357,12 @@ export function DateSelectionModal({
 
                                 {isCheckoutOnly && !isSelectedStart && !isSelectedEnd && (
                                     <div className="absolute top-1 right-1">
-                                        <div className="w-1.5 h-1.5 bg-olive-500 rounded-full animate-pulse" title="Disponível para check-in após o meio-dia" />
+                                        <div className="w-1.5 h-1.5 bg-olive-500 rounded-full" title="Disponível para check-in após o meio-dia" />
                                     </div>
                                 )}
 
                                 {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
-                                    <span className="text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-1 z-10 uppercase">Checkout</span>
-                                )}
-
-                                {!isVivid && isCurrentMonth && (
-                                    <div className="w-6 h-[1px] bg-olive-900/10 mt-2" />
+                                    <span className="text-[8px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-0.5 z-10 uppercase">Sair</span>
                                 )}
 
                                 {(isInRange || isHovered) && !isSelectedStart && !isSelectedEnd && (
@@ -366,96 +378,100 @@ export function DateSelectionModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white border-none rounded-3xl shadow-2xl z-[100] pb-32 md:pb-0">
-                <div className="p-6 md:p-10">
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
-                        <div>
-                            <DialogTitle className="text-2xl md:text-3xl font-bold text-olive-900 mb-1">
-                                Selecionar datas
-                            </DialogTitle>
-                            <p className="text-olive-900/60 font-medium">
-                                Adicione suas datas de viagem para ver os preços exatos
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-2 bg-sand-50/50 p-2 rounded-2xl border border-olive-900/10">
-                            <div className={cn(
-                                "px-4 py-2 rounded-xl transition-all",
-                                !selectedRange.start ? "bg-white shadow-sm ring-2 ring-olive-900" : "bg-transparent"
-                            )}>
-                                <span className="text-[10px] font-bold uppercase block text-olive-900/40">Check-in</span>
-                                <span className="text-sm font-bold text-olive-900">
-                                    {selectedRange.start ? format(selectedRange.start, "dd/MM/yyyy") : "Adicionar data"}
-                                </span>
+            <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white border-none rounded-3xl shadow-2xl z-[100]">
+                <div className="flex flex-col max-h-[90vh]">
+                    {/* Header Fixo */}
+                    <div className="p-6 md:p-10 pb-4 border-b border-olive-900/5">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <DialogTitle className="text-xl md:text-3xl font-bold text-olive-900 mb-1">
+                                    Selecionar datas
+                                </DialogTitle>
+                                <p className="text-olive-900/60 text-xs md:text-sm font-medium">
+                                    Preços exatos com base nas suas datas
+                                </p>
                             </div>
-                            <div className={cn(
-                                "px-4 py-2 rounded-xl transition-all",
-                                selectedRange.start && !selectedRange.end ? "bg-white shadow-sm ring-2 ring-olive-900" : "bg-transparent"
-                            )}>
-                                <span className="text-[10px] font-bold uppercase block text-olive-900/40">Checkout</span>
-                                <span className="text-sm font-bold text-olive-900">
-                                    {selectedRange.end ? format(selectedRange.end, "dd/MM/yyyy") : "Adicionar data"}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="relative">
-                        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-                            {renderMonth(currentMonth)}
-                            <div className="hidden lg:block">
-                                {renderMonth(addMonths(currentMonth, 1))}
-                            </div>
-                        </div>
-
-                        {/* Controles de Navegação */}
-                        <div className="absolute top-0 left-0 right-0 flex justify-between pointer-events-none px-2">
-                            <button
-                                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                                className="w-12 h-12 flex items-center justify-center hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto active:scale-90"
-                            >
-                                <ChevronLeft className="w-6 h-6" />
-                            </button>
-                            <button
-                                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                                className="w-12 h-12 flex items-center justify-center hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto active:scale-90"
-                            >
-                                <ChevronRight className="w-6 h-6" />
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 pt-6 border-t border-olive-900/10 flex items-center justify-between">
-                        <div className="flex flex-col">
-                            <button
-                                onClick={clearDates}
-                                className="text-sm font-bold text-olive-900 underline hover:text-black transition-colors text-left"
-                            >
-                                Limpar datas
-                            </button>
-                            {selectedRange.start && selectedRange.end && (
-                                <div className="mt-1 flex items-center gap-2">
-                                    <span className="text-xl font-black text-olive-900">Total: R${calculateTotal()}</span>
-                                    <span className="text-[10px] font-bold text-olive-900/40 uppercase bg-olive-900/5 px-2 py-0.5 rounded-full">
-                                        {differenceInDays(selectedRange.end, selectedRange.start)} noites
+                            <div className="flex items-center gap-1 bg-sand-50/50 p-1.5 rounded-xl border border-olive-900/10 w-full sm:w-auto">
+                                <div className={cn(
+                                    "flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all",
+                                    !selectedRange.start ? "bg-white shadow-sm ring-1 ring-olive-900" : "bg-transparent"
+                                )}>
+                                    <span className="text-[8px] font-bold uppercase block text-olive-900/40">Check-in</span>
+                                    <span className="text-xs font-bold text-olive-900">
+                                        {selectedRange.start ? format(selectedRange.start, "dd/MM") : "Add data"}
                                     </span>
                                 </div>
-                            )}
+                                <div className={cn(
+                                    "flex-1 sm:flex-none px-3 py-1.5 rounded-lg transition-all",
+                                    selectedRange.start && !selectedRange.end ? "bg-white shadow-sm ring-1 ring-olive-900" : "bg-transparent"
+                                )}>
+                                    <span className="text-[8px] font-bold uppercase block text-olive-900/40">Checkout</span>
+                                    <span className="text-xs font-bold text-olive-900">
+                                        {selectedRange.end ? format(selectedRange.end, "dd/MM") : "Add data"}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-                            <button
-                                onClick={onClose}
-                                className="flex-1 md:flex-none px-6 py-3 text-sm font-bold text-olive-900 hover:bg-olive-900/5 rounded-xl transition-all"
-                            >
-                                Fechar
-                            </button>
-                            <Button
-                                onClick={handleConfirm}
-                                disabled={!selectedRange.start || !selectedRange.end}
-                                className="flex-[2] md:flex-none bg-olive-900 text-sand-50 px-8 py-3 rounded-xl font-bold hover:bg-olive-800 transition-all shadow-lg shadow-olive-900/20 disabled:opacity-50"
-                            >
-                                Confirmar
-                            </Button>
+                    </div>
+
+                    {/* Conteúdo Com Scroll */}
+                    <div className="flex-1 overflow-y-auto p-6 md:p-10 pt-4 custom-scrollbar">
+                        <div className="relative">
+                            <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
+                                {renderMonth(currentMonth)}
+                                {renderMonth(addMonths(currentMonth, 1))}
+                            </div>
+
+                            {/* Controles de Navegação Flutuantes */}
+                            <div className="absolute top-0 left-0 right-0 flex justify-between pointer-events-none px-2 h-10">
+                                <button
+                                    onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                                    className="w-10 h-10 flex items-center justify-center hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto active:scale-90"
+                                >
+                                    <ChevronLeft className="w-6 h-6" />
+                                </button>
+                                <button
+                                    onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                                    className="w-10 h-10 flex items-center justify-center hover:bg-olive-900/5 rounded-full transition-all text-olive-900 pointer-events-auto active:scale-90"
+                                >
+                                    <ChevronRight className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer Fixo */}
+                    <div className="p-6 border-t border-olive-900/10 bg-white/80 backdrop-blur-md">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex flex-col">
+                                <button
+                                    onClick={clearDates}
+                                    className="text-xs font-bold text-olive-900 underline hover:text-black transition-colors"
+                                >
+                                    Limpar
+                                </button>
+                                {selectedRange.start && selectedRange.end && (
+                                    <div className="mt-0.5">
+                                        <span className="text-base font-black text-olive-900">R${calculateTotal()}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={onClose}
+                                    className="px-4 py-2.5 text-xs font-bold text-olive-900 hover:bg-olive-900/5 rounded-xl transition-all"
+                                >
+                                    Fechar
+                                </button>
+                                <Button
+                                    onClick={handleConfirm}
+                                    disabled={!selectedRange.start || !selectedRange.end}
+                                    className="bg-olive-900 text-sand-50 px-6 py-2.5 rounded-xl text-xs font-bold hover:bg-olive-800 transition-all shadow-lg shadow-olive-900/20 disabled:opacity-50"
+                                >
+                                    Confirmar
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
