@@ -62,8 +62,10 @@ export function DateSelectionModal({
         end: initialCheckOut ? parseLocal(initialCheckOut) : null
     });
 
-    // Mapas para busca O(1) de datas ocupadas
+    // Mapas para busca O(1)
     const [occupiedMap, setOccupiedMap] = useState<{ [key: string]: 'reservation' | 'blocked' }>({});
+    const [priceMap, setPriceMap] = useState<{ [key: string]: number }>({});
+    const [rulesMap, setRulesMap] = useState<{ [key: string]: any[] }>({});
 
     useEffect(() => {
         if (isOpen && propertyId) {
@@ -73,23 +75,32 @@ export function DateSelectionModal({
                     const { data } = await axios.get(`/api/calendar?propertyId=${propertyId}`);
                     setData(data);
 
-                    // Pre-processar datas ocupadas para busca rápida
-                    const newMap: { [key: string]: 'reservation' | 'blocked' } = {};
+                    const newOccupiedMap: { [key: string]: 'reservation' | 'blocked' } = {};
+                    const newPriceMap: { [key: string]: number } = {};
+                    const newRulesMap: { [key: string]: any[] } = {};
 
+                    // 1. Pre-processar datas ocupadas
                     data.reservations?.forEach((r: any) => {
                         const start = startOfDay(parseLocal(r.checkIn));
                         const end = startOfDay(parseLocal(r.checkOut));
                         const interval = eachDayOfInterval({ start, end: addDays(end, -1) });
                         interval.forEach(d => {
-                            newMap[format(d, "yyyy-MM-dd")] = 'reservation';
+                            newOccupiedMap[format(d, "yyyy-MM-dd")] = 'reservation';
                         });
                     });
 
                     data.blockedDates?.forEach((b: any) => {
-                        newMap[format(parseLocal(b.date), "yyyy-MM-dd")] = 'blocked';
+                        newOccupiedMap[format(parseLocal(b.date), "yyyy-MM-dd")] = 'blocked';
                     });
 
-                    setOccupiedMap(newMap);
+                    // 2. Pre-processar Overrides de Preço
+                    data.overrides?.forEach((o: any) => {
+                        newPriceMap[format(parseLocal(o.date), "yyyy-MM-dd")] = o.price;
+                    });
+
+                    setOccupiedMap(newOccupiedMap);
+                    setPriceMap(newPriceMap);
+                    // O RulesMap será preenchido sob demanda ou cacheado se necessário
                 } catch (error) {
                     console.error("Erro ao carregar dados do calendário", error);
                 } finally {
@@ -100,12 +111,16 @@ export function DateSelectionModal({
         }
     }, [isOpen, propertyId]);
 
-    const getDayRules = (date: Date) => {
+    // Função otimizada para buscar regras de um dia específico (com cache interno simples para a sessão)
+    const getCachedDayRules = (date: Date) => {
+        const dateKey = format(date, "yyyy-MM-dd");
+        if (rulesMap[dateKey]) return rulesMap[dateKey];
+
         if (!data?.pricingRules) return [];
         const dateOnly = startOfDay(date);
         const now = startOfDay(new Date());
 
-        return data.pricingRules.filter((rule: any) => {
+        const dayRules = data.pricingRules.filter((rule: any) => {
             if (!rule.isActive) return false;
             if (rule.type === 'WEEKEND_SURGE' && (dateOnly.getDay() === 0 || dateOnly.getDay() === 6)) return true;
             if (rule.type === 'SEASONAL' && rule.startDate && rule.endDate) {
@@ -123,6 +138,10 @@ export function DateSelectionModal({
             }
             return false;
         });
+
+        // Atualiza o mapa de regras (sem disparar re-render excessivo)
+        rulesMap[dateKey] = dayRules;
+        return dayRules;
     };
 
     const isDateAvailable = (date: Date) => {
@@ -131,23 +150,19 @@ export function DateSelectionModal({
         const d = startOfDay(date);
         const today = startOfDay(new Date());
 
-        // Regra 1: Não permitir datas passadas
         if (isBefore(d, today)) return false;
 
-        // Regra 2: Janelas de Disponibilidade
+        const dateKey = format(d, "yyyy-MM-dd");
+        if (occupiedMap[dateKey]) return false;
+
         const hasWindows = data.availabilityWindows && data.availabilityWindows.length > 0;
         if (hasWindows) {
-            const inWindow = data.availabilityWindows.some((w: any) => {
+            return data.availabilityWindows.some((w: any) => {
                 const start = startOfDay(parseLocal(w.startDate));
                 const end = startOfDay(parseLocal(w.endDate));
                 return isWithinInterval(d, { start, end });
             });
-            if (!inWindow) return false;
         }
-
-        // Regra 3 e 4: Mapas O(1)
-        const dateKey = format(d, "yyyy-MM-dd");
-        if (occupiedMap[dateKey]) return false;
 
         return true;
     };
@@ -155,7 +170,11 @@ export function DateSelectionModal({
     const isStartOfReservation = (date: Date) => {
         const dKey = format(date, "yyyy-MM-dd");
         if (occupiedMap[dKey] === 'blocked') return true;
-        return data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkIn), date));
+        // Otimização: se já sabemos que está ocupado, buscar nos dados apenas se necessário
+        if (occupiedMap[dKey] === 'reservation') {
+            return data?.reservations?.some((r: any) => format(parseLocal(r.checkIn), "yyyy-MM-dd") === dKey);
+        }
+        return false;
     };
 
     const onDateClick = (day: Date) => {
@@ -243,11 +262,10 @@ export function DateSelectionModal({
 
         for (const date of interval) {
             const dateKey = format(date, "yyyy-MM-dd");
-            const dayOverride = data?.overrides?.find((o: any) => format(parseLocal(o.date), "yyyy-MM-dd") === dateKey);
-            let dayPrice = dayOverride?.price || propertyBasePrice;
+            let dayPrice = priceMap[dateKey] || propertyBasePrice;
 
-            if (!dayOverride) {
-                const rules = getDayRules(date);
+            if (!priceMap[dateKey]) {
+                const rules = getCachedDayRules(date);
                 rules.forEach((r: any) => { dayPrice *= r.value; });
             }
             total += Math.round(dayPrice);
@@ -308,19 +326,19 @@ export function DateSelectionModal({
                             isCurrentMonth && (isNightAvailable || isSameDay(date, hoveredDate)) &&
                             ((date >= selectedRange.start && date <= hoveredDate) || (date <= selectedRange.start && date >= hoveredDate));
 
-                        // Otimização de busca de preços
-                        const dayOverride = data?.overrides?.find((o: any) => format(parseLocal(o.date), "yyyy-MM-dd") === dateKey);
-                        let finalPrice = dayOverride?.price || data?.property?.basePrice || 0;
-                        if (!dayOverride) {
-                            const activeRules = getDayRules(date);
+                        // Otimização: Preço do dia usando o novo mapa O(1) e cache de regras
+                        let finalPrice = priceMap[dateKey] || data?.property?.basePrice || 0;
+                        if (!priceMap[dateKey]) {
+                            const activeRules = getCachedDayRules(date);
                             activeRules.forEach((rule: any) => {
                                 finalPrice *= rule.value;
                             });
                         }
                         const price = Math.round(finalPrice);
 
-                        // Verificação se é dia de checkout de reserva alheia
-                        const isCheckoutOnly = data?.reservations?.some((r: any) => format(parseLocal(r.checkOut), "yyyy-MM-dd") === dateKey) && isNightAvailable;
+                        // Verificação se é dia de checkout de reserva alheia (Otimizado)
+                        const isCheckoutOnly = isNightAvailable && data?.reservations?.some((r: any) => format(parseLocal(r.checkOut), "yyyy-MM-dd") === dateKey);
+
 
                         return (
                             <div
