@@ -338,7 +338,7 @@ export function DateSelectionModal({
 
                         // Verificação se é dia de checkout de reserva alheia (Otimizado)
                         const isCheckoutOnly = isNightAvailable && data?.reservations?.some((r: any) => format(parseLocal(r.checkOut), "yyyy-MM-dd") === dateKey);
-
+                        const isCheckinDay = isCheckoutOnly; // No guest view, checkout only means someone is leaving, so it's a check-in day for new guest
 
                         return (
                             <div
@@ -373,10 +373,8 @@ export function DateSelectionModal({
                                     </span>
                                 )}
 
-                                {isCheckoutOnly && !isSelectedStart && !isSelectedEnd && (
-                                    <div className="absolute top-1 right-1">
-                                        <div className="w-1.5 h-1.5 bg-olive-500 rounded-full" title="Disponível para check-in após o meio-dia" />
-                                    </div>
+                                {isCheckinDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
+                                    <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded mt-0.5 z-10 uppercase">Entrar</span>
                                 )}
 
                                 {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (

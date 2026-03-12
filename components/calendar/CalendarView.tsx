@@ -414,6 +414,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                     data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), cloneDay));
 
                 const isCheckoutDay = isStartBlock && isDateNightAvailable(addDays(cloneDay, -1));
+                const isCheckinDay = isNightAvailable && data?.reservations?.some((r: any) => isSameDay(parseLocal(r.checkOut), cloneDay));
 
                 const isVivid = isNightAvailable || isCheckoutDay;
                 const canInteract = (inWindow && !isPast) || isStartBlock;
@@ -458,6 +459,9 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 </span>
                                 {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelected && (
                                     <span className="text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-1 z-10 uppercase">Checkout</span>
+                                )}
+                                {isCheckinDay && isCurrentMonth && !isSelected && (
+                                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded mt-1 z-10 uppercase">Check-in</span>
                                 )}
                                 {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && !isCheckoutDay && (
                                     <Lock className="w-3 h-3 text-olive-900/50" />
