@@ -117,8 +117,8 @@ export async function POST(
                     metadata: {
                         totalPaid,
                         refunded: confirmRefund,
-                        refundResults,
-                        policySuggestion: suggestion
+                        refundResults: refundResults as any,
+                        policySuggestion: suggestion as any
                     }
                 }
             });

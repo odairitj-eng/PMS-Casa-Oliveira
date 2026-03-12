@@ -18,25 +18,41 @@ export async function POST(
         const body = await req.json();
         const { name, cancelFreeLimitHours, partialRefundPercentage, nonRefundableLimitHours, description } = body;
 
-        // Upsert na política de cancelamento
-        const policy = await db.cancellationPolicy.upsert({
-            where: { propertyId: id },
-            update: {
-                name,
-                cancelFreeLimitHours: parseInt(cancelFreeLimitHours),
-                partialRefundPercentage: parseInt(partialRefundPercentage),
-                nonRefundableLimitHours: parseInt(nonRefundableLimitHours),
-                description
-            },
-            create: {
-                propertyId: id,
-                name,
-                cancelFreeLimitHours: parseInt(cancelFreeLimitHours),
-                partialRefundPercentage: parseInt(partialRefundPercentage),
-                nonRefundableLimitHours: parseInt(nonRefundableLimitHours),
-                description
-            }
+        // 1. Buscar a propriedade para ver se já tem uma política associada
+        const property = await db.property.findUnique({
+            where: { id },
+            include: { cancellationPolicy: true }
         });
+
+        let policy;
+
+        if (property?.cancellationPolicyId) {
+            // 2. Se já existe, atualiza
+            policy = await db.cancellationPolicy.update({
+                where: { id: property.cancellationPolicyId },
+                data: {
+                    name,
+                    cancelFreeLimitHours: parseInt(cancelFreeLimitHours),
+                    partialRefundPercentage: parseInt(partialRefundPercentage),
+                    nonRefundableLimitHours: parseInt(nonRefundableLimitHours),
+                    description
+                }
+            });
+        } else {
+            // 3. Se não existe, cria uma nova e vincula à propriedade
+            policy = await db.cancellationPolicy.create({
+                data: {
+                    name,
+                    cancelFreeLimitHours: parseInt(cancelFreeLimitHours),
+                    partialRefundPercentage: parseInt(partialRefundPercentage),
+                    nonRefundableLimitHours: parseInt(nonRefundableLimitHours),
+                    description,
+                    properties: {
+                        connect: { id }
+                    }
+                }
+            });
+        }
 
         return NextResponse.json({ success: true, policy });
 

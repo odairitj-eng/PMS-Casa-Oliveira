@@ -143,8 +143,8 @@ export async function POST(
                     type: 'CANCELLED_BY_GUEST',
                     reason: 'Cancelado pelo hóspede via painel',
                     metadata: {
-                        refundCalc,
-                        refundResults
+                        refundCalc: refundCalc as any,
+                        refundResults: refundResults as any
                     }
                 }
             });
