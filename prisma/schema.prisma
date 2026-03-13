@@ -65,6 +65,10 @@ model Property {
   checkInEnd       String?  @default("22:00")
   checkOutEnd      String?  @default("11:00")
 
+  // Wi-Fi
+  wifiName         String?
+  wifiPassword     String?
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -83,6 +87,9 @@ model Property {
   
   cancellationPolicyId String?
   cancellationPolicy   CancellationPolicy? @relation(fields: [cancellationPolicyId], references: [id])
+  
+  guide                PropertyGuide?
+  messageTemplates     MessageTemplate[]
 }
 
 model Guest {
@@ -109,6 +116,8 @@ model Guest {
   userId       String?       @unique
   user         User?         @relation(fields: [userId], references: [id])
   reservations Reservation[]
+  credits      ReservationCredit[]
+  messageLogs  MessageLog[]
 }
 
 // Modelos Necessários para Auth.js (NextAuth)
@@ -179,6 +188,7 @@ model Reservation {
   cleaningFee   Float
   totalNights   Int
   holdExpiresAt DateTime?
+  accessToken   String            @unique @default(uuid())
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
@@ -190,6 +200,17 @@ model Reservation {
   
   numGuests    Int?          @default(1)
   occupants    ReservationOccupant[]
+
+  // Rastreabilidade de Rebooking
+  rebookedFromId String?     @unique
+  rebookedFrom   Reservation? @relation("RebookingHistory", fields: [rebookedFromId], references: [id])
+  rebookedTo     Reservation? @relation("RebookingHistory")
+
+  rebookingHistory ReservationRebooking? @relation("OriginalReservation")
+  replacementRef   ReservationRebooking? @relation("NewReservation")
+
+  creditsGenerated ReservationCredit[]
+  messageLogs      MessageLog[]
 
   @@index([propertyId])
   @@index([guestId])
@@ -246,6 +267,56 @@ model ReservationOccupant {
   @@index([reservationId])
 }
 
+model ReservationCredit {
+  id                 String               @id @default(uuid())
+  guestId            String
+  propertyId         String?   // Se limitado a um imóvel
+  sourceReservationId String?
+  
+  amountOriginal     Float
+  amountAvailable    Float
+  amountUsed         Float                @default(0)
+  currency           String               @default("BRL")
+  
+  code               String               @unique // ex: CO-XXXX-YYYY
+  reason             String?
+  status             CreditStatus         @default(ACTIVE)
+  
+  expiresAt          DateTime?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  guest             Guest                @relation(fields: [guestId], references: [id])
+  sourceReservation Reservation?        @relation(fields: [sourceReservationId], references: [id])
+  
+  @@index([guestId])
+  @@index([code])
+}
+
+enum CreditStatus {
+  ACTIVE
+  PARTIALLY_USED
+  USED
+  EXPIRED
+  CANCELLED
+}
+
+model ReservationRebooking {
+  id                     String   @id @default(uuid())
+  originalReservationId  String   @unique
+  newReservationId       String   @unique
+  
+  creditUsedAmount       Float    @default(0)
+  additionalPaymentAmount Float   @default(0)
+  reason                 String?  @db.Text
+  
+  createdBy              String?  // ID do admin
+  createdAt              DateTime @default(now())
+
+  originalReservation    Reservation @relation("OriginalReservation", fields: [originalReservationId], references: [id])
+  newReservation         Reservation @relation("NewReservation", fields: [newReservationId], references: [id])
+}
+
 model Payment {
   id                   String        @id @default(uuid())
   reservationId        String
@@ -271,6 +342,7 @@ model Payment {
 enum PaymentMethod {
   PIX
   CREDIT_CARD
+  CREDIT_BALANCE
 }
 
 enum PaymentStatus {
@@ -278,6 +350,9 @@ enum PaymentStatus {
   APPROVED
   REJECTED
   REFUNDED
+  EXPIRED
+  CANCELLED
+  FAILED
 }
 
 model BlockedDate {
@@ -479,4 +554,230 @@ model ProcessedEvent {
   createdAt DateTime @default(now())
 
   @@index([id, provider])
+}
+
+// ----------------------------------------------------
+// FASE 4: GUEST EXPERIENCE GUIDE (HOUSE GUIDE)
+// ----------------------------------------------------
+
+model PropertyGuide {
+  id         String   @id @default(uuid())
+  propertyId String   @unique
+  isActive   Boolean  @default(true)
+  
+  // Customizações de estilo (opcional para o futuro)
+  accentColor String?
+  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  property   Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  sections   GuideSection[]
+  places     GuidePlace[]
+}
+
+model GuideSection {
+  id             String      @id @default(uuid())
+  guideId        String
+  type           SectionType
+  title          String
+  content        String?     @db.Text
+  imageUrl       String?
+  iconName       String?
+  sortOrder      Int         @default(0)
+  isActive       Boolean     @default(true)
+  
+  // Metadados específicos (ex: Wi-Fi credentials em JSON)
+  config         Json?       
+  
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  guide          PropertyGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+}
+
+enum SectionType {
+  WELCOME
+  HOST
+  ABOUT_SPACE
+  CHECK_IN
+  CHECK_OUT
+  HOUSE_RULES
+  WIFI
+  HOW_TO_GET
+  HOUSE_MANUAL
+  EMERGENCY
+  TRANSPORT
+  SPACE_TOUR
+  TROUBLESHOOTING
+  STAY_TIMELINE
+  GUIDED_CHECKIN
+  GUIDED_CHECKOUT
+  OTHER
+}
+
+model GuidePlace {
+  id          String    @id @default(uuid())
+  guideId     String
+  category    PlaceCategory
+  name        String
+  description String?   @db.Text
+  imageUrl    String?
+  address     String?
+  distance    String?   // ex: "500m", "5 min walk"
+  googleMapsUrl String?
+  tags        String[]  @default([]) // Tags de curadoria: "Favorito", "Perto", etc.
+  
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  guide       PropertyGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+}
+
+enum PlaceCategory {
+  RESTAURANT
+  CAFE
+  SUPERMARKET
+  MARKET
+  PHARMACY
+  PARK
+  GYM_YOGA
+  DELIVERY
+  FOR_KIDS
+  ATTRACTION
+  BREAKFAST
+  ROMANTIC
+  FAMILY
+  TO_GO
+  OTHER
+}
+
+// --- MÓDULO DE MENSAGENS E COMUNICAÇÃO ---
+
+model MessageTemplate {
+  id                  String   @id @default(uuid())
+  propertyId          String?  // null = global template
+  name                String
+  slug                String?  @unique
+  category            MessageCategory @default(GENERAL)
+  channelType         CommunicationChannel @default(WHATSAPP)
+  subject             String?  // Para e-mail
+  body                String   @db.Text
+  isActive            Boolean  @default(true)
+  isAutomatic         Boolean  @default(false)
+  
+  // Lógica de Gatilho (Trigger)
+  triggerType         MessageTrigger?
+  triggerOffsetValue  Int?     @default(0)
+  triggerOffsetUnit   TriggerUnit? @default(DAYS)
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  property            Property? @relation(fields: [propertyId], references: [id])
+  logs                MessageLog[]
+  schedules           MessageSchedule[]
+
+  @@index([propertyId])
+}
+
+model MessageLog {
+  id              String   @id @default(uuid())
+  templateId      String?
+  guestId         String
+  reservationId   String?
+  propertyId      String
+  channelType     CommunicationChannel
+  recipient       String
+  renderedSubject String?
+  renderedBody    String   @db.Text
+  status          MessageStatus @default(SENT)
+  scheduledFor    DateTime?
+  sentAt          DateTime?
+  errorMessage    String?  @db.Text
+  createdBy       String?  // ex: "SYSTEM" ou ID do Admin
+  
+  createdAt       DateTime @default(now())
+
+  template        MessageTemplate? @relation(fields: [templateId], references: [id])
+  guest           Guest            @relation(fields: [guestId], references: [id])
+  reservation     Reservation?     @relation(fields: [reservationId], references: [id])
+
+  @@index([guestId])
+  @@index([reservationId])
+}
+
+model MessageSchedule {
+  id              String   @id @default(uuid())
+  templateId      String
+  reservationId   String
+  guestId         String
+  propertyId      String
+  scheduledFor    DateTime
+  status          ScheduleStatus @default(PENDING)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  template        MessageTemplate @relation(fields: [templateId], references: [id])
+
+  @@unique([templateId, reservationId]) // Evita agendar o mesmo template para a mesma reserva
+  @@index([scheduledFor])
+}
+
+enum MessageCategory {
+  PRE_CHECKIN
+  CHECKIN
+  DURING_STAY
+  CHECKOUT
+  POST_CHECKOUT
+  MARKETING
+  VIP
+  BILLING
+  REMINDER
+  SUPPORT
+  GENERAL
+}
+
+enum CommunicationChannel {
+  WHATSAPP
+  EMAIL
+  BOTH
+}
+
+enum MessageTrigger {
+  RESERVATION_CONFIRMED
+  CHECKIN_DATE
+  CHECKOUT_DATE
+}
+
+enum TriggerUnit {
+  MINUTES
+  HOURS
+  DAYS
+}
+
+enum MessageStatus {
+  DRAFT
+  SCHEDULED
+  READY
+  SENT
+  FAILED
+  OPENED
+  CLICKED
+  CANCELLED
+}
+
+enum ScheduleStatus {
+  PENDING
+  PROCESSED
+  CANCELLED
+  FAILED
 }

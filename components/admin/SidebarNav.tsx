@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Copy, CalendarDays, Users, LayoutDashboard, Settings, TrendingUp, Building2, Globe } from "lucide-react";
+import { Copy, CalendarDays, Users, LayoutDashboard, Settings, TrendingUp, Building2, Globe, MessageSquare } from "lucide-react";
 
 export function SidebarNav() {
     const { data: session } = useSession();
@@ -15,6 +15,8 @@ export function SidebarNav() {
         { href: "/admin/calendar", label: "Calendário", icon: CalendarDays },
         { href: "/admin/pricing", label: "Smart Pricing", icon: TrendingUp },
         { href: "/admin/properties", label: "Imóveis", icon: Building2 },
+        { href: "/admin/guide", label: "Guia do Hóspede", icon: Globe },
+        { href: "/admin/messages", label: "Mensagens", icon: MessageSquare },
         { href: "/admin/guests", label: "Hóspedes & CRM", icon: Users },
         // Apenas ADMIN vê gestão de equipe e integração técnica
         ...(userRole === "ADMIN" ? [

@@ -15,7 +15,8 @@ import {
     TrendingUp,
     Clock,
     DollarSign,
-    Loader2
+    Loader2,
+    MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +27,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { ManualReservationModal } from "@/components/admin/ManualReservationModal";
+import { MessageActionModal } from "@/components/admin/MessageActionModal";
 
 export default function GuestDetailPage() {
     const params = useParams<{ id: string }>();
@@ -36,6 +38,7 @@ export default function GuestDetailPage() {
     const [notes, setNotes] = useState("");
     const [isSaving, setIsSaving] = useState(false);
     const [isReservationModalOpen, setIsReservationModalOpen] = useState(false);
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
 
     const fetchGuest = async () => {
         setIsLoading(true);
@@ -57,12 +60,6 @@ export default function GuestDetailPage() {
 
     const handleToggleStatus = async (field: string, value: boolean) => {
         try {
-            // This block seems to be a misplaced snippet from a GuestModal's save function.
-            // The original handleToggleStatus logic is preserved below, as applying the snippet directly
-            // would introduce undefined variables and break the function's intended purpose.
-            // The instruction mentions "update API path in GuestModal" but provides code for GuestDetailPage.
-            // Assuming the intent was to ensure the API path is correct for a PATCH operation on a guest.
-            // The existing `axios.patch` call already uses `/api/admin/guests/${id}`.
             await axios.patch(`/api/admin/guests/${id}`, { [field]: value });
             toast.success("Status atualizado!");
             fetchGuest();
@@ -280,6 +277,13 @@ export default function GuestDetailPage() {
                                 <MessageCircle className="w-5 h-5 text-green-600" /> Abrir WhatsApp
                             </Button>
 
+                            <Button
+                                onClick={() => setIsMessageModalOpen(true)}
+                                className="w-full h-14 rounded-2xl bg-olive-800 text-white hover:bg-olive-700 font-bold flex items-center justify-center gap-3 shadow-lg"
+                            >
+                                <MessageSquare className="w-5 h-5 text-sand-100" /> Mensagem Profissional
+                            </Button>
+
                             <div className="grid grid-cols-2 gap-3">
                                 <Button
                                     onClick={() => handleToggleStatus("isVip", !guest.isVip)}
@@ -355,6 +359,11 @@ export default function GuestDetailPage() {
                         onClose={() => setIsReservationModalOpen(false)}
                         guest={{ id, name: guest.name, email: guest.email }}
                         onSuccess={fetchGuest}
+                    />
+                    <MessageActionModal
+                        isOpen={isMessageModalOpen}
+                        onClose={() => setIsMessageModalOpen(false)}
+                        guestId={id}
                     />
                 </div>
             </div>

@@ -20,6 +20,8 @@
     "@radix-ui/react-primitive": "^2.1.4",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@types/crypto-js": "^4.2.2",
     "axios": "^1.7.2",
     "cheerio": "^1.2.0",
@@ -35,6 +37,7 @@
     "react-big-calendar": "^1.19.4",
     "react-dom": "^18",
     "react-hot-toast": "^2.6.0",
+    "resend": "^6.9.3",
     "tailwind-merge": "^2.6.1",
     "uuid": "^10.0.0",
     "zod": "^4.3.6"

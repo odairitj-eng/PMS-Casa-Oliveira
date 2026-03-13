@@ -8,6 +8,7 @@ import { getDateAvailabilityStatus } from "@/lib/availability";
 import { startOfDay, format } from "date-fns";
 import { channex } from "@/lib/channex";
 import { reservationSchema } from "@/lib/validations/schemas";
+import { scheduleMessagesForReservation } from "@/lib/messages/scheduler";
 
 export async function POST(req: NextRequest) {
     try {
@@ -96,6 +97,11 @@ export async function POST(req: NextRequest) {
 
             return reservation;
         });
+
+        // Agendar mensagens automáticas para esta nova reserva
+        await scheduleMessagesForReservation(result.id).catch(err =>
+            console.error("[Scheduler Error]:", err)
+        );
 
         // Disparo Assíncrono para a Channex (Segundo Plano)
         // Não usamos 'await' aqui para que o Admin receba a resposta do site imediatamente

@@ -86,3 +86,17 @@ export function getNewStatusAfterCancellation(
         default: return "CANCELLED_SYSTEM";
     }
 }
+
+/**
+ * Gera um código único para o cupom de crédito.
+ * Formato: CO-XXXX-YYYY (Casa Oliveira - Aleatório - Timestamp)
+ */
+export function generateCreditCode(): string {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let randomPart = "";
+    for (let i = 0; i < 4; i++) {
+        randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const timestampPart = Date.now().toString(36).toUpperCase().slice(-4);
+    return `CO-${randomPart}-${timestampPart}`;
+}

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, ShieldCheck, ArrowLeft, Loader2, Plus } from "lucide-react";
+import { CheckCircle2, ShieldCheck, ArrowLeft, Loader2, Plus, BookOpen } from "lucide-react";
 import toast from "react-hot-toast";
 import Image from "next/image";
 
@@ -84,6 +84,8 @@ function CheckoutContent() {
         return () => clearTimeout(timer);
     }, [status, searchParams, propertyId, checkIn, checkOut, router]);
 
+    const [accessToken, setAccessToken] = useState("");
+
     const handleSubmit = async () => {
         if (!phone) {
             toast.error("O telefone é obrigatório para confirmar a reserva.");
@@ -109,6 +111,10 @@ function CheckoutContent() {
                 occupants: occupants.filter(o => o.name),
                 paymentMethod
             });
+
+            if (response.data.accessToken) {
+                setAccessToken(response.data.accessToken);
+            }
 
             if (paymentMethod === "PIX") {
                 toast.success("Reserva realizada com sucesso!", { id: idToast });
@@ -170,9 +176,19 @@ function CheckoutContent() {
                             </div>
                         </div>
 
-                        <Button onClick={() => router.push("/")} className="w-full h-14 bg-olive-900 text-sand-50 rounded-2xl font-bold text-lg hover:bg-olive-800 transition-all shadow-lg">
-                            Voltar ao Site
-                        </Button>
+                        <div className="space-y-3 pt-4 border-t border-olive-900/5">
+                            <Button
+                                onClick={() => router.push(`/guide/${accessToken}`)}
+                                className="w-full h-14 bg-sage-50 text-olive-900 hover:bg-sage-100 rounded-2xl font-bold flex items-center justify-center gap-3 border border-sage-200"
+                            >
+                                <BookOpen className="w-5 h-5" />
+                                Acessar Guia do Hóspede
+                            </Button>
+
+                            <Button onClick={() => router.push("/")} variant="ghost" className="w-full h-14 text-olive-900/40 rounded-2xl font-bold hover:text-olive-900">
+                                Voltar ao Site
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>

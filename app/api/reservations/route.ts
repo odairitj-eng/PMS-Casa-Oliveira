@@ -113,13 +113,27 @@ export async function POST(req: NextRequest) {
             const expiresAt = new Date();
             expiresAt.setMinutes(expiresAt.getMinutes() + 30);
 
+            // 3.1 Buscar Créditos Ativos do Hóspede
+            const activeCredits = await tx.reservationCredit.findMany({
+                where: {
+                    guestId: guest.id,
+                    status: { in: ["ACTIVE", "PARTIALLY_USED"] },
+                    expiresAt: { gt: new Date() }
+                },
+                orderBy: { expiresAt: "asc" } // Usar os que expiram primeiro
+            });
+
+            const totalAvailableCredit = activeCredits.reduce((sum: number, c: any) => sum + c.amountAvailable, 0);
+            const creditToApply = Math.min(totalAvailableCredit, totalAmount);
+            const remainingToPay = Math.max(0, totalAmount - creditToApply);
+
             const reservation = await tx.reservation.create({
                 data: {
                     propertyId,
                     guestId: guest.id,
                     checkIn: inDate,
                     checkOut: outDate,
-                    status: 'PENDING_PAYMENT',
+                    status: remainingToPay <= 0 ? 'CONFIRMED' : 'PENDING_PAYMENT',
                     totalAmount,
                     nightlyRate,
                     cleaningFee,
@@ -138,6 +152,48 @@ export async function POST(req: NextRequest) {
                 }
             });
 
+            // 3.2 Aplicar Créditos Transacionalmente
+            if (creditToApply > 0) {
+                let remainingToConsume = creditToApply;
+                for (const credit of activeCredits) {
+                    if (remainingToConsume <= 0) break;
+                    const amountFromThisCredit = Math.min(credit.amountAvailable, remainingToConsume);
+
+                    await tx.reservationCredit.update({
+                        where: { id: credit.id },
+                        data: {
+                            amountAvailable: { decrement: amountFromThisCredit },
+                            amountUsed: { increment: amountFromThisCredit },
+                            status: (credit.amountAvailable - amountFromThisCredit <= 0) ? "USED" : "PARTIALLY_USED"
+                        }
+                    });
+
+                    remainingToConsume -= amountFromThisCredit;
+                }
+
+                // Registrar Pagamento por Crédito
+                await tx.payment.create({
+                    data: {
+                        reservationId: reservation.id,
+                        method: "CREDIT_BALANCE",
+                        status: "APPROVED",
+                        amount: creditToApply,
+                        provider: "SYSTEM_CREDIT",
+                        gatewayTransactionId: `CREDIT_APP_${reservation.id}`
+                    }
+                });
+
+                // Registrar Evento
+                await tx.reservationEvent.create({
+                    data: {
+                        reservationId: reservation.id,
+                        type: "CREDIT_APPLIED",
+                        reason: "Aplicação automática de crédito de reserva anterior.",
+                        metadata: { appliedAmount: creditToApply }
+                    }
+                });
+            }
+
             // 4. Bloquear as Datas
             let blockDt = new Date(inDate);
             const datesToBlock = [];
@@ -155,7 +211,7 @@ export async function POST(req: NextRequest) {
                 data: datesToBlock
             });
 
-            return reservation;
+            return { reservation, remainingToPay };
         });
 
         // Disparo Assíncrono para a Channex (Segundo Plano)
@@ -165,53 +221,70 @@ export async function POST(req: NextRequest) {
             format(outDate, "yyyy-MM-dd")
         ).catch(err => console.error("[Channex Sync Error]:", err));
 
+        // 5. Se houver saldo, processar pagamento externo
+        const reservationId = result.reservation.id;
+        const amountToPayExternally = result.remainingToPay;
+
+        if (amountToPayExternally <= 0) {
+            return NextResponse.json({
+                success: true,
+                reservationId: reservationId,
+                accessToken: result.reservation.accessToken,
+                paidWithCredit: true
+            }, { status: 201 });
+        }
+
         if (paymentMethod === "PIX") {
             const pixData = await createPixPayment({
-                amount: result.totalAmount,
-                description: `Reserva Casa Oliveira (${result.totalNights} noites)`,
+                amount: amountToPayExternally,
+                description: `Reserva Casa Oliveira (Saldo remanescente)`,
                 email: guestEmail,
-                externalId: result.id
+                externalId: reservationId
             });
 
             await db.payment.create({
                 data: {
-                    reservationId: result.id,
+                    reservationId: reservationId,
                     gatewayTransactionId: pixData.id,
                     method: 'PIX',
-                    amount: result.totalAmount,
+                    amount: amountToPayExternally,
                     status: 'PENDING'
                 }
             });
 
             return NextResponse.json({
                 success: true,
-                reservationId: result.id,
-                pix: pixData.point_of_interaction.transaction_data
+                reservationId: reservationId,
+                accessToken: result.reservation.accessToken,
+                pix: pixData.point_of_interaction.transaction_data,
+                remainingAmount: amountToPayExternally
             }, { status: 201 });
         } else {
-            // FluxO CARTÃO (Redirecionamento Seguro / Preference)
+            // FluxO CARTÃO
             const { createCheckoutPreference } = await import("@/lib/payments");
             const preference = await createCheckoutPreference({
-                amount: result.totalAmount,
-                description: `Reserva Casa Oliveira (${result.totalNights} noites)`,
+                amount: amountToPayExternally,
+                description: `Reserva Casa Oliveira (Saldo remanescente)`,
                 email: guestEmail,
-                externalId: result.id
+                externalId: reservationId
             });
 
             await db.payment.create({
                 data: {
-                    reservationId: result.id,
+                    reservationId: reservationId,
                     gatewayTransactionId: preference.id?.toString() || "pending_pref",
                     method: 'CREDIT_CARD',
-                    amount: result.totalAmount,
+                    amount: amountToPayExternally,
                     status: 'PENDING'
                 }
             });
 
             return NextResponse.json({
                 success: true,
-                reservationId: result.id,
-                checkoutUrl: preference.init_point
+                reservationId: reservationId,
+                accessToken: result.reservation.accessToken,
+                checkoutUrl: preference.init_point,
+                remainingAmount: amountToPayExternally
             }, { status: 201 });
         }
 

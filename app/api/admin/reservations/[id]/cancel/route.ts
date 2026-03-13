@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth/options";
 import { db } from "@/lib/db";
 import { refundPayment } from "@/lib/payments";
-import { calculateRefundAmount, getNewStatusAfterCancellation } from "@/lib/cancellation";
+import { calculateRefundAmount, getNewStatusAfterCancellation, generateCreditCode } from "@/lib/cancellation";
 import { channex } from "@/lib/channex";
 import { format } from "date-fns";
 
@@ -24,7 +24,7 @@ export async function POST(
 
         const { id } = params;
         const body = await req.json();
-        const { reason, confirmRefund = true } = body;
+        const { reason, confirmRefund = true, convertToCredit = false } = body;
 
         if (!reason) {
             return NextResponse.json({ error: 'O motivo do cancelamento é obrigatório.' }, { status: 400 });
@@ -53,61 +53,80 @@ export async function POST(
 
         const totalPaid = reservation.payments.reduce((sum, p) => sum + p.amount, 0);
 
-        // 2. Calcular reembolso (O admin pode decidir se segue a política ou faz total)
-        // Por padrão, o admin tem poder total, mas calculamos o sugerido.
+        // 2. Calcular reembolso sugerido (Políticas)
         const suggestion = calculateRefundAmount(reservation.checkIn, totalPaid, reservation.property.cancellationPolicy);
 
         const result = await db.$transaction(async (tx) => {
-            // Advisory lock para evitar concorrência no cancelamento
             await tx.$executeRaw`SELECT pg_advisory_xact_lock(2001)`;
 
-            // 3. Atualizar Status da Reserva
             const updatedReservation = await tx.reservation.update({
                 where: { id },
                 data: {
-                    status: getNewStatusAfterCancellation("HOST"), // Admin cancelando = HOST
+                    status: getNewStatusAfterCancellation("HOST"),
                 }
             });
 
-            // 4. Liberar Calendário (Remover BlockedDates da reserva)
             await tx.blockedDate.deleteMany({
                 where: { reservationId: id }
             });
 
-            // 5. Processar Reembolsos no Mercado Pago (se confirmado)
             const refundResults = [];
-            if (confirmRefund && totalPaid > 0) {
-                for (const payment of reservation.payments) {
-                    if (payment.externalId) {
-                        try {
-                            const refund = await refundPayment({
-                                paymentId: payment.externalId,
-                                // Aqui o admin pode passar um valor customizado no futuro, 
-                                // por enquanto reembolsamos o total do pagamento aprovado se confirmRefund for true
-                                amount: payment.amount
-                            });
+            let creditedAmount = 0;
+            let creditCode = "";
 
-                            await tx.payment.update({
-                                where: { id: payment.id },
-                                data: {
-                                    status: 'REFUNDED',
-                                    refundAmount: payment.amount,
-                                    refundStatus: 'COMPLETED',
-                                    refundProviderId: refund.id,
-                                    refundedAt: new Date()
-                                }
-                            });
+            // 5. Processar Destino Financeiro (Reembolso ou Crédito)
+            if (totalPaid > 0) {
+                if (confirmRefund) {
+                    // FLUXO A: Reembolso via Gateway
+                    for (const payment of reservation.payments) {
+                        if (payment.externalId && payment.provider === 'MERCADO_PAGO') {
+                            try {
+                                const refund = await refundPayment({
+                                    paymentId: payment.externalId,
+                                    amount: payment.amount
+                                });
 
-                            refundResults.push({ id: payment.id, success: true });
-                        } catch (err: any) {
-                            console.error(`Failed to refund payment ${payment.id}:`, err.message);
-                            refundResults.push({ id: payment.id, success: false, error: err.message });
+                                await tx.payment.update({
+                                    where: { id: payment.id },
+                                    data: {
+                                        status: 'REFUNDED',
+                                        refundAmount: payment.amount,
+                                        refundStatus: 'COMPLETED',
+                                        refundProviderId: refund.id,
+                                        refundedAt: new Date()
+                                    }
+                                });
+                                refundResults.push({ id: payment.id, success: true });
+                            } catch (err: any) {
+                                console.error(`Failed to refund payment ${payment.id}:`, err.message);
+                                refundResults.push({ id: payment.id, success: false, error: err.message });
+                            }
                         }
                     }
+                } else if (convertToCredit) {
+                    // FLUXO B: Conversão em Crédito do Sistema
+                    creditCode = generateCreditCode();
+                    creditedAmount = totalPaid;
+
+                    const twelveMonthsFromNow = new Date();
+                    twelveMonthsFromNow.setFullYear(twelveMonthsFromNow.getFullYear() + 1);
+
+                    await tx.reservationCredit.create({
+                        data: {
+                            guestId: reservation.guestId,
+                            sourceReservationId: reservation.id,
+                            amountOriginal: creditedAmount,
+                            amountAvailable: creditedAmount,
+                            code: creditCode,
+                            reason: `Crédito originado do cancelamento da reserva ${reservation.id}`,
+                            expiresAt: twelveMonthsFromNow,
+                            status: "ACTIVE"
+                        }
+                    });
                 }
             }
 
-            // 6. Registrar Evento de Auditoria
+            // 6. Registrar Evento de Auditoria Detalhada
             await tx.reservationEvent.create({
                 data: {
                     reservationId: id,
@@ -117,13 +136,17 @@ export async function POST(
                     metadata: {
                         totalPaid,
                         refunded: confirmRefund,
+                        convertedToCredit: convertToCredit,
+                        creditedAmount: creditedAmount,
+                        creditCode: creditCode,
                         refundResults: refundResults as any,
                         policySuggestion: suggestion as any
                     }
                 }
             });
 
-            // 7. Atualizar estatísticas do hóspede (Diminuir receita)
+            // 7. Atualizar estatísticas do hóspede (Diminuir receita apenas se houver reembolso externo)
+            // Se virou crédito, a receita "ainda existe" no sistema como passivo
             if (totalPaid > 0 && confirmRefund) {
                 await tx.guest.update({
                     where: { id: reservation.guestId },
