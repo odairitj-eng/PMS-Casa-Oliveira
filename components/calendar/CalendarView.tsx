@@ -434,7 +434,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                     <div
                         key={cloneDay.toString()}
                         className={cn(
-                            "relative h-24 md:h-40 p-2 md:p-5 transition-all cursor-pointer group rounded-2xl md:rounded-[2rem] border",
+                            "relative h-32 md:h-40 p-1 md:p-5 transition-all cursor-pointer group rounded-2xl md:rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
                             isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-80 border-olive-900/10",
                             !isVivid && !dayBlock && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-70 border-olive-900/15",
@@ -449,33 +449,33 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         onPointerEnter={() => canInteract && handlePointerEnter(cloneDay)}
                         onContextMenu={(e) => e.preventDefault()}
                     >
-                        <div className="relative z-10 flex flex-col h-full overflow-hidden">
-                            <div className="flex justify-between items-start">
-                                <span className={cn(
-                                    "text-sm md:text-lg font-black mb-1 transition-colors",
-                                    isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
-                                    isSelected ? "text-olive-900" : (isNightlyAvailable || isCheckoutDay || isCheckinDay ? "text-olive-900" : "text-olive-900/40"),
-                                    !isCurrentMonth && "text-olive-900/0"
-                                )}>
-                                    {format(cloneDay, "d")}
-                                </span>
+                        <div className="relative z-10 flex flex-col items-center h-full overflow-hidden text-center">
+                            <span className={cn(
+                                "text-sm md:text-lg font-black mb-0.5 md:mb-1 transition-colors",
+                                isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
+                                isSelected ? "text-olive-900" : (isNightlyAvailable || isCheckoutDay || isCheckinDay ? "text-olive-900" : "text-olive-900/40"),
+                                !isCurrentMonth && "text-olive-900/0"
+                            )}>
+                                {format(cloneDay, "d")}
+                            </span>
+
+                            <div className="flex flex-col items-center gap-0.5 w-full">
                                 {!isNightlyAvailable && isCheckoutDay && isCurrentMonth && !isSelected && (
-                                    <span className="text-[7px] md:text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-0.5 md:mt-1 z-10 uppercase truncate max-w-[40px] md:max-w-none">Out</span>
+                                    <span className="text-[7px] md:text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded uppercase truncate max-w-full">Out</span>
                                 )}
                                 {isCheckinDay && isCurrentMonth && !isSelected && (
-                                    <span className="text-[7px] md:text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded mt-0.5 md:mt-1 z-10 uppercase truncate max-w-[40px] md:max-w-none">In</span>
+                                    <span className="text-[7px] md:text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded uppercase truncate max-w-full">In</span>
                                 )}
                             </div>
 
                             {isCurrentMonth && (
-                                <div className="mt-auto">
+                                <div className="mt-auto w-full flex flex-col items-center gap-0.5">
                                     {dayReservation ? (
                                         <div className={cn(
-                                            "flex items-center gap-1 text-[8px] md:text-[10px] font-bold py-0.5 md:py-1 px-1 md:px-2 rounded-full",
+                                            "flex flex-col items-center text-[7px] md:text-[10px] font-bold py-0.5 px-1 rounded-lg w-full",
                                             isSelected ? "bg-olive-900/10 text-olive-900" : "bg-olive-900/5 text-olive-900/60"
                                         )}>
-                                            <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-olive-900/20 flex-shrink-0" />
-                                            <span className="truncate font-bold text-[7px] md:text-[9px]">Ocupado</span>
+                                            <span className="truncate font-bold">Ocupado</span>
                                         </div>
                                     ) : dayBlock ? (
                                         (() => {
@@ -487,15 +487,14 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             if (isAirbnb) { bgClass = "bg-rose-100"; textClass = "text-rose-700"; }
                                             else if (isBooking) { bgClass = "bg-blue-100"; textClass = "text-blue-800"; }
                                             return (
-                                                <div className={cn("flex items-center gap-0.5 md:gap-1 text-[7px] md:text-[9px] font-bold py-0.5 md:py-1 px-1 md:px-2 rounded-full", bgClass, textClass)}>
-                                                    <Minus className="w-2 md:w-2.5 h-2 md:h-2.5" />
+                                                <div className={cn("flex flex-col items-center text-[6px] md:text-[9px] font-bold py-0.5 px-1 rounded-lg w-full", bgClass, textClass)}>
                                                     <span className="truncate">{reason}</span>
                                                 </div>
                                             );
                                         })()
                                     ) : isNightlyAvailable ? (
-                                        <div className="flex flex-col">
-                                            <span className="text-xs md:text-lg font-black tracking-tight text-olive-900 truncate">R${price}</span>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-[9px] md:text-lg font-black tracking-tight text-olive-900">R${price}</span>
                                         </div>
                                     ) : null}
                                 </div>
