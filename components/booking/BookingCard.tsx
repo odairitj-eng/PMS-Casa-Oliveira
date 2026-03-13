@@ -258,10 +258,8 @@ export function BookingCard({
                     {hasDates ? "Você ainda não será cobrado agora" : "Selecione check-in e checkout para ver o valor total da estadia."}
                 </p>
 
-                <div className="pt-2 px-1">
-                    <p className="text-[10px] leading-relaxed text-center font-bold text-olive-900/40 uppercase tracking-tighter italic">
-                        Check-in e check-out devem respeitar os horários informados, salvo acordo prévio.
-                    </p>
+                <div className="mt-4 p-3 bg-sand-50/50 border-l-4 border-olive-900/20 rounded-r-2xl italic text-[11px] text-olive-900/70 leading-relaxed">
+                    Check-in e check-out devem respeitar os horários informados, salvo acordo prévio.
                 </div>
 
                 {hasDates && pricing && (
