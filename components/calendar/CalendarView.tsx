@@ -76,21 +76,22 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         if (isBefore(clickedDay, today)) return;
 
         const propertyMinNights = data?.property?.minimumNights || 1;
-        const clickedDayStr = format(clickedDay, "yyyy-MM-dd");
-        const inWindow = isDateInWindow(clickedDay);
+        const isNightlyAvailable = isDateNightAvailable(clickedDay);
+        const isYesterdayAvailable = isDateNightAvailable(addDays(clickedDay, -1));
+        const isTomorrowAvailable = isDateNightAvailable(addDays(clickedDay, 1));
+
         const dayReservation = data?.reservations?.find((r: any) => {
             const s = startOfDay(parseLocal(r.checkIn));
             const e = startOfDay(parseLocal(r.checkOut));
             return clickedDay >= s && clickedDay < e;
         });
-        const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), clickedDay));
+
+        // Padrãão Profissional: Pode entrar no dia que o outro sai (transiçãão de check-in)
+        const isCheckinTransition = !isNightlyAvailable && isTomorrowAvailable;
+        const isCheckoutTransition = !isNightlyAvailable && isYesterdayAvailable;
 
         if (!selectedRange || (selectedRange.start && selectedRange.end && !isSameDay(selectedRange.start, selectedRange.end))) {
-            const isCheckinDayTransition = !inWindow || dayReservation || dayBlock;
-            const tomorrowAvailable = isDateNightAvailable(addDays(clickedDay, 1));
-            const isActualCheckinDay = isCheckinDayTransition && tomorrowAvailable;
-
-            if ((!inWindow || dayReservation || dayBlock) && !isActualCheckinDay) {
+            if (!isNightlyAvailable && !isCheckinTransition) {
                 if (dayReservation) {
                     setSelectedReservation(dayReservation);
                     setIsDetailsModalOpen(true);
@@ -103,14 +104,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
         } else {
             // Tentando fechar o range
             if (isBefore(clickedDay, selectedRange.start)) {
-                const inWindow = isDateInWindow(clickedDay);
-                const dayReservation = data?.reservations?.find((r: any) => {
-                    const s = startOfDay(parseLocal(r.checkIn));
-                    const e = startOfDay(parseLocal(r.checkOut));
-                    return clickedDay >= s && clickedDay < e;
-                });
-                const dayBlock = data?.blockedDates?.find((b: any) => isSameDay(parseLocal(b.date), clickedDay));
-                if (!inWindow || dayReservation || dayBlock) {
+                if (!isNightlyAvailable && !isCheckinTransition) {
                     toast.error("Não é possível iniciar uma reserva em uma data ocupada.");
                     return;
                 }
@@ -123,19 +117,25 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 return;
             }
 
+            // Validar checkout
+            const isAvailableForCheckOut = isNightlyAvailable || isCheckoutTransition;
+            if (!isAvailableForCheckOut) {
+                toast.error("Esta data está ocupada para checkout.");
+                return;
+            }
+
             // Verificar se há bloqueios NO MEIO do caminho (excluindo o dia de saída clickedDay)
             const interval = eachDayOfInterval({ start: selectedRange.start, end: clickedDay });
             const nights = interval.slice(0, -1);
 
-            const hasBlockInRange = nights.some((d: Date) => {
-                const dayRes = data?.reservations?.some((r: any) => {
-                    const s = startOfDay(parseLocal(r.checkIn));
-                    const e = startOfDay(parseLocal(r.checkOut));
-                    return d >= s && d < e;
-                });
-                const dayBlk = data?.blockedDates?.some((b: any) => isSameDay(parseLocal(b.date), d));
-                const win = isDateInWindow(d);
-                return !win || dayRes || dayBlk;
+            const hasBlockInRange = nights.some((d: Date, index: number) => {
+                const isNighlyAvail = isDateNightAvailable(d);
+                if (index === 0) {
+                    // Se o primeiro dia for uma transiçãão de check-in, permitimos a noite
+                    const isStartTransition = !isNighlyAvail && isDateNightAvailable(addDays(d, 1));
+                    if (isStartTransition) return false;
+                }
+                return !isNighlyAvail;
             });
 
             if (hasBlockInRange) {
