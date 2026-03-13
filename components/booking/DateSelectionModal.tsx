@@ -182,13 +182,9 @@ export function DateSelectionModal({
         const isAvailableForCheckIn = isDateAvailable(d);
         const minNights = data?.property?.minimumNights || 1;
 
-        // Regra especial para permitir check-in em dias de transição (fim de reserva anterior)
-        const isNeighborAvailable = isDateAvailable(addDays(d, 1));
-        const isActualCheckinDay = !isAvailableForCheckIn && isNeighborAvailable;
-
         // Se não tem início ou estamos resetando
         if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
-            if (!isAvailableForCheckIn && !isActualCheckinDay) {
+            if (!isAvailableForCheckIn) {
                 toast.error("Esta data está ocupada para check-in.");
                 return;
             }
@@ -213,10 +209,10 @@ export function DateSelectionModal({
             // Verificar se há bloqueios NO MEIO do intervalo (excluindo o dia de saída d)
             const interval = eachDayOfInterval({ start: selectedRange.start, end: d });
             const nightsInterval = interval.slice(0, -1);
-            const hasBlockInRange = nightsInterval.some(date => !isDateAvailable(date));
 
-            if (hasBlockInRange) {
-                toast.error("O intervalo contém datas ocupadas. Selecione um período livre.");
+            const blockedDay = nightsInterval.find(date => !isDateAvailable(date));
+            if (blockedDay) {
+                toast.error(`A noite de ${format(blockedDay, "dd/MM")} está ocupada. Escolha outro período.`);
                 if (isAvailableForCheckIn) {
                     setSelectedRange({ start: d, end: null });
                 }
@@ -322,15 +318,13 @@ export function DateSelectionModal({
                         const isYesterdayAvailable = isDateAvailable(addDays(date, -1));
                         const isTomorrowAvailable = isDateAvailable(addDays(date, 1));
 
-                        // Ocupado hoje (noite de hoje nãão pode ser reservada totalmente)
-                        const isNightlyBlocked = !isNightlyAvailable;
+                        // Padrãão Profissional (Airbnb):
+                        // ENTRAR: Primeira noite livre apóós um bloqueio.
+                        // SAIR: Dia de checkout (primeira noite bloqueada apóós disponibilidade).
+                        const isCheckinDay = isNightlyAvailable && !isYesterdayAvailable;
+                        const isCheckoutDay = !isNightlyAvailable && isYesterdayAvailable;
 
-                        // ENTRAR: Hoje estãá bloqueado (fim de reserva), mas amanhãã estãá livre.
-                        // SAIR: Hoje estãá bloqueado (iníício de reserva), mas ontem estava livre.
-                        const isCheckinDay = isNightlyBlocked && isTomorrowAvailable;
-                        const isCheckoutDay = isNightlyBlocked && isYesterdayAvailable;
-
-                        const isVivid = isNightlyAvailable || isCheckinDay || isCheckoutDay;
+                        const isVivid = isNightlyAvailable || isCheckoutDay;
 
                         const isToday = isSameDay(date, today);
 
@@ -350,7 +344,6 @@ export function DateSelectionModal({
 
                         return (
                             <div
-                                id={`date-${dateKey}`}
                                 key={i}
                                 onClick={() => isCurrentMonth && (isVivid || isInRange) && onDateClick(date)}
                                 onMouseEnter={() => isCurrentMonth && isVivid && setHoveredDate(date)}
