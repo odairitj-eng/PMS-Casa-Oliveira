@@ -52,7 +52,7 @@ export default async function PropertyPage({ params }: Props) {
     }
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-7xl mx-auto px-5 md:px-8 py-8">
             {/* Title Section */}
             <div className="mb-6">
                 <h1 className="text-3xl md:text-4xl font-bold text-olive-900 mb-2">

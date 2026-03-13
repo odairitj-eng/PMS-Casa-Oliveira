@@ -209,7 +209,7 @@ export default function ConciergeHome({
                             {property.city}, {property.state}
                         </p>
                         <button className="w-full h-14 bg-olive-900 text-sand-50 rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all">
-                            <Image src="/imagens/logo.png?v=3" alt="Logo" width={20} height={20} className="invert brightness-200" />
+                            <Image src="/imagens/logo.png?v=4" alt="Logo" width={20} height={20} className="invert brightness-200" />
                             Abrir no Google Maps
                         </button>
                     </div>

@@ -48,7 +48,7 @@ function LoginContent() {
                 <div className="text-center space-y-6">
                     <div className="inline-block rounded-[2.5rem] overflow-hidden mb-2 shadow-xl shadow-olive-900/10">
                         <Image
-                            src="/imagens/logo.png?v=3"
+                            src="/imagens/logo.png?v=4"
                             alt="Casa Oliveira"
                             width={100}
                             height={100}

@@ -86,7 +86,7 @@ export function Header() {
 
                         <div className="h-8 w-[1px] bg-olive-900/10 hidden md:block" />
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-4">
                             <UserMenu />
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -109,7 +109,7 @@ export function Header() {
                 <div className="p-6 flex justify-between items-center border-b border-olive-900/10 bg-white/40">
                     <div className="rounded-xl overflow-hidden shadow-sm border border-olive-900/5 bg-white">
                         <Image
-                            src="/imagens/logo.png?v=3"
+                            src="/imagens/logo.png?v=4"
                             alt="Casa Oliveira"
                             width={50}
                             height={50}

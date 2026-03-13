@@ -428,6 +428,9 @@ export function DateSelectionModal({
                                 <p className="text-olive-900/60 text-xs md:text-sm font-medium">
                                     Preços exatos com base nas suas datas
                                 </p>
+                                <div className="mt-4 p-3 bg-sand-50/50 border-l-4 border-olive-900/20 rounded-r-xl italic text-[10px] md:text-xs text-olive-900/70 leading-relaxed max-w-md">
+                                    Check-in e check-out devem respeitar os horários informados, salvo acordo prévio.
+                                </div>
                             </div>
 
                             <div className="flex items-center gap-1 bg-sand-50/50 p-1.5 rounded-xl border border-olive-900/10 w-full sm:w-auto">
