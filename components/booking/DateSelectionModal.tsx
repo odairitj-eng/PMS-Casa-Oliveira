@@ -319,12 +319,12 @@ export function DateSelectionModal({
                         const isTomorrowAvailable = isDateAvailable(addDays(date, 1));
 
                         // Padrãão Profissional (Airbnb):
-                        // ENTRAR: Primeira noite livre apóós um bloqueio.
-                        // SAIR: Dia de checkout (primeira noite bloqueada apóós disponibilidade).
-                        const isCheckinDay = isNightlyAvailable && !isYesterdayAvailable;
+                        // ENTRAR: ÚÚltimo dia de um bloqueio (hoje ocupado, amanhãã livre).
+                        // SAIR: Primeiro dia de um bloqueio (hoje ocupado, ontem livre).
+                        const isCheckinDay = !isNightlyAvailable && isTomorrowAvailable;
                         const isCheckoutDay = !isNightlyAvailable && isYesterdayAvailable;
 
-                        const isVivid = isNightlyAvailable || isCheckoutDay;
+                        const isVivid = isNightlyAvailable || isCheckinDay || isCheckoutDay;
 
                         const isToday = isSameDay(date, today);
 

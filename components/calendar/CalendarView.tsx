@@ -415,14 +415,15 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
                 const isNightlyAvailable = isDateNightAvailable(cloneDay);
                 const isYesterdayAvailable = isDateNightAvailable(addDays(cloneDay, -1));
+                const isTomorrowAvailable = isDateNightAvailable(addDays(cloneDay, 1));
 
                 // Padrãão Profissional (Airbnb):
-                // CHECKIN: Primeira noite livre apóós um bloqueio.
-                // CHECKOUT: Dia de checkout (primeira noite bloqueada apóós disponibilidade).
-                const isCheckinDay = isNightlyAvailable && !isYesterdayAvailable;
+                // CHECKIN (ENTRAR): ÚÚltimo dia de um bloqueio (hoje ocupado, amanhãã livre).
+                // CHECKOUT (SAIR): Primeiro dia de um bloqueio (hoje ocupado, ontem livre).
+                const isCheckinDay = !isNightlyAvailable && isTomorrowAvailable;
                 const isCheckoutDay = !isNightlyAvailable && isYesterdayAvailable;
 
-                const isVivid = isNightlyAvailable || isCheckoutDay;
+                const isVivid = isNightlyAvailable || isCheckinDay || isCheckoutDay;
                 const canInteract = (inWindow && !isPast) || isCheckoutDay || isCheckinDay;
 
                 const isInDragRange = getIsDateInDragRange(cloneDay);
