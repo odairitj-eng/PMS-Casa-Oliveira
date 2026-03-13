@@ -167,7 +167,7 @@ export default function MessageCenterPage() {
                                     </CardHeader>
                                     <CardContent className="p-6">
                                         <p className="text-olive-900/60 text-sm line-clamp-3 mb-6 font-medium italic">
-                                            "{template.body}"
+                                            &quot;{template.body}&quot;
                                         </p>
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">

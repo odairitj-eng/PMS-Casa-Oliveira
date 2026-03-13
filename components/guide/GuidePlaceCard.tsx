@@ -86,7 +86,7 @@ export default function GuidePlaceCard({
             {description && (
                 <div className="p-4 pt-0 border-t border-olive-900/5 bg-olive-50/10">
                     <p className="text-xs text-olive-800/70 italic leading-relaxed pt-3">
-                        "{description}"
+                        &quot;{description}&quot;
                     </p>
                 </div>
             )}
