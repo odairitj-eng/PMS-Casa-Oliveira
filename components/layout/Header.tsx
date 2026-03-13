@@ -42,7 +42,7 @@ export function Header() {
                     <Link href="/" className="hover:opacity-80 transition-all active:scale-95">
                         <div className="rounded-2xl overflow-hidden shadow-sm border border-olive-900/5">
                             <Image
-                                src="/imagens/logo.png"
+                                src="/imagens/logo.png?v=3"
                                 alt="Casa Oliveira"
                                 width={100}
                                 height={100}
@@ -109,7 +109,7 @@ export function Header() {
                 <div className="p-6 flex justify-between items-center border-b border-olive-900/10 bg-white/40">
                     <div className="rounded-xl overflow-hidden shadow-sm border border-olive-900/5 bg-white">
                         <Image
-                            src="/imagens/logo.png"
+                            src="/imagens/logo.png?v=3"
                             alt="Casa Oliveira"
                             width={50}
                             height={50}

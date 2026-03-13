@@ -302,50 +302,50 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
     const renderHeader = () => {
         return (
-            <div className="flex items-center justify-between px-2 mb-6">
-                <div className="flex items-center gap-2">
-                    <button className="flex items-center gap-1 hover:bg-gray-100 px-3 py-2 rounded-lg transition-colors group">
-                        <h2 className="text-2xl font-bold text-olive-900 capitalize">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between px-2 mb-4 md:mb-6 gap-4">
+                <div className="flex items-center gap-2 w-full md:w-auto overflow-hidden">
+                    <button className="flex items-center gap-1 hover:bg-gray-100 px-2 md:px-3 py-2 rounded-lg transition-colors group">
+                        <h2 className="text-xl md:text-2xl font-bold text-olive-900 capitalize truncate">
                             {viewMode === 'month'
                                 ? format(currentMonth, "MMMM", { locale: ptBR })
                                 : format(currentMonth, "yyyy")
                             }
                         </h2>
-                        <ChevronRight className="w-5 h-5 text-olive-900 transform group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-olive-900 transform group-hover:translate-x-0.5 transition-transform" />
                     </button>
 
-                    <div className="flex items-center gap-1 ml-4">
-                        <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1 ml-auto md:ml-4">
+                        <div className="flex items-center gap-0.5 md:gap-1">
                             <button
                                 onClick={() => handleMonthChange(-1)}
-                                className="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-olive-900/10 text-olive-900 transition-all active:scale-90"
+                                className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl md:rounded-2xl hover:bg-olive-900/10 text-olive-900 transition-all active:scale-90"
                             >
-                                <ChevronLeft className="w-6 h-6" />
+                                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                             </button>
                             <button
                                 onClick={() => handleMonthChange(1)}
-                                className="w-12 h-12 flex items-center justify-center rounded-2xl hover:bg-olive-900/10 text-olive-900 transition-all active:scale-90"
+                                className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl md:rounded-2xl hover:bg-olive-900/10 text-olive-900 transition-all active:scale-90"
                             >
-                                <ChevronRight className="w-6 h-6" />
+                                <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
                             </button>
                         </div>
 
                         <button
                             onClick={handleRecalcRolling}
-                            className="p-2 hover:bg-olive-900/5 rounded-full transition-all text-olive-900/20 hover:text-olive-900 ml-2"
+                            className="p-2 hover:bg-olive-900/5 rounded-full transition-all text-olive-900/20 hover:text-olive-900 ml-1 md:ml-2"
                             title="Recalcular janelas dinâmicas (Rolling)"
                         >
-                            <Clock className="w-5 h-5" />
+                            <Clock className="w-4 h-4 md:w-5 md:h-5" />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-between w-full md:w-auto gap-4">
                     <div className="bg-sand-50 rounded-xl p-1 flex border border-olive-900/5">
                         <button
                             onClick={() => setViewMode('month')}
                             className={cn(
-                                "px-4 py-1.5 text-sm font-bold rounded-lg transition-all",
+                                "px-3 md:px-4 py-1.5 text-xs md:text-sm font-bold rounded-lg transition-all",
                                 viewMode === 'month' ? "bg-white shadow-sm text-olive-900" : "text-olive-900/40 hover:text-olive-900"
                             )}
                         >
@@ -354,7 +354,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         <button
                             onClick={() => setViewMode('year')}
                             className={cn(
-                                "px-4 py-1.5 text-sm font-bold rounded-lg transition-all",
+                                "px-3 md:px-4 py-1.5 text-xs md:text-sm font-bold rounded-lg transition-all",
                                 viewMode === 'year' ? "bg-white shadow-sm text-olive-900" : "text-olive-900/40 hover:text-olive-900"
                             )}
                         >
@@ -364,23 +364,18 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
 
                     {selectedRange && (
                         <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-300">
-                            <div className="bg-olive-900 text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 shadow-lg shadow-olive-900/20">
-                                {format(selectedRange.start, "d 'de' MMM", { locale: ptBR })}
-                                {isSameDay(selectedRange.start, selectedRange.end) ? "" : ` — ${format(selectedRange.end, "d 'de' MMM", { locale: ptBR })}`}
+                            <div className="bg-olive-900 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-full text-[10px] md:text-xs font-bold flex items-center gap-1.5 md:gap-2 shadow-lg shadow-olive-900/20 max-w-[120px] md:max-w-none">
+                                <span className="truncate">
+                                    {format(selectedRange.start, "d 'de' MMM", { locale: ptBR })}
+                                </span>
                                 <X
-                                    className="w-3.5 h-3.5 ml-1 cursor-pointer hover:text-sand-200"
+                                    className="w-3 h-3 md:w-3.5 md:h-3.5 cursor-pointer hover:text-sand-200 flex-shrink-0"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedRange(null);
                                     }}
                                 />
                             </div>
-                            <button
-                                className="bg-olive-900 text-white rounded-full h-8 px-5 text-xs font-bold hover:bg-olive-950 transition-colors shadow-lg shadow-olive-900/20"
-                                onClick={handleOpenSidebar}
-                            >
-                                Configurar
-                            </button>
                         </div>
                     )}
                 </div>
@@ -439,7 +434,7 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                     <div
                         key={cloneDay.toString()}
                         className={cn(
-                            "relative h-40 p-5 transition-all cursor-pointer group rounded-[2rem] border",
+                            "relative h-24 md:h-40 p-2 md:p-5 transition-all cursor-pointer group rounded-2xl md:rounded-[2rem] border",
                             !isCurrentMonth && "bg-gray-50/10 text-gray-300 border-transparent",
                             isPast && isCurrentMonth && "bg-gray-100/50 grayscale-[0.8] opacity-80 border-olive-900/10",
                             !isVivid && !dayBlock && isCurrentMonth && "bg-gray-50/50 grayscale-[0.5] opacity-70 border-olive-900/15",
@@ -454,10 +449,10 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                         onPointerEnter={() => canInteract && handlePointerEnter(cloneDay)}
                         onContextMenu={(e) => e.preventDefault()}
                     >
-                        <div className="relative z-10 flex flex-col h-full">
+                        <div className="relative z-10 flex flex-col h-full overflow-hidden">
                             <div className="flex justify-between items-start">
                                 <span className={cn(
-                                    "text-lg font-black mb-1 transition-colors",
+                                    "text-sm md:text-lg font-black mb-1 transition-colors",
                                     isToday && !isSelected && "text-olive-900 underline decoration-2 underline-offset-4",
                                     isSelected ? "text-olive-900" : (isNightlyAvailable || isCheckoutDay || isCheckinDay ? "text-olive-900" : "text-olive-900/40"),
                                     !isCurrentMonth && "text-olive-900/0"
@@ -465,13 +460,10 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                     {format(cloneDay, "d")}
                                 </span>
                                 {!isNightlyAvailable && isCheckoutDay && isCurrentMonth && !isSelected && (
-                                    <span className="text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-1 z-10 uppercase">Checkout</span>
+                                    <span className="text-[7px] md:text-[9px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-0.5 md:mt-1 z-10 uppercase truncate max-w-[40px] md:max-w-none">Out</span>
                                 )}
                                 {isCheckinDay && isCurrentMonth && !isSelected && (
-                                    <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded mt-1 z-10 uppercase">Check-in</span>
-                                )}
-                                {(isPast || !inWindow) && isCurrentMonth && !dayReservation && !dayBlock && !isCheckoutDay && (
-                                    <Lock className="w-3 h-3 text-olive-900/50" />
+                                    <span className="text-[7px] md:text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded mt-0.5 md:mt-1 z-10 uppercase truncate max-w-[40px] md:max-w-none">In</span>
                                 )}
                             </div>
 
@@ -479,11 +471,11 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                 <div className="mt-auto">
                                     {dayReservation ? (
                                         <div className={cn(
-                                            "flex items-center gap-1 text-[10px] font-bold py-1 px-2 rounded-full",
+                                            "flex items-center gap-1 text-[8px] md:text-[10px] font-bold py-0.5 md:py-1 px-1 md:px-2 rounded-full",
                                             isSelected ? "bg-olive-900/10 text-olive-900" : "bg-olive-900/5 text-olive-900/60"
                                         )}>
-                                            <div className="w-3.5 h-3.5 rounded-full bg-olive-900/20 flex-shrink-0" />
-                                            <span className="truncate font-bold text-[9px]">Ocupado</span>
+                                            <div className="w-2 h-2 md:w-3.5 md:h-3.5 rounded-full bg-olive-900/20 flex-shrink-0" />
+                                            <span className="truncate font-bold text-[7px] md:text-[9px]">Ocupado</span>
                                         </div>
                                     ) : dayBlock ? (
                                         (() => {
@@ -495,15 +487,15 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                                             if (isAirbnb) { bgClass = "bg-rose-100"; textClass = "text-rose-700"; }
                                             else if (isBooking) { bgClass = "bg-blue-100"; textClass = "text-blue-800"; }
                                             return (
-                                                <div className={cn("flex items-center gap-1 text-[9px] font-bold py-1 px-2 rounded-full", bgClass, textClass)}>
-                                                    <Minus className="w-2.5 h-2.5" />
+                                                <div className={cn("flex items-center gap-0.5 md:gap-1 text-[7px] md:text-[9px] font-bold py-0.5 md:py-1 px-1 md:px-2 rounded-full", bgClass, textClass)}>
+                                                    <Minus className="w-2 md:w-2.5 h-2 md:h-2.5" />
                                                     <span className="truncate">{reason}</span>
                                                 </div>
                                             );
                                         })()
                                     ) : isNightlyAvailable ? (
                                         <div className="flex flex-col">
-                                            <span className="text-lg font-black tracking-tight text-olive-900">R${price}</span>
+                                            <span className="text-xs md:text-lg font-black tracking-tight text-olive-900 truncate">R${price}</span>
                                         </div>
                                     ) : null}
                                 </div>

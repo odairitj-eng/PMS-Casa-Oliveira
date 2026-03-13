@@ -36,7 +36,7 @@ function CalendarContent() {
 
     // Carregar Propriedades
     useEffect(() => {
-        axios.get("/api/admin/properties", { timeout: 8000 }).then(res => {
+        axios.get("/api/admin/properties", { timeout: 15000 }).then(res => {
             const props = res.data;
             setProperties(props);
 
@@ -118,24 +118,24 @@ function CalendarContent() {
     return (
         <div className="space-y-4 px-2">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 md:p-8 rounded-[2.5rem] border border-olive-900/5 shadow-sm gap-6 md:gap-0">
-                <div className="space-y-3">
-                    <h1 className="text-3xl font-bold text-olive-900 tracking-tight">Calendário de Tarifas</h1>
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-olive-900/5 shadow-sm gap-6">
+                <div className="space-y-3 w-full lg:w-auto">
+                    <h1 className="text-2xl md:text-3xl font-bold text-olive-900 tracking-tight">Calendário de Tarifas</h1>
 
                     {/* Imóvel Selector Component */}
                     {isPropertiesLoading ? (
-                        <div className="h-11 w-[240px] bg-sand-50/50 rounded-2xl animate-pulse flex items-center px-4 text-xs font-bold text-olive-900/40">Carregando imóveis...</div>
+                        <div className="h-11 w-full md:w-[240px] bg-sand-50/50 rounded-2xl animate-pulse flex items-center px-4 text-xs font-bold text-olive-900/40">Carregando imóveis...</div>
                     ) : hasError ? (
-                        <div className="h-11 w-[240px] bg-red-50 rounded-2xl flex items-center px-4 text-xs font-bold text-red-600 border border-red-200">Falha ao carregar API</div>
+                        <div className="h-11 w-full md:w-[240px] bg-red-50 rounded-2xl flex items-center px-4 text-xs font-bold text-red-600 border border-red-200">Falha ao carregar API</div>
                     ) : properties.length > 0 ? (
-                        <div className="relative inline-flex items-center">
+                        <div className="relative inline-flex items-center w-full lg:w-auto">
                             <div className="absolute left-4 pointer-events-none text-olive-900/40">
                                 <Building className="w-4 h-4" />
                             </div>
                             <select
                                 value={selectedPropertyId || ""}
                                 onChange={handlePropertyChange}
-                                className="appearance-none bg-sand-50/50 hover:bg-sand-50 transition-colors border border-olive-900/10 text-olive-900 text-sm font-bold rounded-2xl h-11 pl-11 pr-10 focus:outline-none focus:ring-2 focus:ring-olive-900/20 cursor-pointer w-full md:w-auto min-w-[480px]"
+                                className="appearance-none bg-sand-50/50 hover:bg-sand-50 transition-colors border border-olive-900/10 text-olive-900 text-sm font-bold rounded-2xl h-11 pl-11 pr-10 focus:outline-none focus:ring-2 focus:ring-olive-900/20 cursor-pointer w-full min-w-0 md:min-w-[400px]"
                             >
                                 {properties.map(p => (
                                     <option key={p.id} value={p.id}>{p.name}</option>
@@ -146,39 +146,39 @@ function CalendarContent() {
                             </div>
                         </div>
                     ) : (
-                        <div className="h-11 w-[240px] bg-sand-50/50 rounded-2xl flex items-center px-4 text-xs font-bold text-olive-900/40 border border-olive-900/10">Nenhum imóvel disponível</div>
+                        <div className="h-11 w-full md:w-[240px] bg-sand-50/50 rounded-2xl flex items-center px-4 text-xs font-bold text-olive-900/40 border border-olive-900/10">Nenhum imóvel disponível</div>
                     )}
                 </div>
 
-                <div className="flex items-center gap-3 mt-6 md:mt-0">
+                <div className="grid grid-cols-2 md:flex items-center gap-2 md:gap-3 w-full lg:w-auto">
                     {/* Sincronizar iCal */}
                     <button
                         onClick={handleForceSync}
                         disabled={isSyncing}
                         className={cn(
-                            "flex items-center gap-2 px-5 h-11 rounded-2xl text-[13px] font-extrabold transition-all border",
+                            "flex items-center justify-center gap-2 px-3 md:px-5 h-10 md:h-11 rounded-xl md:rounded-2xl text-[11px] md:text-[13px] font-extrabold transition-all border",
                             isSyncing
                                 ? "bg-black/5 text-black/20 border-transparent cursor-not-allowed"
                                 : "border-olive-900/10 text-olive-900 hover:bg-olive-900/5 hover:border-olive-900/30"
                         )}
                     >
-                        <RefreshCcw className={cn("w-4 h-4", isSyncing && "animate-spin")} />
-                        {isSyncing ? "Sincronizando..." : "Sincronizar iCal"}
+                        <RefreshCcw className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isSyncing && "animate-spin")} />
+                        <span className="truncate">{isSyncing ? "Sinc..." : "iCal"}</span>
                     </button>
 
                     {/* Abrir Janela de Reservas */}
                     <button
                         onClick={() => setShowOpenWindow(true)}
-                        className="flex items-center gap-2 px-5 h-11 border border-olive-900/20 rounded-2xl text-[13px] font-extrabold transition-all text-olive-900 hover:bg-olive-900/5"
+                        className="flex items-center justify-center gap-2 px-3 md:px-5 h-10 md:h-11 border border-olive-900/20 rounded-xl md:rounded-2xl text-[11px] md:text-[13px] font-extrabold transition-all text-olive-900 hover:bg-olive-900/5"
                     >
-                        <CalendarPlus className="w-4 h-4" />
-                        Abrir Janela
+                        <CalendarPlus className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                        <span className="truncate">Janela</span>
                     </button>
 
                     {/* Bloquear Manual */}
                     <button
                         onClick={() => setShowBlockModal(true)}
-                        className="flex items-center gap-2 px-6 h-11 bg-olive-900 text-white hover:bg-black rounded-2xl text-[13px] font-extrabold transition-all shadow-lg shadow-olive-900/10 active:scale-95"
+                        className="col-span-2 md:col-auto flex items-center justify-center gap-2 px-6 h-11 bg-olive-900 text-white hover:bg-black rounded-xl md:rounded-2xl text-[12px] md:text-[13px] font-extrabold transition-all shadow-lg shadow-olive-900/10 active:scale-95"
                     >
                         <Lock className="w-4 h-4" />
                         Bloquear Manual

@@ -152,7 +152,7 @@ function CheckoutContent() {
                 <Card className="max-w-xl mx-auto shadow-2xl rounded-[2rem] overflow-hidden border-0">
                     <div className="bg-olive-900 p-8 text-center text-white relative">
                         <div className="absolute top-6 left-8 bg-white rounded-xl p-1.5 shadow-lg">
-                            <Image src="/imagens/logo.png" alt="Logo" width={40} height={40} className="object-contain" />
+                            <Image src="/imagens/logo.png?v=3" alt="Logo" width={40} height={40} className="object-contain" />
                         </div>
                         <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-400" />
                         <h1 className="text-3xl font-bold">Reserva Quase Pronta!</h1>
@@ -199,7 +199,7 @@ function CheckoutContent() {
         <div className="min-h-screen bg-sand-50 py-12 px-4 bg-[url('/imagens/pattern.png')] bg-repeat">
             <div className="max-w-5xl mx-auto mb-8 flex justify-center lg:justify-start">
                 <Link href="/">
-                    <Image src="/imagens/logo.png" alt="Casa Oliveira" width={150} height={50} className="object-contain hover:opacity-80 transition-opacity" />
+                    <Image src="/imagens/logo.png?v=3" alt="Casa Oliveira" width={150} height={50} className="object-contain hover:opacity-80 transition-opacity" />
                 </Link>
             </div>
             <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -345,7 +345,7 @@ function CheckoutContent() {
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-olive-900/10">
-                                    <Image src="/imagens/logo.png" alt="Logo" width={80} height={80} className="opacity-20 object-contain" />
+                                    <Image src="/imagens/logo.png?v=3" alt="Logo" width={80} height={80} className="opacity-20 object-contain" />
                                 </div>
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-olive-900/60 via-transparent to-transparent" />

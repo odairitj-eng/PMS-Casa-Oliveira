@@ -93,16 +93,7 @@ export function UserMenu() {
                             </Link>
                         )}
 
-                        {(userRole === "ADMIN") && (
-                            <Link
-                                href="/admin/settings"
-                                className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-olive-900/70 hover:text-olive-900 hover:bg-olive-900/5 rounded-2xl transition-all"
-                                onClick={() => setIsOpen(false)}
-                            >
-                                <Settings className="w-5 h-5" />
-                                Configurações
-                            </Link>
-                        )}
+                        {/* Link de Configurações global removido pois agora é por imóvel */}
 
                         <div className="pt-2 mt-2 border-t border-olive-900/5">
                             <button

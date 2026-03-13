@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { SidebarNav } from "@/components/admin/SidebarNav";
+import { PropertySelector } from "@/components/admin/PropertySelector";
 import { Menu, X, LayoutDashboard, CalendarDays, Users, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +31,7 @@ export default function AdminLayout({
                 <div className="p-6 border-b border-olive-800/50 flex flex-col items-center pt-8 text-center">
                     <div className="rounded-2xl overflow-hidden inline-flex w-fit mb-4 mx-auto shadow-lg shadow-black/20">
                         <Image
-                            src="/imagens/logo.png?v=2"
+                            src="/imagens/logo.png?v=3"
                             alt="Casa Oliveira PMS"
                             width={100}
                             height={100}
@@ -65,14 +66,18 @@ export default function AdminLayout({
             <main className="flex-1 min-h-screen">
                 {/* Admin Top Bar */}
                 <header className="h-16 md:h-20 border-b border-olive-900/5 bg-white/70 backdrop-blur-md px-6 md:px-12 flex justify-between items-center sticky top-0 z-40">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-6">
                         <button
                             onClick={() => setIsSidebarOpen(true)}
                             className="p-2 bg-olive-900/5 rounded-xl text-olive-900 md:hidden"
                         >
                             <Menu className="w-5 h-5" />
                         </button>
-                        <h1 className="text-[10px] font-black text-olive-900 uppercase tracking-[0.2em] opacity-30">Painel de Controle</h1>
+                        <div className="flex items-center gap-4">
+                            <h1 className="text-[10px] font-black text-olive-900 uppercase tracking-[0.2em] opacity-30 hidden lg:block">Painel de Controle</h1>
+                            <div className="h-4 w-px bg-olive-900/10 hidden lg:block" />
+                            <PropertySelector />
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-4">

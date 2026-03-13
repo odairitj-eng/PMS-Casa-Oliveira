@@ -134,7 +134,7 @@ export default async function PropertyPage({ params }: Props) {
                     <div id="regras" className="py-8 border-t border-olive-900/10 scroll-mt-24">
                         <h2 className="text-2xl font-bold mb-4">Regras da casa</h2>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8 p-6 bg-olive-900/5 rounded-2xl border border-olive-900/10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4 p-6 bg-olive-900/5 rounded-2xl border border-olive-900/10 shadow-sm">
                             <div className="flex items-start gap-3">
                                 <LucideIcons.Clock className="w-5 h-5 text-olive-900 mt-1 opacity-70" />
                                 <div>
@@ -158,6 +158,10 @@ export default async function PropertyPage({ params }: Props) {
                                     </p>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="bg-sand-50/50 border-l-4 border-olive-900/20 p-4 mb-8 rounded-r-xl italic text-sm text-olive-900/70">
+                            Check-in e check-out devem respeitar os horários informados, salvo acordo prévio.
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

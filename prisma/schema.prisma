@@ -9,133 +9,108 @@ datasource db {
 }
 
 model Property {
-  id               String   @id @default(uuid())
-  name             String
-  slug             String   @unique @default("")
-
-  // Fase 2: Configuração de Exibição Pública
-  publicTitle      String?
-  publicSubtitle   String?
-  shortDescription String?  @db.Text
-  fullDescription  String?  @db.Text
-  hostName         String?
-  propertyType     String?  @default("HOUSE")
-  category         String?  @default("Casa")
-  accommodationType String? @default("Espaço inteiro")
-
-  // Capacidade e Estrutura
-  maxGuests        Int      @default(4)
-  bedrooms         Int      @default(2)
-  beds             Int      @default(3)
-  bathrooms        Int      @default(2)
-  allowsPets       Boolean  @default(false)
-  maxPets          Int      @default(0)
-
-  // Estrutura do Prédio/Espaço
-  buildingFloors   Int?     @default(1)
-  floorNumber      Int?     @default(0)
-  constructionYear Int?
-  propertySize     Float?
-  propertySizeUnit String?  @default("m²")
-
-  // Localização
-  street           String?
-  streetNumber     String?
-  neighborhood     String?
-  city             String?
-  state            String?
-  postalCode       String?
-  country          String?
-  locationText     String?
-  latitude         Float?
-  longitude        Float?
-  publicLatitude   Float?
-  publicLongitude  Float?
-
-  isActive         Boolean  @default(true)
-
-  // Financeiro
-  basePrice        Float
-  cleaningFee      Float    @default(0)
-  minimumNights    Int      @default(2)
-  currency         String   @default("BRL")
-  
-  // Horários de Check-in/Out
-  checkInStart     String?  @default("14:00")
-  checkInEnd       String?  @default("22:00")
-  checkOutEnd      String?  @default("11:00")
-
-  // Wi-Fi
-  wifiName         String?
-  wifiPassword     String?
-
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
-  channexId        String?  @unique
-  reservations        Reservation[]
-  blockedDates        BlockedDate[]
-  nightlyOverrides    NightlyOverride[]
-  pricingRules        PricingRule[]
-  availabilityWindows AvailabilityWindow[]
-  photos              PropertyPhoto[]
-  amenities           PropertyAmenity[]
-  rules               PropertyRule[]
-  integrations        Integration[]
-  syncLogs            SyncLog[]
-  reservationLinks    ReservationLink[]
-  
+  id                   String               @id @default(uuid())
+  name                 String
+  basePrice            Float
+  cleaningFee          Float                @default(0)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  bathrooms            Int                  @default(2)
+  bedrooms             Int                  @default(2)
+  beds                 Int                  @default(3)
+  city                 String?
+  country              String?
+  currency             String               @default("BRL")
+  fullDescription      String?
+  hostName             String?
+  isActive             Boolean              @default(true)
+  latitude             Float?
+  locationText         String?
+  longitude            Float?
+  maxGuests            Int                  @default(4)
+  minimumNights        Int                  @default(2)
+  neighborhood         String?
+  propertyType         String?              @default("HOUSE")
+  publicSubtitle       String?
+  publicTitle          String?
+  shortDescription     String?
+  state                String?
+  allowsPets           Boolean              @default(false)
+  maxPets              Int                  @default(0)
+  postalCode           String?
+  publicLatitude       Float?
+  publicLongitude      Float?
+  street               String?
+  streetNumber         String?
+  slug                 String               @unique @default("")
+  channexId            String?              @unique
+  accommodationType    String?              @default("Espaço inteiro")
+  buildingFloors       Int?                 @default(1)
+  category             String?              @default("Casa")
+  constructionYear     Int?
+  floorNumber          Int?                 @default(0)
+  propertySize         Float?
+  propertySizeUnit     String?              @default("m²")
+  checkInEnd           String?              @default("22:00")
+  checkInStart         String?              @default("14:00")
+  checkOutEnd          String?              @default("11:00")
   cancellationPolicyId String?
-  cancellationPolicy   CancellationPolicy? @relation(fields: [cancellationPolicyId], references: [id])
-  
-  guide                PropertyGuide?
+  wifiName             String?
+  wifiPassword         String?
+  availabilityWindows  AvailabilityWindow[]
+  blockedDates         BlockedDate[]
+  integrations         Integration[]
   messageTemplates     MessageTemplate[]
+  nightlyOverrides     NightlyOverride[]
+  pricingRules         PricingRule[]
+  cancellationPolicy   CancellationPolicy?  @relation(fields: [cancellationPolicyId], references: [id])
+  amenities            PropertyAmenity[]
+  guide                PropertyGuide?
+  photos               PropertyPhoto[]
+  rules                PropertyRule[]
+  reservations         Reservation[]
+  reservationLinks     ReservationLink[]
+  syncLogs             SyncLog[]
 }
 
 model Guest {
-  id                     String   @id @default(uuid())
-  name                   String
-  email                  String   @unique
-  phone                  String
-  status                 String   @default("REGULAR") // REGULAR, VIP, FIVE_STAR, INACTIVE, BLOCKED
-  isVip                  Boolean  @default(false)
-  isFiveStar             Boolean  @default(false)
-  notes                  String?  @db.Text
-  sourceChannel          String?  @default("DIRECT") // DIRECT, AIRBNB, BOOKING, WHATSAPP, MANUAL
-  
-  // Estatísticas Automáticas
-  totalBookings          Int      @default(0)
-  completedStays         Int      @default(0)
-  totalRevenueGenerated  Float    @default(0)
-  lastReservationAt      DateTime?
-  lastStayAt             DateTime?
-
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt @default(now())
-
-  userId       String?       @unique
-  user         User?         @relation(fields: [userId], references: [id])
-  reservations Reservation[]
-  credits      ReservationCredit[]
-  messageLogs  MessageLog[]
+  id                    String              @id @default(uuid())
+  name                  String
+  email                 String              @unique
+  phone                 String
+  isVip                 Boolean             @default(false)
+  notes                 String?
+  totalBookings         Int                 @default(0)
+  createdAt             DateTime            @default(now())
+  userId                String?             @unique
+  completedStays        Int                 @default(0)
+  isFiveStar            Boolean             @default(false)
+  lastReservationAt     DateTime?
+  lastStayAt            DateTime?
+  sourceChannel         String?             @default("DIRECT")
+  status                String              @default("REGULAR")
+  totalRevenueGenerated Float               @default(0)
+  updatedAt             DateTime            @default(now()) @updatedAt
+  user                  User?               @relation(fields: [userId], references: [id])
+  messageLogs           MessageLog[]
+  reservations          Reservation[]
+  credits               ReservationCredit[]
 }
 
-// Modelos Necessários para Auth.js (NextAuth)
 model Account {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -155,17 +130,11 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole  @default(USER)
-  accounts      Account[]
-  sessions      Session[]
-  guest         Guest?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now()) @updatedAt
-}
-
-enum UserRole {
-  ADMIN
-  CO_ADMIN
-  USER
+  accounts      Account[]
+  guest         Guest?
+  sessions      Session[]
 }
 
 model VerificationToken {
@@ -177,43 +146,401 @@ model VerificationToken {
 }
 
 model Reservation {
-  id            String            @id @default(uuid())
-  propertyId    String
-  guestId       String
-  checkIn       DateTime
-  checkOut      DateTime
-  status        ReservationStatus @default(PENDING_PAYMENT)
-  totalAmount   Float
-  nightlyRate   Float
-  cleaningFee   Float
-  totalNights   Int
-  holdExpiresAt DateTime?
-  accessToken   String            @unique @default(uuid())
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  property     Property      @relation(fields: [propertyId], references: [id])
-  guest        Guest         @relation(fields: [guestId], references: [id])
-  payments     Payment[]
-  blockedDates BlockedDate[]
-  events       ReservationEvent[]
-  
-  numGuests    Int?          @default(1)
-  occupants    ReservationOccupant[]
-
-  // Rastreabilidade de Rebooking
-  rebookedFromId String?     @unique
-  rebookedFrom   Reservation? @relation("RebookingHistory", fields: [rebookedFromId], references: [id])
-  rebookedTo     Reservation? @relation("RebookingHistory")
-
-  rebookingHistory ReservationRebooking? @relation("OriginalReservation")
-  replacementRef   ReservationRebooking? @relation("NewReservation")
-
-  creditsGenerated ReservationCredit[]
+  id               String                @id @default(uuid())
+  propertyId       String
+  guestId          String
+  checkIn          DateTime
+  checkOut         DateTime
+  status           ReservationStatus     @default(PENDING_PAYMENT)
+  totalAmount      Float
+  nightlyRate      Float
+  cleaningFee      Float
+  totalNights      Int
+  holdExpiresAt    DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  numGuests        Int?                  @default(1)
+  accessToken      String                @unique @default(uuid())
+  rebookedFromId   String?               @unique
+  blockedDates     BlockedDate[]
   messageLogs      MessageLog[]
+  payments         Payment[]
+  guest            Guest                 @relation(fields: [guestId], references: [id])
+  property         Property              @relation(fields: [propertyId], references: [id])
+  rebookedFrom     Reservation?          @relation("RebookingHistory", fields: [rebookedFromId], references: [id])
+  rebookedTo       Reservation?          @relation("RebookingHistory")
+  creditsGenerated ReservationCredit[]
+  events           ReservationEvent[]
+  occupants        ReservationOccupant[]
+  replacementRef   ReservationRebooking? @relation("NewReservation")
+  rebookingHistory ReservationRebooking? @relation("OriginalReservation")
 
   @@index([propertyId])
   @@index([guestId])
+}
+
+model CancellationPolicy {
+  id                      String     @id @default(uuid())
+  name                    String
+  description             String?
+  cancelFreeLimitHours    Int        @default(48)
+  partialRefundPercentage Float      @default(50)
+  nonRefundableLimitHours Int        @default(24)
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+  properties              Property[]
+}
+
+model ReservationEvent {
+  id            String      @id @default(uuid())
+  reservationId String
+  type          String
+  userId        String?
+  reason        String?
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+}
+
+model ReservationOccupant {
+  id            String      @id @default(uuid())
+  reservationId String
+  name          String
+  document      String?
+  isChild       Boolean     @default(false)
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId])
+}
+
+model ReservationCredit {
+  id                  String       @id @default(uuid())
+  guestId             String
+  propertyId          String?
+  sourceReservationId String?
+  amountOriginal      Float
+  amountAvailable     Float
+  amountUsed          Float        @default(0)
+  currency            String       @default("BRL")
+  code                String       @unique
+  reason              String?
+  status              CreditStatus @default(ACTIVE)
+  expiresAt           DateTime?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  guest               Guest        @relation(fields: [guestId], references: [id])
+  sourceReservation   Reservation? @relation(fields: [sourceReservationId], references: [id])
+
+  @@index([guestId])
+  @@index([code])
+}
+
+model ReservationRebooking {
+  id                      String      @id @default(uuid())
+  originalReservationId   String      @unique
+  newReservationId        String      @unique
+  creditUsedAmount        Float       @default(0)
+  additionalPaymentAmount Float       @default(0)
+  reason                  String?
+  createdBy               String?
+  createdAt               DateTime    @default(now())
+  newReservation          Reservation @relation("NewReservation", fields: [newReservationId], references: [id])
+  originalReservation     Reservation @relation("OriginalReservation", fields: [originalReservationId], references: [id])
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  reservationId        String
+  gatewayTransactionId String?
+  method               PaymentMethod
+  status               PaymentStatus @default(PENDING)
+  amount               Float
+  createdAt            DateTime      @default(now())
+  expiresAt            DateTime?
+  externalId           String?
+  provider             String?
+  updatedAt            DateTime      @default(now()) @updatedAt
+  refundAmount         Float?
+  refundProviderId     String?
+  refundStatus         String?
+  refundedAt           DateTime?
+  reservation          Reservation   @relation(fields: [reservationId], references: [id])
+}
+
+model BlockedDate {
+  id            String        @id @default(uuid())
+  propertyId    String
+  date          DateTime
+  source        BlockedSource
+  reservationId String?
+  createdAt     DateTime      @default(now())
+  reason        String?
+  property      Property      @relation(fields: [propertyId], references: [id])
+  reservation   Reservation?  @relation(fields: [reservationId], references: [id])
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+}
+
+model AvailabilityWindow {
+  id          String     @id @default(uuid())
+  propertyId  String
+  startDate   DateTime
+  endDate     DateTime
+  mode        WindowMode @default(MANUAL_RANGE)
+  rollingDays Int?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  property    Property   @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId, startDate, endDate])
+}
+
+model NightlyOverride {
+  id            String   @id @default(uuid())
+  propertyId    String
+  date          DateTime
+  price         Float
+  minimumNights Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  property      Property @relation(fields: [propertyId], references: [id])
+
+  @@unique([propertyId, date])
+  @@index([propertyId])
+}
+
+model PricingRule {
+  id          String    @id @default(uuid())
+  propertyId  String
+  type        RuleType
+  value       Float
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  endDate     DateTime?
+  minDays     Int?
+  startDate   DateTime?
+  color       String?
+  property    Property  @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+model Integration {
+  id         String    @id @default(uuid())
+  platform   Platform
+  icalUrl    String
+  lastSyncAt DateTime?
+  createdAt  DateTime  @default(now())
+  propertyId String
+  property   Property  @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+model SyncLog {
+  id           String     @id @default(uuid())
+  platform     Platform
+  status       SyncStatus
+  eventsAdded  Int        @default(0)
+  errorMessage String?
+  createdAt    DateTime   @default(now())
+  propertyId   String?
+  property     Property?  @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+model SystemSettings {
+  id                     String   @id @default("singleton")
+  propertyId             String?
+  mercadoPagoPublicKey   String?
+  mercadoPagoAccessToken String?
+  whatsappNumber         String?
+  contactEmail           String?
+  minNightsDefault       Int      @default(2)
+  maxGuestsDefault       Int      @default(4)
+  updatedAt              DateTime @updatedAt
+}
+
+model ReservationLink {
+  id             String    @id @default(uuid())
+  token          String    @unique
+  discount       Float?
+  expiresAt      DateTime?
+  preFilledDates String?
+  createdAt      DateTime  @default(now())
+  propertyId     String?
+  property       Property? @relation(fields: [propertyId], references: [id])
+}
+
+model PropertyPhoto {
+  id         String   @id @default(uuid())
+  propertyId String
+  imageUrl   String
+  sortOrder  Int      @default(0)
+  isPrimary  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model PropertyAmenity {
+  id          String   @id @default(uuid())
+  propertyId  String
+  amenityKey  String
+  amenityName String
+  iconName    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, amenityKey])
+  @@index([propertyId])
+}
+
+model PropertyRule {
+  id         String   @id @default(uuid())
+  propertyId String
+  ruleText   String
+  iconName   String?
+  sortOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+}
+
+model ProcessedEvent {
+  id        String   @id
+  provider  String
+  createdAt DateTime @default(now())
+
+  @@index([id, provider])
+}
+
+model PropertyGuide {
+  id          String         @id @default(uuid())
+  propertyId  String         @unique
+  isActive    Boolean        @default(true)
+  accentColor String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  places      GuidePlace[]
+  sections    GuideSection[]
+  property    Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+}
+
+model GuideSection {
+  id        String        @id @default(uuid())
+  guideId   String
+  type      SectionType
+  title     String
+  content   String?
+  imageUrl  String?
+  iconName  String?
+  sortOrder Int           @default(0)
+  isActive  Boolean       @default(true)
+  config    Json?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  guide     PropertyGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+}
+
+model GuidePlace {
+  id            String        @id @default(uuid())
+  guideId       String
+  category      PlaceCategory
+  name          String
+  description   String?
+  imageUrl      String?
+  address       String?
+  distance      String?
+  googleMapsUrl String?
+  tags          String[]      @default([])
+  sortOrder     Int           @default(0)
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  guide         PropertyGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@index([guideId])
+}
+
+model MessageTemplate {
+  id                 String               @id @default(uuid())
+  propertyId         String?
+  name               String
+  slug               String?              @unique
+  category           MessageCategory      @default(GENERAL)
+  channelType        CommunicationChannel @default(WHATSAPP)
+  subject            String?
+  body               String
+  isActive           Boolean              @default(true)
+  isAutomatic        Boolean              @default(false)
+  triggerType        MessageTrigger?
+  triggerOffsetValue Int?                 @default(0)
+  triggerOffsetUnit  TriggerUnit?         @default(DAYS)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  logs               MessageLog[]
+  schedules          MessageSchedule[]
+  property           Property?            @relation(fields: [propertyId], references: [id])
+
+  @@index([propertyId])
+}
+
+model MessageLog {
+  id              String               @id @default(uuid())
+  templateId      String?
+  guestId         String
+  reservationId   String?
+  propertyId      String
+  channelType     CommunicationChannel
+  recipient       String
+  renderedSubject String?
+  renderedBody    String
+  status          MessageStatus        @default(SENT)
+  scheduledFor    DateTime?
+  sentAt          DateTime?
+  errorMessage    String?
+  createdBy       String?
+  createdAt       DateTime             @default(now())
+  guest           Guest                @relation(fields: [guestId], references: [id])
+  reservation     Reservation?         @relation(fields: [reservationId], references: [id])
+  template        MessageTemplate?     @relation(fields: [templateId], references: [id])
+
+  @@index([guestId])
+  @@index([reservationId])
+}
+
+model MessageSchedule {
+  id            String          @id @default(uuid())
+  templateId    String
+  reservationId String
+  guestId       String
+  propertyId    String
+  scheduledFor  DateTime
+  status        ScheduleStatus  @default(PENDING)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  template      MessageTemplate @relation(fields: [templateId], references: [id])
+
+  @@unique([templateId, reservationId])
+  @@index([scheduledFor])
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  CO_ADMIN
 }
 
 enum ReservationStatus {
@@ -228,115 +555,12 @@ enum ReservationStatus {
   EXPIRED
 }
 
-model CancellationPolicy {
-  id                         String   @id @default(uuid())
-  name                       String
-  description                String?  @db.Text
-  cancelFreeLimitHours       Int      @default(48)
-  partialRefundPercentage    Float    @default(50)
-  nonRefundableLimitHours    Int      @default(24)
-  createdAt                  DateTime @default(now())
-  updatedAt                  DateTime @updatedAt
-
-  properties Property[]
-}
-
-model ReservationEvent {
-  id            String   @id @default(uuid())
-  reservationId String
-  type          String   // CANCEL_REQUESTED, CANCELLED, REFUND_REQUESTED, REFUND_COMPLETED, etc
-  userId        String?  // Quem realizou a ação (admin ou null se sistema/hóspede s/ login)
-  reason        String?  @db.Text
-  metadata      Json?    // Detalhes extras (ex: valores calculados)
-  createdAt     DateTime @default(now())
-
-  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-
-  @@index([reservationId])
-}
-
-model ReservationOccupant {
-  id            String      @id @default(uuid())
-  reservationId String
-  name          String
-  document      String?     // CPF ou Identidade
-  isChild       Boolean     @default(false)
-  
-  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-
-  @@index([reservationId])
-}
-
-model ReservationCredit {
-  id                 String               @id @default(uuid())
-  guestId            String
-  propertyId         String?   // Se limitado a um imóvel
-  sourceReservationId String?
-  
-  amountOriginal     Float
-  amountAvailable    Float
-  amountUsed         Float                @default(0)
-  currency           String               @default("BRL")
-  
-  code               String               @unique // ex: CO-XXXX-YYYY
-  reason             String?
-  status             CreditStatus         @default(ACTIVE)
-  
-  expiresAt          DateTime?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-
-  guest             Guest                @relation(fields: [guestId], references: [id])
-  sourceReservation Reservation?        @relation(fields: [sourceReservationId], references: [id])
-  
-  @@index([guestId])
-  @@index([code])
-}
-
 enum CreditStatus {
   ACTIVE
   PARTIALLY_USED
   USED
   EXPIRED
   CANCELLED
-}
-
-model ReservationRebooking {
-  id                     String   @id @default(uuid())
-  originalReservationId  String   @unique
-  newReservationId       String   @unique
-  
-  creditUsedAmount       Float    @default(0)
-  additionalPaymentAmount Float   @default(0)
-  reason                 String?  @db.Text
-  
-  createdBy              String?  // ID do admin
-  createdAt              DateTime @default(now())
-
-  originalReservation    Reservation @relation("OriginalReservation", fields: [originalReservationId], references: [id])
-  newReservation         Reservation @relation("NewReservation", fields: [newReservationId], references: [id])
-}
-
-model Payment {
-  id                   String        @id @default(uuid())
-  reservationId        String
-  gatewayTransactionId String?
-  provider             String?       // ex: "MERCADO_PAGO"
-  method               PaymentMethod
-  status               PaymentStatus @default(PENDING)
-  amount               Float
-  externalId           String?       // ID na API externa
-  expiresAt            DateTime?     // Para Pix ou boletos
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt @default(now())
-
-  // Campos de Reembolso
-  refundAmount         Float?
-  refundStatus         String?       // PENDING, COMPLETED, FAILED
-  refundProviderId     String?       // ID do refund no Mercado Pago
-  refundedAt           DateTime?
-
-  reservation Reservation @relation(fields: [reservationId], references: [id])
 }
 
 enum PaymentMethod {
@@ -355,29 +579,13 @@ enum PaymentStatus {
   FAILED
 }
 
-model BlockedDate {
-  id            String        @id @default(uuid())
-  propertyId    String
-  date          DateTime
-  source        BlockedSource
-  reservationId String?
-  reason        String?
-  createdAt     DateTime      @default(now())
-
-  property    Property     @relation(fields: [propertyId], references: [id])
-  reservation Reservation? @relation(fields: [reservationId], references: [id])
-
-  @@unique([propertyId, date])
-  @@index([propertyId])
-}
-
 enum BlockedSource {
   AIRBNB
   BOOKING
-  CHANNEX
   ADMIN
   DIRECT_RESERVATION
   MANUAL
+  CHANNEX
 }
 
 enum WindowMode {
@@ -385,73 +593,11 @@ enum WindowMode {
   ROLLING_FROM_TODAY
 }
 
-model AvailabilityWindow {
-  id          String     @id @default(uuid())
-  propertyId  String
-  startDate   DateTime
-  endDate     DateTime
-  mode        WindowMode @default(MANUAL_RANGE)
-  rollingDays Int?
-  isActive    Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  property Property @relation(fields: [propertyId], references: [id])
-
-  @@index([propertyId, startDate, endDate])
-}
-
-model NightlyOverride {
-  id            String   @id @default(uuid())
-  propertyId    String
-  date          DateTime
-  price         Float
-  minimumNights Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  property Property @relation(fields: [propertyId], references: [id])
-
-  @@unique([propertyId, date])
-  @@index([propertyId])
-}
-
-model PricingRule {
-  id          String   @id @default(uuid())
-  propertyId  String
-  type        RuleType
-  value       Float // Pode ser porcentagem (ex: 1.2 para +20%) ou valor fixo
-  description String?
-  minDays     Int?     // Para Early Bird e Last Minute dinâmico
-  startDate   DateTime? // Para Sazonalidade
-  endDate     DateTime? // Para Sazonalidade
-  color       String?   // Para identificação visual no calendário
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id])
-
-  @@index([propertyId])
-}
-
 enum RuleType {
-  WEEKEND_SURGE // Aumento automático de sexta a domingo
-  LAST_MINUTE // Desconto para reservas em cima da hora
-  EARLY_BIRD // Desconto para reservas antecipadas
-  SEASONAL // Ajuste por temporada (ex: Verão/Inverno)
-}
-
-model Integration {
-  id         String    @id @default(uuid())
-  propertyId String
-  platform   Platform
-  icalUrl    String
-  lastSyncAt DateTime?
-  createdAt  DateTime  @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id])
-
-  @@index([propertyId])
+  WEEKEND_SURGE
+  LAST_MINUTE
+  EARLY_BIRD
+  SEASONAL
 }
 
 enum Platform {
@@ -460,142 +606,9 @@ enum Platform {
   CHANNEX
 }
 
-model SyncLog {
-  id           String     @id @default(uuid())
-  propertyId   String?
-  platform     Platform
-  status       SyncStatus
-  eventsAdded  Int        @default(0)
-  errorMessage String?
-  createdAt    DateTime   @default(now())
-
-  property Property? @relation(fields: [propertyId], references: [id])
-
-  @@index([propertyId])
-}
-
 enum SyncStatus {
   SUCCESS
   FAILED
-}
-
-model SystemSettings {
-  id                     String   @id @default("singleton")
-  propertyId             String?
-  mercadoPagoPublicKey   String?
-  mercadoPagoAccessToken String?
-  whatsappNumber         String?
-  contactEmail           String?
-  minNightsDefault       Int      @default(2)
-  maxGuestsDefault       Int      @default(4)
-  updatedAt              DateTime @updatedAt
-}
-
-model ReservationLink {
-  id             String    @id @default(uuid())
-  token          String    @unique
-  propertyId     String?
-  discount       Float?
-  expiresAt      DateTime?
-  preFilledDates String? // JSON string
-  createdAt      DateTime  @default(now())
-
-  property Property? @relation(fields: [propertyId], references: [id])
-}
-
-// ----------------------------------------------------
-// FASE 2: CONTEÚDO DA PROPRIEDADE
-// ----------------------------------------------------
-
-model PropertyPhoto {
-  id         String   @id @default(uuid())
-  propertyId String
-  imageUrl   String
-  sortOrder  Int      @default(0)
-  isPrimary  Boolean  @default(false)
-  createdAt  DateTime @default(now())
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@index([propertyId])
-}
-
-model PropertyAmenity {
-  id          String   @id @default(uuid())
-  propertyId  String
-  amenityKey  String
-  amenityName String
-  iconName    String?
-  sortOrder   Int      @default(0)
-  isActive    Boolean  @default(true)
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@unique([propertyId, amenityKey])
-  @@index([propertyId])
-}
-
-model PropertyRule {
-  id         String   @id @default(uuid())
-  propertyId String
-  ruleText   String
-  iconName   String?
-  sortOrder  Int      @default(0)
-  isActive   Boolean  @default(true)
-
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@index([propertyId])
-}
-
-model ProcessedEvent {
-  id        String   @id
-  provider  String
-  createdAt DateTime @default(now())
-
-  @@index([id, provider])
-}
-
-// ----------------------------------------------------
-// FASE 4: GUEST EXPERIENCE GUIDE (HOUSE GUIDE)
-// ----------------------------------------------------
-
-model PropertyGuide {
-  id         String   @id @default(uuid())
-  propertyId String   @unique
-  isActive   Boolean  @default(true)
-  
-  // Customizações de estilo (opcional para o futuro)
-  accentColor String?
-  
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  property   Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  sections   GuideSection[]
-  places     GuidePlace[]
-}
-
-model GuideSection {
-  id             String      @id @default(uuid())
-  guideId        String
-  type           SectionType
-  title          String
-  content        String?     @db.Text
-  imageUrl       String?
-  iconName       String?
-  sortOrder      Int         @default(0)
-  isActive       Boolean     @default(true)
-  
-  // Metadados específicos (ex: Wi-Fi credentials em JSON)
-  config         Json?       
-  
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  guide          PropertyGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
-
-  @@index([guideId])
 }
 
 enum SectionType {
@@ -618,29 +631,6 @@ enum SectionType {
   OTHER
 }
 
-model GuidePlace {
-  id          String    @id @default(uuid())
-  guideId     String
-  category    PlaceCategory
-  name        String
-  description String?   @db.Text
-  imageUrl    String?
-  address     String?
-  distance    String?   // ex: "500m", "5 min walk"
-  googleMapsUrl String?
-  tags        String[]  @default([]) // Tags de curadoria: "Favorito", "Perto", etc.
-  
-  sortOrder   Int       @default(0)
-  isActive    Boolean   @default(true)
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  guide       PropertyGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
-
-  @@index([guideId])
-}
-
 enum PlaceCategory {
   RESTAURANT
   CAFE
@@ -657,79 +647,6 @@ enum PlaceCategory {
   FAMILY
   TO_GO
   OTHER
-}
-
-// --- MÓDULO DE MENSAGENS E COMUNICAÇÃO ---
-
-model MessageTemplate {
-  id                  String   @id @default(uuid())
-  propertyId          String?  // null = global template
-  name                String
-  slug                String?  @unique
-  category            MessageCategory @default(GENERAL)
-  channelType         CommunicationChannel @default(WHATSAPP)
-  subject             String?  // Para e-mail
-  body                String   @db.Text
-  isActive            Boolean  @default(true)
-  isAutomatic         Boolean  @default(false)
-  
-  // Lógica de Gatilho (Trigger)
-  triggerType         MessageTrigger?
-  triggerOffsetValue  Int?     @default(0)
-  triggerOffsetUnit   TriggerUnit? @default(DAYS)
-  
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-
-  property            Property? @relation(fields: [propertyId], references: [id])
-  logs                MessageLog[]
-  schedules           MessageSchedule[]
-
-  @@index([propertyId])
-}
-
-model MessageLog {
-  id              String   @id @default(uuid())
-  templateId      String?
-  guestId         String
-  reservationId   String?
-  propertyId      String
-  channelType     CommunicationChannel
-  recipient       String
-  renderedSubject String?
-  renderedBody    String   @db.Text
-  status          MessageStatus @default(SENT)
-  scheduledFor    DateTime?
-  sentAt          DateTime?
-  errorMessage    String?  @db.Text
-  createdBy       String?  // ex: "SYSTEM" ou ID do Admin
-  
-  createdAt       DateTime @default(now())
-
-  template        MessageTemplate? @relation(fields: [templateId], references: [id])
-  guest           Guest            @relation(fields: [guestId], references: [id])
-  reservation     Reservation?     @relation(fields: [reservationId], references: [id])
-
-  @@index([guestId])
-  @@index([reservationId])
-}
-
-model MessageSchedule {
-  id              String   @id @default(uuid())
-  templateId      String
-  reservationId   String
-  guestId         String
-  propertyId      String
-  scheduledFor    DateTime
-  status          ScheduleStatus @default(PENDING)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  template        MessageTemplate @relation(fields: [templateId], references: [id])
-
-  @@unique([templateId, reservationId]) // Evita agendar o mesmo template para a mesma reserva
-  @@index([scheduledFor])
 }
 
 enum MessageCategory {

@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { Home, Globe, ArrowRight, BookOpen } from "lucide-react";
+import { Home, Globe, ArrowRight, BookOpen, Plus } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminGuideSelectionPage() {
@@ -63,6 +63,20 @@ export default async function AdminGuideSelectionPage() {
                         </div>
                     </Link>
                 ))}
+
+                {/* Card de Adicionar Novo Imóvel */}
+                <Link
+                    href="/admin/properties/new"
+                    className="group border-2 border-dashed border-olive-900/10 rounded-3xl p-6 flex flex-col items-center justify-center text-center gap-4 hover:border-olive-900/20 hover:bg-olive-50/50 transition-all h-56"
+                >
+                    <div className="w-12 h-12 rounded-full bg-olive-900/5 flex items-center justify-center text-olive-900 group-hover:bg-olive-900 group-hover:text-white transition-all">
+                        <Plus size={24} />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-olive-900">Adicionar Imóvel</h3>
+                        <p className="text-xs text-olive-800/40 mt-1">Gerencie um novo imóvel no sistema</p>
+                    </div>
+                </Link>
             </div>
         </div>
     );
