@@ -1,24 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/options";
 
 export async function POST(
     req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
+        const session = await getServerSession(authOptions) as any;
+        if (!session || session.user?.role !== "ADMIN") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
         const propertyId = params.id;
         const body = await req.json();
-        const { type, title, content, imageUrl, iconName, sortOrder, isActive, config } = body;
+        const { type, title, content, imageUrl, iconName, config, sortOrder, isActive } = body;
 
         // Garante que o guia existe
-        const guide = await db.propertyGuide.findUnique({
+        const guide = await (db as any).propertyGuide.findUnique({
             where: { propertyId },
         });
 
@@ -26,7 +26,7 @@ export async function POST(
             return new NextResponse("Guide not found", { status: 404 });
         }
 
-        const section = await db.guideSection.create({
+        const section = await (db as any).guideSection.create({
             data: {
                 guideId: guide.id,
                 type,
@@ -52,8 +52,8 @@ export async function PATCH(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
+        const session = await getServerSession(authOptions) as any;
+        if (!session || session.user?.role !== "ADMIN") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
@@ -66,13 +66,13 @@ export async function PATCH(
 
         // Atualização em lote de ordens
         const updates = items.map((item) =>
-            db.guideSection.update({
+            (db as any).guideSection.update({
                 where: { id: item.id },
                 data: { sortOrder: item.sortOrder },
             })
         );
 
-        await db.$transaction(updates);
+        await (db as any).$transaction(updates);
 
         return NextResponse.json({ success: true });
     } catch (error) {

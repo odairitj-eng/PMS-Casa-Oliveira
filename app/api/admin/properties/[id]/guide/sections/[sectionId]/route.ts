@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/options";
 
 export async function PATCH(
     req: NextRequest,
     { params }: { params: { id: string, sectionId: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
+        const session = await getServerSession(authOptions) as any;
+        if (!session || session.user?.role !== "ADMIN") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
@@ -19,7 +19,7 @@ export async function PATCH(
         // Removemos campos que não devem ser editados via este endpoint se necessário
         const { id, guideId, createdAt, updatedAt, ...updateData } = body;
 
-        const section = await db.guideSection.update({
+        const section = await (db as any).guideSection.update({
             where: { id: sectionId },
             data: updateData,
         });
@@ -36,14 +36,14 @@ export async function DELETE(
     { params }: { params: { id: string, sectionId: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
+        const session = await getServerSession(authOptions) as any;
+        if (!session || session.user?.role !== "ADMIN") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
         const sectionId = params.sectionId;
 
-        await db.guideSection.delete({
+        await (db as any).guideSection.delete({
             where: { id: sectionId },
         });
 

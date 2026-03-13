@@ -4,6 +4,8 @@ import React from "react";
 import Image from "next/image";
 import { ExternalLink, Navigation } from "lucide-react";
 import { PlaceCategory } from "@prisma/client";
+// @ts-ignore - silenciar erro se o prisma client não estiver sincronizado no IDE
+type PlaceholderCategory = PlaceCategory;
 
 interface GuidePlaceCardProps {
     name: string;
@@ -18,11 +20,17 @@ const CATEGORY_LABELS: Record<PlaceCategory, string> = {
     RESTAURANT: "Restaurante",
     CAFE: "Café",
     SUPERMARKET: "Supermercado",
-    PARK: "Parque",
+    MARKET: "Mercado Local",
+    PHARMACY: "Farmácia",
+    PARK: "Parque / Ar Livre",
     GYM_YOGA: "Academia / Yoga",
     DELIVERY: "Delivery",
     FOR_KIDS: "Para Crianças",
-    ATTRACTION: "Atração",
+    ATTRACTION: "Atração / Turismo",
+    BREAKFAST: "Café da Manhã",
+    ROMANTIC: "Romântico",
+    FAMILY: "Família",
+    TO_GO: "Para Levar",
     OTHER: "Local",
 };
 

@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/auth/options";
 
 export async function GET(
     req: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
+        const session = await getServerSession(authOptions) as any;
+        if (!session || session.user?.role !== "ADMIN") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
         const propertyId = params.id;
 
-        const guide = await db.propertyGuide.findUnique({
+        const guide = await (db as any).propertyGuide.findUnique({
             where: { propertyId },
             include: {
                 sections: {
@@ -43,8 +43,8 @@ export async function POST(
     { params }: { params: { id: string } }
 ) {
     try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== "ADMIN") {
+        const session = await getServerSession(authOptions) as any;
+        if (!session || session.user?.role !== "ADMIN") {
             return new NextResponse("Unauthorized", { status: 401 });
         }
 
@@ -52,7 +52,7 @@ export async function POST(
         const body = await req.json();
         const { isActive, accentColor } = body;
 
-        const guide = await db.propertyGuide.upsert({
+        const guide = await (db as any).propertyGuide.upsert({
             where: { propertyId },
             update: {
                 isActive,
