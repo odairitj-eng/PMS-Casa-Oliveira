@@ -98,6 +98,7 @@ export function DateSelectionModal({
                         newPriceMap[format(parseLocal(o.date), "yyyy-MM-dd")] = o.price;
                     });
 
+                    console.log("DIAG - Occupied Map:", newOccupiedMap);
                     setOccupiedMap(newOccupiedMap);
                     setPriceMap(newPriceMap);
                     // O RulesMap será preenchido sob demanda ou cacheado se necessário
@@ -179,10 +180,17 @@ export function DateSelectionModal({
 
     const onDateClick = (day: Date) => {
         const d = startOfDay(day);
-        const isAvailableForCheckIn = isDateAvailable(d);
+        const isNightlyAvailable = isDateAvailable(d);
+        const isYesterdayAvailable = isDateAvailable(addDays(d, -1));
+        const isTomorrowAvailable = isDateAvailable(addDays(d, 1));
+
+        // Padrãão Profissional: Pode entrar no dia que o outro sai (último dia de um bloqueio)
+        const isCheckinTransition = !isNightlyAvailable && isTomorrowAvailable;
+        const isCheckoutTransition = !isNightlyAvailable && isYesterdayAvailable;
+
+        const isAvailableForCheckIn = isNightlyAvailable || isCheckinTransition;
         const minNights = data?.property?.minimumNights || 1;
 
-        // Se não tem início ou estamos resetando
         if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
             if (!isAvailableForCheckIn) {
                 toast.error("Esta data está ocupada para check-in.");
@@ -191,7 +199,6 @@ export function DateSelectionModal({
             setSelectedRange({ start: d, end: null });
             setHoveredDate(null);
         } else {
-            // Tentando fechar o range
             if (isBefore(d, selectedRange.start)) {
                 if (!isAvailableForCheckIn) {
                     toast.error("Esta data está ocupada para check-in.");
@@ -206,16 +213,29 @@ export function DateSelectionModal({
                 return;
             }
 
-            // Verificar se há bloqueios NO MEIO do intervalo (excluindo o dia de saída d)
+            // Validar checkout
+            const isAvailableForCheckOut = isNightlyAvailable || isCheckoutTransition;
+            if (!isAvailableForCheckOut) {
+                toast.error("Esta data está ocupada para checkout.");
+                return;
+            }
+
             const interval = eachDayOfInterval({ start: selectedRange.start, end: d });
             const nightsInterval = interval.slice(0, -1);
 
-            const blockedDay = nightsInterval.find(date => !isDateAvailable(date));
+            // Regra Profissional: Se o dia de iníício é uma transição (checkout de outro), 
+            // a primeira noite é tecnicamente livre para o novo hóóspede.
+            const blockedDay = nightsInterval.find((date, index) => {
+                if (index === 0) {
+                    // Se for o primeiro dia e for uma transição de check-in, permitimos
+                    const isStartTransition = !isDateAvailable(date) && isDateAvailable(addDays(date, 1));
+                    if (isStartTransition) return false;
+                }
+                return !isDateAvailable(date);
+            });
+
             if (blockedDay) {
                 toast.error(`A noite de ${format(blockedDay, "dd/MM")} está ocupada. Escolha outro período.`);
-                if (isAvailableForCheckIn) {
-                    setSelectedRange({ start: d, end: null });
-                }
                 return;
             }
 

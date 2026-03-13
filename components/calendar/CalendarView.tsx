@@ -418,8 +418,8 @@ export function CalendarView({ refreshKey = 0, propertyId }: { refreshKey?: numb
                 const isTomorrowAvailable = isDateNightAvailable(addDays(cloneDay, 1));
 
                 // Padrãão Profissional (Airbnb):
-                // CHECKIN (ENTRAR): ÚÚltimo dia de um bloqueio (hoje ocupado, amanhãã livre).
-                // CHECKOUT (SAIR): Primeiro dia de um bloqueio (hoje ocupado, ontem livre).
+                // ENTRAR: ÚÚltimo dia de um bloqueio (hoje ocupado, amanhãã livre).
+                // SAIR: Primeiro dia de um bloqueio (hoje ocupado, ontem livre).
                 const isCheckinDay = !isNightlyAvailable && isTomorrowAvailable;
                 const isCheckoutDay = !isNightlyAvailable && isYesterdayAvailable;
 
