@@ -180,6 +180,11 @@ export function DateSelectionModal({
 
     const onDateClick = (day: Date) => {
         const d = startOfDay(day);
+        const today = startOfDay(new Date());
+
+        // Bloqueio explícito de datas passadas
+        if (isBefore(d, today)) return;
+
         const isNightlyAvailable = isDateAvailable(d);
         const isYesterdayAvailable = isDateAvailable(addDays(d, -1));
         const isTomorrowAvailable = isDateAvailable(addDays(d, 1));
@@ -338,11 +343,12 @@ export function DateSelectionModal({
                         const isYesterdayAvailable = isDateAvailable(addDays(date, -1));
                         const isTomorrowAvailable = isDateAvailable(addDays(date, 1));
 
-                        // Padrãão Profissional (Airbnb):
-                        // ENTRAR: ÚÚltimo dia de um bloqueio (hoje ocupado, amanhãã livre).
+                        // Padrão Profissional (Airbnb):
+                        // ENTRAR: Último dia de um bloqueio (hoje ocupado, amanhã livre).
                         // SAIR: Primeiro dia de um bloqueio (hoje ocupado, ontem livre).
-                        const isCheckinDay = !isNightlyAvailable && isTomorrowAvailable;
-                        const isCheckoutDay = !isNightlyAvailable && isYesterdayAvailable;
+                        // Adicionamos !isBefore(date, today) para garantir que transições no passado não sejam clicáveis
+                        const isCheckinDay = !isNightlyAvailable && isTomorrowAvailable && !isBefore(date, today);
+                        const isCheckoutDay = !isNightlyAvailable && isYesterdayAvailable && !isBefore(date, today);
 
                         const isVivid = isNightlyAvailable || isCheckinDay || isCheckoutDay;
 
