@@ -182,9 +182,13 @@ export function DateSelectionModal({
         const isAvailableForCheckIn = isDateAvailable(d);
         const minNights = data?.property?.minimumNights || 1;
 
+        // Regra especial para permitir check-in em dias de transição (fim de reserva anterior)
+        const isNeighborAvailable = isDateAvailable(addDays(d, 1));
+        const isActualCheckinDay = !isAvailableForCheckIn && isNeighborAvailable;
+
         // Se não tem início ou estamos resetando
         if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
-            if (!isAvailableForCheckIn) {
+            if (!isAvailableForCheckIn && !isActualCheckinDay) {
                 toast.error("Esta data está ocupada para check-in.");
                 return;
             }
@@ -314,16 +318,24 @@ export function DateSelectionModal({
                         const isSelectedEnd = selectedRange.end && isSameDay(date, selectedRange.end);
                         const isInRange = selectedRange.start && selectedRange.end &&
                             isWithinInterval(date, { start: selectedRange.start, end: selectedRange.end });
-                        const isNightAvailable = isDateAvailable(date);
-                        const isStartBlock = isStartOfReservation(date);
-                        const isCheckoutDay = isStartBlock && isDateAvailable(addDays(date, -1));
+                        const isNightlyAvailable = isDateAvailable(date);
+                        const isYesterdayAvailable = isDateAvailable(addDays(date, -1));
+                        const isTomorrowAvailable = isDateAvailable(addDays(date, 1));
 
-                        const isVivid = isNightAvailable || isCheckoutDay; // Vívido se noite livre OU checkout após noite livre
+                        // Ocupado hoje (noite de hoje nãão pode ser reservada totalmente)
+                        const isNightlyBlocked = !isNightlyAvailable;
+
+                        // ENTRAR: Hoje estãá bloqueado (fim de reserva), mas amanhãã estãá livre.
+                        // SAIR: Hoje estãá bloqueado (iníício de reserva), mas ontem estava livre.
+                        const isCheckinDay = isNightlyBlocked && isTomorrowAvailable;
+                        const isCheckoutDay = isNightlyBlocked && isYesterdayAvailable;
+
+                        const isVivid = isNightlyAvailable || isCheckinDay || isCheckoutDay;
 
                         const isToday = isSameDay(date, today);
 
                         const isHovered = selectedRange.start && !selectedRange.end && hoveredDate &&
-                            isCurrentMonth && (isNightAvailable || isSameDay(date, hoveredDate)) &&
+                            isCurrentMonth && (isNightlyAvailable || isSameDay(date, hoveredDate)) &&
                             ((date >= selectedRange.start && date <= hoveredDate) || (date <= selectedRange.start && date >= hoveredDate));
 
                         // Otimização: Preço do dia usando o novo mapa O(1) e cache de regras
@@ -336,12 +348,9 @@ export function DateSelectionModal({
                         }
                         const price = Math.round(finalPrice);
 
-                        // Verificação se é dia de checkout de reserva alheia (Otimizado)
-                        const isCheckoutOnly = isNightAvailable && data?.reservations?.some((r: any) => format(parseLocal(r.checkOut), "yyyy-MM-dd") === dateKey);
-                        const isCheckinDay = isCheckoutOnly; // No guest view, checkout only means someone is leaving, so it's a check-in day for new guest
-
                         return (
                             <div
+                                id={`date-${dateKey}`}
                                 key={i}
                                 onClick={() => isCurrentMonth && (isVivid || isInRange) && onDateClick(date)}
                                 onMouseEnter={() => isCurrentMonth && isVivid && setHoveredDate(date)}
@@ -349,7 +358,7 @@ export function DateSelectionModal({
                                 className={cn(
                                     "h-14 flex flex-col items-center justify-center relative cursor-pointer text-sm transition-all group",
                                     !isCurrentMonth && "opacity-0 pointer-events-none",
-                                    isCurrentMonth && !isVivid && !isStartBlock && "opacity-30 cursor-not-allowed grayscale",
+                                    isCurrentMonth && !isVivid && !isSelectedEnd && !isInRange && "opacity-30 cursor-not-allowed grayscale",
                                     isVivid && isCurrentMonth && "hover:bg-olive-900/5 rounded-xl",
                                     (isInRange || isHovered) && "bg-olive-900/5 rounded-none",
                                     isSelectedStart && "bg-olive-900 text-white rounded-xl z-10 shadow-lg shadow-olive-900/20 opacity-100 grayscale-0",
@@ -364,7 +373,7 @@ export function DateSelectionModal({
                                     {format(date, "d")}
                                 </span>
 
-                                {isNightAvailable && isCurrentMonth && (
+                                {isNightlyAvailable && isCurrentMonth && (
                                     <span className={cn(
                                         "text-[9px] font-bold mt-0.5 z-10 transition-colors",
                                         (isSelectedStart || isSelectedEnd) ? "text-white/60" : "text-olive-900/40"
@@ -377,7 +386,7 @@ export function DateSelectionModal({
                                     <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100/80 px-1 rounded mt-0.5 z-10 uppercase">Entrar</span>
                                 )}
 
-                                {!isNightAvailable && isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
+                                {isCheckoutDay && isCurrentMonth && !isSelectedStart && !isSelectedEnd && (
                                     <span className="text-[8px] font-bold text-olive-900 bg-olive-900/10 px-1 rounded mt-0.5 z-10 uppercase">Sair</span>
                                 )}
 
