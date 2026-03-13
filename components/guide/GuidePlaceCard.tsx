@@ -5,6 +5,8 @@ import Image from "next/image";
 import { ExternalLink, Navigation } from "lucide-react";
 // @ts-ignore
 import { PlaceCategory } from "@prisma/client";
+// @ts-ignore - silenciar erro se o prisma client não estiver sincronizado no IDE
+type PlaceholderCategory = PlaceCategory;
 
 interface GuidePlaceCardProps {
     name: string;
